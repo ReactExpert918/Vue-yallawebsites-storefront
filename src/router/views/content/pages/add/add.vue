@@ -1,0 +1,200 @@
+<script>
+import CKEditor from "@ckeditor/ckeditor5-vue";
+import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
+
+import Layout from "../../../../layouts/main";
+import PageHeader from "@/components/page-header";
+import axios from "axios";
+import appConfig from "@/app.config";
+
+/**
+ * Pages component
+ */
+export default {
+  page: {
+    title: "Add Page",
+    meta: [{ name: "description", content: appConfig.description }]
+  },
+  components: { Layout, PageHeader, ckeditor: CKEditor.component },
+  data() {
+    return {
+      title: "Add Page",
+      backendURL: process.env.VUE_APP_BACKEND_URL,
+      pageData: {
+        title: "",
+        content: "",
+        layout_id: "",
+        visibility: "",
+        meta_title: "",
+        meta_keywords: [],
+        meta_keywords_str: "",
+        meta_description: "",
+        enabled: false
+      },
+      layouts: [],
+      items: [
+        {
+          text: "Content",
+        },
+        {
+          text: "Pages",
+          href: "/content/pages"
+        },
+        {
+          text: "Add Page",
+          active: true
+        }
+      ],
+      editor: ClassicEditor,
+      editorData: "",
+      content: "",
+      plugins: [
+        "advlist autolink link image lists charmap print preview hr anchor pagebreak spellchecker",
+        "searchreplace wordcount visualblocks visualchars code fullscreen insertdatetime media nonbreaking",
+        "save table contextmenu directionality emoticons template paste textcolor",
+      ],
+      toolbar: "insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | l      ink image | print preview media fullpage | forecolor backcolor emoticons",
+      options: {
+        height: 300,
+        style_formats: [
+          { title: "Bold text", inline: "b" },
+          { title: "Red text", inline: "span", styles: { color: "#ff0000" } },
+          { title: "Red header", block: "h1", styles: { color: "#ff0000" } },
+          { title: "Example 1", inline: "span", classes: "example1" },
+          { title: "Example 2", inline: "span", classes: "example2" },
+          { title: "Table styles" },
+          { title: "Table row 1", selector: "tr", classes: "tablerow1" },
+        ],
+      },
+      textarea: '',
+      lgchecked: false,
+    };
+  },
+ mounted() {
+      axios
+      .get(`${this.backendURL}/api/v1/pages/layouts`)
+      .then(response => (this.layouts = response.data.data))
+  },
+  methods:{
+    addPage(){
+      this.pageData.meta_keywords = this.pageData.meta_keywords_str.split(" ");
+      if (this.pageData.meta_keywords[0] == ""){
+        this.pageData.meta_keywords = [];
+      } 
+      axios
+      .post(`${this.backendURL}/api/v1/pages` , this.pageData)
+      .then(response => (alert(`${response.data.data.id} Created!`)))
+    }
+  }
+};
+</script>
+
+<template>
+  <Layout>
+    <PageHeader :title="title" :items="items" />
+
+    <div class="row">
+      <div class="col-9">
+        <div class="card">
+          <div class="card-body">
+            <div class="pageEditor">
+               <b-form-input for="text" class="mb-3" v-model="pageData.title"></b-form-input>
+               <ckeditor :editor="editor" v-model="pageData.content"></ckeditor>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-body">
+          <h4 class="card-title mb-3">SEO</h4>
+            <div class="row">
+              <div class="col-md-6">
+                <label class="mb-1 mt-3 font-weight-medium">Meta Title</label>
+                <b-form-input for="text" v-model="pageData.meta_title"></b-form-input>
+              </div>
+              <div class="col-md-6">
+                 <label class="mb-1 mt-3 font-weight-medium">Meta Keywords</label>
+                <b-form-input for="text" v-model="pageData.meta_keywords_str"></b-form-input>
+              </div>
+              <div class="col-md-12">
+                 <label class="mb-1 mt-3 font-weight-medium">Meta Description</label>
+                <textarea
+                v-model="pageData.meta_description"
+                class="form-control"
+                :maxlength="225"
+                rows="3"
+                placeholder="This textarea has a limit of 225 chars."
+              ></textarea>
+              <div class="text-center">
+                <p
+                  v-if="textarea"
+                  class="badge position-absolute"
+                  :class="{ 'badge-success': textarea.length !== 225,
+                            'badge-danger': textarea.length === 225 }"
+                >
+                  {{ textarea.length }} /
+                  225
+                </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-3">
+        <div class="card">
+          <div class="card-body">
+            <div class="row">
+                <div class="col-12">
+                  <form class="form-horizontal pagesSidebar" role="form">
+                    <div class="form-group row">
+                      <label class="col-md-6 col-form-label">Enabled</label>
+                      <div class="col-md-6 align-right">
+                        <b-form-checkbox switch size="lg" v-model="pageData.enabled" class="text-right"></b-form-checkbox>
+                      </div>
+                    </div>
+                    <div class="form-group row">
+                      <label class="col-md-6 col-form-label">Visibility</label>
+                      <div class="col-md-6 align-right pl-0">
+                        <select class="custom-select" v-model="pageData.visibility">
+                          <option value="public" selected>Public</option>
+                          <option value="private">Private</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="form-group row">
+                      <label class="col-md-6 col-form-label">Layout</label>
+                      <div class="col-md-6 align-right pl-0">
+                        <select class="custom-select" v-model="pageData.layout_id">
+                          <option v-for="layout in layouts" v-bind:value="layout.id" :key="layout.id">{{layout.name}}</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="form-group row">
+                      <label class="col-md-6 col-form-label">URL Key</label>
+                      <div class="col-md-6 align-right pl-0">
+                        <b-form-input for="text" v-model="pageData.url_key"></b-form-input>
+                      </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-md-6">
+                          <b-button variant="light" class="pl-4 pr-4">
+                              Preview
+                          </b-button>
+                        </div>
+                        <div class="col-md-6">
+                         <b-button variant="primary" @click="addPage()">
+                              <i class="bx bx-check-double font-size-16 align-middle mr-2"></i>
+                              Publish
+                          </b-button>
+                        </div>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    <!-- end row -->
+  </Layout>
+</template>

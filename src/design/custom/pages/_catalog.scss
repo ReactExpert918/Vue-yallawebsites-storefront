@@ -1,0 +1,106 @@
+//
+// timeline.scss
+//
+
+/************** Horizontal timeline **************/
+.cursor-pointer{
+    cursor: pointer;
+}
+.category-tabs {
+    .move {
+        margin-right: 10px;
+        padding: 15px;
+        display: inline-block;
+        background: #f1f1f1;
+    }
+    .actions-right {
+        float: right;
+        padding: 15px;
+    }
+    div[role="tabpanel"] {
+        margin-left: 40px;
+    }
+    .cursor-ponter{
+        cursor: pointer;
+        border-radius: 3px;
+    }
+}
+.category-tab {
+    border-radius: 3px;
+    margin-bottom: 5px;
+    background: #f6f6f9;
+}
+.product-in-category {
+    .sort {
+        width: 100px;
+    }
+    td {
+        vertical-align: middle;
+    }
+}
+.dropzone {
+    min-height: 0px;
+}
+#dropzone.dropzone .dz-message {
+    margin: 0px !important;
+    font-size: 16px;
+}
+.dropzone.dz-clickable {
+    width: 100%;
+    min-height: 0px;
+}
+.highlight-border {
+    border: 3px solid #566ee5;
+}
+.imagesUploaded  {
+    .imageFile {
+        padding: 10px;
+        width: 100%;
+        margin-top: 10px;
+        background: #f6f6f9;
+        border-radius: 3px;
+        
+        img {
+            display: inline-block;
+            vertical-align: middle;
+            padding: 15px;
+        }
+
+        span {
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .actions-right {
+            float: right;
+            padding: 5px;
+        }
+        &.full {
+            .actions-right {
+                float: none;
+            }
+            
+            img {
+                width: 100%;
+                margin: auto;
+                display: block;
+                padding: 0;
+                height: 200px;
+            }
+            .imagesUploaded .imageFile.full span {
+                padding: 0px;
+                display: block;
+            }
+        }
+    }
+}
+.slim-tab {
+    background: #f6f6f9;
+    border-radius: 3px;
+
+    span {
+        display: inline-block;
+    }
+    .actions-right{
+        float: right;
+    }
+}
