@@ -2,7 +2,6 @@
 import Layout from "../../../layouts/main";
 import PageHeader from "@/components/page-header";
 import axios from "axios";
-import { productsData } from "./products-data";
 import appConfig from "@/app.config";
 
 /**
@@ -16,8 +15,9 @@ export default {
   components: { Layout, PageHeader },
   data() {
     return {
+      backendURL: process.env.VUE_APP_BACKEND_URL,
       selectedAll: false,
-      productsData: productsData,
+      productsData: [],
       title: "Products",
       items: [
         {
@@ -52,8 +52,9 @@ export default {
               key: "price",
               sortable: true,
           },
-          {
-              key: "qty",
+          { 
+              label: "qty",
+              key: "quantity",
               sortable: true,
           },
           {
@@ -86,11 +87,9 @@ export default {
     }
   },
   mounted() {
-      // Set the initial number of items
-      this.totalRows = this.items.length;
       axios
-      .get('https://api.coindesk.com/v1/bpi/currentprice.json')
-      .then(response => (this.info = response))
+      .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}`)
+      .then(response => (this.productsData = response.data.data));
   },
   methods: {
       /**
@@ -179,7 +178,8 @@ export default {
                       </template>
                       <template #cell(status)="data">
                         <span class="badge badge-success font-size-12">
-                          {{data.item.status}}
+                          <span v-if="data.item.enabled">Enabled</span>
+                          <span v-else>Disabled</span>
                         </span>
                       </template>
                       <template #cell(actions)="data">
