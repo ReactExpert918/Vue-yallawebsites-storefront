@@ -188,7 +188,7 @@ export default {
                             <i class="mdi mdi-dots-horizontal font-size-18"></i>
                           </template>
 
-                          <b-dropdown-item :href="'/catalog/products/edit/' + data.item.productId">
+                          <b-dropdown-item :href="'/catalog/products/edit/' + data.item.id">
                             <i class="fas fa-pencil-alt text-success mr-1"></i> Edit
                           </b-dropdown-item>
 
