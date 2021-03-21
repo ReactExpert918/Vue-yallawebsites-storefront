@@ -9,7 +9,6 @@ import PageHeader from "@/components/page-header";
 
 import { variationsData } from "./variations-data";
 import axios from "axios";
-import { allProductsData } from "./all-products";
 import appConfig from "@/app.config";
 
 /**
@@ -25,11 +24,12 @@ export default {
   data() {
     return {
       backendURL: process.env.VUE_APP_BACKEND_URL,
-      productData: {layout:{} , meta_keywords_str:"" , meta_description:""},
+      productData: {layout:{} , meta_keywords_str:"" , meta_description:"" , bundle_ids:[]},
       variationsData: variationsData,
-      allProductsData: allProductsData,
+      allProductsData: [],
       preVariation: [],
       layouts: [],
+      categories: [],
       VariationOptionsName: ['name1', 'name2', 'name3'],
       id: [],
       variations: [],
@@ -77,22 +77,22 @@ export default {
           },
           { 
               label: "Product Name",
-              key: "productName",
+              key: "name",
               sortable: true,
           },
           {   
               label: "SKU",
-              key: "productSku",
+              key: "sku",
               sortable: true,
           },
           {
               label: "Price",
-              key: "productPrice",
+              key: "price",
               sortable: true,
           },
           {
               label: "Qty",
-              key: "productQty",
+              key: "quantity",
               sortable: true,
           },
           {
@@ -143,6 +143,9 @@ export default {
       .get(`${this.backendURL}/api/v1/pages/layouts`)
       .then(response => (this.layouts = response.data.data));
       axios
+      .get(`${this.backendURL}/api/v1/categories`)
+      .then(response => (this.categories = response.data.data));
+      axios
       .get(`${this.backendURL}/api/v1/products/${this.$route.params.id}`)
       .then(response => {
           this.productData = response.data.data;
@@ -157,8 +160,19 @@ export default {
             }
           }
       });
+      axios
+      .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}`)
+      .then(response => (this.allProductsData = response.data.data));
   },
   methods: {
+      isBundleID(id){
+        for (var i = 0; i < this.productData.bundle_ids.length; i++){
+          if (this.productData.bundle_ids[i] == id){
+            return true;
+          }
+        }
+        return false;
+      },
       addTag (searchQuery, id) {
           let optionValue = {
             name: searchQuery
@@ -606,8 +620,14 @@ export default {
                     <!-- Table -->
                     <div class="table-responsive mb-0">
                         <b-table :items="allProductsData" selectable :fields="fields" responsive="sm" :per-page="perPage" :current-page="currentPage" :sort-by.sync="sortBy" :sort-desc.sync="sortDesc" :filter="filter" :filter-included-fields="filterOn" @filtered="onFiltered">
-                      <template #cell(selected)>
-                        <b-form-checkbox switch size="lg" v-model="lgchecked"></b-form-checkbox>
+                      <template #cell(selected)="data">
+                        <b-form-checkbox switch size="lg" :checked="isBundleID(data.item.id)"></b-form-checkbox>
+                      </template>
+                       <template #cell(status)="data">
+                        <span class="badge badge-success font-size-12">
+                          <span v-if="data.item.enabled">Enabled</span>
+                          <span v-else>Disabled</span>
+                        </span>
                       </template>
                         </b-table>
                     </div>
@@ -698,7 +718,7 @@ export default {
                     </div>
                     <div class="form-group row">
                       <label class="col-md-6 col-form-label">Categories</label>
-                      <multiselect class="mr-3 ml-2" v-model="value1" :options="categoryvalues" :multiple="true"></multiselect>
+                      <multiselect class="mr-3 ml-2"  v-model="productData.category_ids" label="name" track-by="id" :options="categories"  :multiple="true"></multiselect>
                     </div>
                     <div class="row">
                       <div class="col-md-4">

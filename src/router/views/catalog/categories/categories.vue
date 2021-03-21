@@ -60,7 +60,7 @@ export default {
   },
   mounted(){
     axios
-    .get(`${this.backendURL}/api/v1/categories`)
+    .get(`${this.backendURL}/api/v1/categories?tree=true`)
     .then(response => (this.categoriesData = response.data.data));
   },
   methods: {
