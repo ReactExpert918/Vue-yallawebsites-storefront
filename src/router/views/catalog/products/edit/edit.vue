@@ -30,6 +30,7 @@ export default {
       preVariation: [],
       layouts: [],
       categories: [],
+      selectedCategories: [],
       VariationOptionsName: ['name1', 'name2', 'name3'],
       id: [],
       variations: [],
@@ -165,6 +166,42 @@ export default {
       .then(response => (this.allProductsData = response.data.data));
   },
   methods: {
+
+      updateProduct(){
+        this.productData.meta_keywords = this.productData.meta_keywords_str.split(" ");
+        if (this.productData.meta_keywords[0] == ""){
+          this.productData.meta_keywords = [];
+        } 
+        var productReq = {
+           name: this.productData.name,
+           price: parseFloat(this.productData.price),
+           cost_price: parseFloat(this.productData.cost_price),
+           sale_price: parseFloat(this.productData.sale_price),
+           short_description: this.productData.short_description,
+           long_description: this.productData.long_description,
+           meta_title: this.productData.meta_title,
+           meta_description: this.productData.meta_description,
+           meta_keywords: this.productData.meta_keywords,
+           layout_id: this.productData.layout.id,
+           ean: this.productData.ean,
+           sku: this.productData.sku,
+           visibility: this.productData.visibility,
+           url_key: this.productData.url_key,
+           quantity: parseInt(this.productData.quantity),
+           enabled: this.productData.enabled,
+           is_downloadable: this.productData.is_downloadable,
+           category_ids: [],
+        }
+
+        for(var i = 0; i < this.selectedCategories.length; i++){ 
+           productReq.category_ids.push(this.selectedCategories[i].id);
+        }
+
+        axios
+        .put(`${this.backendURL}/api/v1/products/${this.$route.params.id}` , productReq)
+        .then(response => (alert(`${response.data.data.id} Product Updated!`)))
+      },
+
       isBundleID(id){
         for (var i = 0; i < this.productData.bundle_ids.length; i++){
           if (this.productData.bundle_ids[i] == id){
@@ -718,7 +755,7 @@ export default {
                     </div>
                     <div class="form-group row">
                       <label class="col-md-6 col-form-label">Categories</label>
-                      <multiselect class="mr-3 ml-2"  v-model="productData.category_ids" label="name" track-by="id" :options="categories"  :multiple="true"></multiselect>
+                      <multiselect class="mr-3 ml-2"  v-model="selectedCategories" label="name" track-by="id" :options="categories"  :multiple="true"></multiselect>
                     </div>
                     <div class="row">
                       <div class="col-md-4">
@@ -730,7 +767,7 @@ export default {
                           </b-button>
                         </div>
                         <div class="col-md-12">
-                         <b-button variant="primary" class="btn-block">
+                         <b-button variant="primary" class="btn-block" @click="updateProduct()">
                               <i class="bx bx-check-double font-size-16 align-middle mr-2"></i>
                               Publish
                           </b-button>
