@@ -202,6 +202,12 @@ export default {
         .then(response => (alert(`${response.data.data.id} Product Updated!`)))
       },
 
+      deleteProduct(){
+        axios
+        .delete(`${this.backendURL}/api/v1/products/${this.productData.id}`)
+        .then(response => (alert(`${response.data.data.id} Product deleted!`)));
+      },
+
       isBundleID(id){
         for (var i = 0; i < this.productData.bundle_ids.length; i++){
           if (this.productData.bundle_ids[i] == id){
@@ -784,7 +790,7 @@ export default {
     <b-modal id="modal-delete-page" centered title="Delete Product" title-class="font-18" hide-footer>
       <p>Are you sure? Pressing Delete will remove this product permenantly.</p>
       <div class="text-right">
-        <b-button variant="danger">Delete</b-button>
+        <b-button variant="danger" @click="deleteProduct()">Delete</b-button>
       </div>
     </b-modal>
   </Layout>
