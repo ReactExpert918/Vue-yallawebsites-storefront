@@ -6,9 +6,6 @@ import Multiselect from "vue-multiselect";
 
 import Layout from "../../../../layouts/main";
 import PageHeader from "@/components/page-header";
-
-import { allProductsData } from "./all-products";
-
 import axios from "axios";
 import appConfig from "@/app.config";
 /**
@@ -22,8 +19,32 @@ export default {
   components: { Layout, PageHeader, ckeditor: CKEditor.component, vueDropzone: vue2Dropzone, Multiselect },
   data() {
     return {
-      allProductsData: allProductsData,
+      backendURL: process.env.VUE_APP_BACKEND_URL,
+      allProductsData: [],
       preVariation: [],
+      newProduct: {
+           name: "",
+           price: 0,
+           cost_price: 0,
+           sale_price: 0,
+           short_description: "",
+           long_description: "",
+           meta_title: "",
+           meta_description: "",
+           meta_keywords: [],
+           layout_id: "",
+           ean: "",
+           sku: "",
+           visibility: "",
+           url_key: "",
+           quantity: "",
+           enabled: false,
+           is_downloadable: false,
+           category_ids: [],
+      },
+      layouts: [],
+      categories: [],
+      selectedCategories: [],
       VariationOptionsName: ['name1', 'name2', 'name3'],
       id: [],
       variations: [],
@@ -68,22 +89,22 @@ export default {
           },
           { 
               label: "Product Name",
-              key: "productName",
+              key: "name",
               sortable: true,
           },
           {   
               label: "SKU",
-              key: "productSku",
+              key: "sku",
               sortable: true,
           },
           {
               label: "Price",
-              key: "productPrice",
+              key: "price",
               sortable: true,
           },
           {
               label: "Qty",
-              key: "productQty",
+              key: "quantity",
               sortable: true,
           },
           {
@@ -137,22 +158,35 @@ export default {
       },
   },
   mounted() {
-      // Set the initial number of items
-      this.totalRows = this.items.length;
       axios
-          .get("http://dummy.restapiexample.com/api/v1/employees", {
-              headers: {
-                  "Content-type": "application/json;charset=utf-8",
-              },
-          })
-          .then((res) => {
-              return res;
-          });
+      .get(`${this.backendURL}/api/v1/pages/layouts`)
+      .then(response => (this.layouts = response.data.data));
+      axios
+      .get(`${this.backendURL}/api/v1/categories`)
+      .then(response => (this.categories = response.data.data));
+      axios
+      .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}`)
+      .then(response => (this.allProductsData = response.data.data));
   },
   methods: {
-      /**
-        * Search the table data with search input
-        */
+      createProduct(){
+        this.newProduct.meta_keywords = this.newProduct.meta_keywords_str.split(" ");
+        if (this.newProduct.meta_keywords[0] == ""){
+          this.newProduct.meta_keywords = [];
+        } 
+
+        for(var i = 0; i < this.selectedCategories.length; i++){ 
+           this.newProduct.category_ids.push(this.selectedCategories[i].id);
+        }
+        this.newProduct.price = parseFloat(this.newProduct.price);
+        this.newProduct.cost_price = parseFloat(this.newProduct.cost_price);
+        this.newProduct.sale_price = parseFloat(this.newProduct.sale_price);
+        this.newProduct.quantity = parseInt(this.newProduct.quantity);
+
+        axios
+        .post(`${this.backendURL}/api/v1/products` , this.newProduct)
+        .then(response => (alert(`${response.data.data.id} Product Created!`)))
+      },
       addTag (searchQuery, id) {
           let optionValue = {
             name: searchQuery
@@ -277,7 +311,7 @@ export default {
             <div class="row">
               <div class="col-9">
                 <label class="mt-3">Product Name</label>
-                <b-form-input for="text" value="Product Name"></b-form-input>
+                <b-form-input for="text" v-model="newProduct.name"></b-form-input>
               </div>
               <div class="col-3">
               <label class="mt-3">Product Type</label>
@@ -290,27 +324,27 @@ export default {
               </div>
               <div class="col-4">
                 <label class="mt-3">Product Price</label>
-                <b-form-input for="text" value="Product Name"></b-form-input>
+                <b-form-input for="text" v-model="newProduct.price"></b-form-input>
               </div>
               <div class="col-4">
                 <label class="mt-3">Product Cost Price</label>
-                <b-form-input for="text" value="Cost Price"></b-form-input>
+                <b-form-input for="text" v-model="newProduct.cost_price"></b-form-input>
               </div>
               <div class="col-4">
                 <label class="mt-3">Product Sale Price</label>
-                <b-form-input for="text" value="Sale Price"></b-form-input>
+                <b-form-input for="text" v-model="newProduct.sale_price"></b-form-input>
               </div>
               <div class="col-4">
                 <label class="mt-3">Qty</label>
-                <b-form-input for="text" value="Qty"></b-form-input>
+                <b-form-input for="text" v-model="newProduct.quantity"></b-form-input>
               </div>
               <div class="col-4">
                 <label class="mt-3">SKU</label>
-                <b-form-input for="text" value="SKU"></b-form-input>
+                <b-form-input for="text" v-model="newProduct.sku"></b-form-input>
               </div>
               <div class="col-4">
                 <label class="mt-3">EAN</label>
-                <b-form-input for="text" value="EAN"></b-form-input>
+                <b-form-input for="text" v-model="newProduct.ean"></b-form-input>
               </div>
             </div>
           </div>
@@ -321,7 +355,7 @@ export default {
           <h4 class="card-title mt-3">Short Description</h4>
           <div class="row">
             <div class="col-12">
-              <ckeditor :editor="editor"></ckeditor>
+              <ckeditor :editor="editor" v-model="newProduct.short_description"></ckeditor>
             </div>
           </div>
           </div>
@@ -332,7 +366,7 @@ export default {
             <h4 class="card-title mt-3">Full Product Description</h4>
             <div class="row">
               <div class="col-12">
-                <ckeditor :editor="editor"></ckeditor>
+                <ckeditor :editor="editor" v-model="newProduct.long_description"></ckeditor>
               </div>
             </div>
           </div>
@@ -617,6 +651,12 @@ export default {
                       <template #cell(selected)>
                         <b-form-checkbox switch size="lg" v-model="lgchecked"></b-form-checkbox>
                       </template>
+                       <template #cell(status)="data">
+                        <span class="badge badge-success font-size-12">
+                          <span v-if="data.item.enabled">Enabled</span>
+                          <span v-else>Disabled</span>
+                        </span>
+                      </template>
                         </b-table>
                     </div>
                     <div class="row">
@@ -637,16 +677,16 @@ export default {
             <div class="row">
               <div class="col-md-6">
                 <label class="mb-1 mt-3 font-weight-medium">Meta Title</label>
-                <b-form-input for="text" value=""></b-form-input>
+                <b-form-input for="text" v-model="newProduct.meta_title"></b-form-input>
               </div>
               <div class="col-md-6">
                  <label class="mb-1 mt-3 font-weight-medium">Meta Keywords</label>
-                <b-form-input for="text" value=""></b-form-input>
+                <b-form-input for="text" v-model="newProduct.meta_keywords_str"></b-form-input>
               </div>
               <div class="col-md-12">
                  <label class="mb-1 mt-3 font-weight-medium">Meta Description</label>
                 <textarea
-                v-model="textarea"
+                v-model="newProduct.meta_description"
                 class="form-control"
                 :maxlength="225"
                 rows="3"
@@ -678,39 +718,35 @@ export default {
                     <div class="form-group row">
                       <label class="col-md-6 col-form-label">Enabled</label>
                       <div class="col-md-6 align-right">
-                        <b-form-checkbox switch size="lg" v-model="lgchecked" class="text-right"></b-form-checkbox>
+                        <b-form-checkbox switch size="lg" v-model="newProduct.enabled" class="text-right"></b-form-checkbox>
                       </div>
                     </div>
                     <div class="form-group row">
                       <label class="col-md-6 col-form-label">Visibility</label>
                       <div class="col-md-6 align-right pl-0">
-                        <select class="custom-select">
-                          <option selected>Public</option>
-                          <option value="1">Private</option>
+                        <select class="custom-select" v-model="newProduct.visibility">
+                          <option value="public" selected>Public</option>
+                          <option value="private">Private</option>
                         </select>
                       </div>
                     </div>
                     <div class="form-group row">
                       <label class="col-md-6 col-form-label">Layout</label>
                       <div class="col-md-6 align-right pl-0">
-                        <select class="custom-select">
-                          <option selected>Full Width</option>
-                          <option value="1">1 Column</option>
-                          <option value="2">2 Column Left</option>
-                          <option value="3">2 Column Right</option>
-                          <option value="4">Custom Layout</option>
+                        <select class="custom-select" v-model="newProduct.layout_id">
+                         <option v-for="layout in layouts" v-bind:value="layout.id" :key="layout.id">{{layout.name}}</option>
                         </select>
                       </div>
                     </div>
                     <div class="form-group row">
                       <label class="col-md-6 col-form-label">URL</label>
                       <div class="col-md-6 align-right pl-0">
-                        <b-form-input for="text" value=""></b-form-input>
+                        <b-form-input for="text" v-model="newProduct.url_key"></b-form-input>
                       </div>
                     </div>
                     <div class="form-group row">
                       <label class="col-md-6 col-form-label">Categories</label>
-                      <multiselect v-model="value1" class="mr-3 ml-2" :options="categoryvalues" :multiple="true"></multiselect>
+                      <multiselect class="mr-3 ml-2"  v-model="selectedCategories" label="name" track-by="id" :options="categories"  :multiple="true"></multiselect>
                     </div>
                     <div class="form-group row">
                        <div class="col-md-6">
@@ -719,7 +755,7 @@ export default {
                           </b-button>
                         </div>
                         <div class="col-md-6 pl-0">
-                         <b-button variant="primary" class="btn-block">
+                         <b-button variant="primary" class="btn-block" @click="createProduct()">
                               <i class="bx bx-check-double font-size-16 align-middle mr-2"></i>
                               Publish
                           </b-button>

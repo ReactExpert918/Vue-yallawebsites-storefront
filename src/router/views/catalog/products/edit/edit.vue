@@ -162,7 +162,7 @@ export default {
           }
       });
       axios
-      .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}`)
+      .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}&without=${this.$route.params.id}`)
       .then(response => (this.allProductsData = response.data.data));
   },
   methods: {
