@@ -123,10 +123,11 @@ export default {
         ],
       },
       dropzoneOptions: {
-        url: "https://httpbin.org/post",
-        thumbnailWidth: 150,
-        maxFilesize: 0.5,
-        headers: { "My-Awesome-Header": "header value" }
+        url: `${process.env.VUE_APP_BACKEND_URL}/api/v1/products/upload`,
+        // thumbnailWidth: 75,
+        paramName: "product_image",
+        maxFilesize: 200
+        // headers: {"SomeHeader": "some value"},
       },
       textarea: '',
       lgchecked: '',
@@ -206,6 +207,10 @@ export default {
         axios
         .delete(`${this.backendURL}/api/v1/products/${this.productData.id}`)
         .then(response => (alert(`${response.data.data.id} Product deleted!`)));
+      },
+
+      handleImageUpload(){
+        this.$refs.myVueDropzone.setOption("url" , `${this.backendURL}/api/v1/products/${this.productData.id}/upload`);
       },
 
       isBundleID(id){
@@ -412,7 +417,8 @@ export default {
                   id="dropzone"
                   ref="myVueDropzone"
                   :use-custom-slot="true"
-                  :options="dropzoneOptions">
+                  :options="dropzoneOptions"
+                  @vdropzone-file-added="handleImageUpload">
                   <div class="dropzone-custom-content">
                     <i class="display-4 text-muted bx bxs-cloud-upload"></i>
                     <h4>Drop files here or click to upload.</h4>
@@ -422,21 +428,11 @@ export default {
                 <div class="col-9">
                   <div class="row">
                     <div class="imagesUploaded mb-2 col-6">
-                      <div class="imageFile highlight-border">
-                          <img src="placeholder.png"/>
+                      <div class="imageFile highlight-border" v-for="(image , index) of productData.images" :key="index">
+                          <img :src="image" />
                           <span class="actions-right cursor-ponter">
                             <b-button id="tooltip-set-default-1" variant="primary" class="mr-2"><i class="bx bx-image-alt"></i></b-button>
                             <b-tooltip target="tooltip-set-default-1">Set Image As Default</b-tooltip>
-                            <b-button class="mr-1 w-s" variant="danger"><i class="mdi mdi-trash-can d-block"></i></b-button>
-                          </span>
-                      </div>
-                    </div>
-                    <div class="imagesUploaded mb-2 col-6">
-                      <div class="imageFile">
-                          <img src="placeholder.png"/>
-                          <span class="actions-right cursor-ponter">
-                            <b-button id="tooltip-set-default-2" variant="primary" class="mr-2"><i class="bx bx-image-alt"></i></b-button>
-                            <b-tooltip target="tooltip-set-default-2">Set Image As Default</b-tooltip>
                             <b-button class="mr-1 w-s" variant="danger"><i class="mdi mdi-trash-can d-block"></i></b-button>
                           </span>
                       </div>
