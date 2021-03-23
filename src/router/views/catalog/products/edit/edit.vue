@@ -24,7 +24,14 @@ export default {
   data() {
     return {
       backendURL: process.env.VUE_APP_BACKEND_URL,
-      productData: {layout:{} , meta_keywords_str:"" , meta_description:"" , bundle_ids:[]},
+      productData: {
+        layout:{} , 
+        meta_keywords_str:"" ,
+        meta_description:"" , 
+        bundle_ids:[],
+        default_image_url: "",
+        delete_image_urls: [],
+      },
       variationsData: variationsData,
       allProductsData: [],
       preVariation: [],
@@ -161,6 +168,7 @@ export default {
               this.productData.meta_keywords_str += " ";
             }
           }
+          this.productData.delete_image_urls = [];
       });
       axios
       .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}&without=${this.$route.params.id}`)
@@ -191,6 +199,8 @@ export default {
            quantity: parseInt(this.productData.quantity),
            enabled: this.productData.enabled,
            is_downloadable: this.productData.is_downloadable,
+           default_image_url: this.productData.default_image_url,
+           delete_image_urls: this.productData.delete_image_urls,
            category_ids: [],
         }
 
@@ -431,9 +441,9 @@ export default {
                       <div class="imageFile highlight-border" v-for="(image , index) of productData.images" :key="index">
                           <img :src="image" />
                           <span class="actions-right cursor-ponter">
-                            <b-button id="tooltip-set-default-1" variant="primary" class="mr-2"><i class="bx bx-image-alt"></i></b-button>
+                            <b-button id="tooltip-set-default-1" variant="primary" class="mr-2" @click="productData.default_image_url = image"><i class="bx bx-image-alt"></i></b-button>
                             <b-tooltip target="tooltip-set-default-1">Set Image As Default</b-tooltip>
-                            <b-button class="mr-1 w-s" variant="danger"><i class="mdi mdi-trash-can d-block"></i></b-button>
+                            <b-button class="mr-1 w-s" variant="danger" @click="productData.delete_image_urls.push(image)"><i class="mdi mdi-trash-can d-block"></i></b-button>
                           </span>
                       </div>
                     </div>
