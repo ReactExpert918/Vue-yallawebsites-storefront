@@ -7,10 +7,8 @@ import Multiselect from "vue-multiselect";
 import Layout from "../../../../layouts/main";
 import PageHeader from "@/components/page-header";
 
-import { productData } from "./edit-data";
 import { variationsData } from "./variations-data";
 import axios from "axios";
-import { allProductsData } from "./all-products";
 import appConfig from "@/app.config";
 
 /**
@@ -25,10 +23,21 @@ export default {
 
   data() {
     return {
-      productData: productData,
+      backendURL: process.env.VUE_APP_BACKEND_URL,
+      productData: {
+        layout:{} , 
+        meta_keywords_str:"" ,
+        meta_description:"" , 
+        bundle_ids:[],
+        default_image_url: "",
+        delete_image_urls: [],
+      },
       variationsData: variationsData,
-      allProductsData: allProductsData,
+      allProductsData: [],
       preVariation: [],
+      layouts: [],
+      categories: [],
+      selectedCategories: [],
       VariationOptionsName: ['name1', 'name2', 'name3'],
       id: [],
       variations: [],
@@ -76,22 +85,22 @@ export default {
           },
           { 
               label: "Product Name",
-              key: "productName",
+              key: "name",
               sortable: true,
           },
           {   
               label: "SKU",
-              key: "productSku",
+              key: "sku",
               sortable: true,
           },
           {
               label: "Price",
-              key: "productPrice",
+              key: "price",
               sortable: true,
           },
           {
               label: "Qty",
-              key: "productQty",
+              key: "quantity",
               sortable: true,
           },
           {
@@ -121,10 +130,11 @@ export default {
         ],
       },
       dropzoneOptions: {
-        url: "https://httpbin.org/post",
-        thumbnailWidth: 150,
-        maxFilesize: 0.5,
-        headers: { "My-Awesome-Header": "header value" }
+        url: `${process.env.VUE_APP_BACKEND_URL}/api/v1/products/upload`,
+        // thumbnailWidth: 75,
+        paramName: "product_image",
+        maxFilesize: 200
+        // headers: {"SomeHeader": "some value"},
       },
       textarea: '',
       lgchecked: '',
@@ -135,27 +145,92 @@ export default {
     };
   },
   computed: {
-      /**
-        * Total no. of records
-        */
-      rows() {
-          return this.allProductsData.length;
-      },
+      
   },
   mounted() {
-      // Set the initial number of items
-      this.totalRows = this.items.length;
       axios
-          .get("http://dummy.restapiexample.com/api/v1/employees", {
-              headers: {
-                  "Content-type": "application/json;charset=utf-8",
-              },
-          })
-          .then((res) => {
-              return res;
-          });
+      .get(`${this.backendURL}/api/v1/pages/layouts`)
+      .then(response => (this.layouts = response.data.data));
+      axios
+      .get(`${this.backendURL}/api/v1/categories`)
+      .then(response => (this.categories = response.data.data));
+      axios
+      .get(`${this.backendURL}/api/v1/products/${this.$route.params.id}`)
+      .then(response => {
+          this.productData = response.data.data;
+          this.productData.meta_keywords_str = "";
+          if (this.productData.layout == null){
+            this.productData.layout = {};
+          }
+          for (var i  = 0; i < this.productData.meta_keywords.length; i++){
+            this.productData.meta_keywords_str += this.productData.meta_keywords[i];
+            if ((this.productData.meta_keywords.length - i) > 1){ // adding space seperated words and checking for the last item
+              this.productData.meta_keywords_str += " ";
+            }
+          }
+          this.productData.delete_image_urls = [];
+      });
+      axios
+      .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}&without=${this.$route.params.id}`)
+      .then(response => (this.allProductsData = response.data.data));
   },
   methods: {
+
+      updateProduct(){
+        this.productData.meta_keywords = this.productData.meta_keywords_str.split(" ");
+        if (this.productData.meta_keywords[0] == ""){
+          this.productData.meta_keywords = [];
+        } 
+        var productReq = {
+           name: this.productData.name,
+           price: parseFloat(this.productData.price),
+           cost_price: parseFloat(this.productData.cost_price),
+           sale_price: parseFloat(this.productData.sale_price),
+           short_description: this.productData.short_description,
+           long_description: this.productData.long_description,
+           meta_title: this.productData.meta_title,
+           meta_description: this.productData.meta_description,
+           meta_keywords: this.productData.meta_keywords,
+           layout_id: this.productData.layout.id,
+           ean: this.productData.ean,
+           sku: this.productData.sku,
+           visibility: this.productData.visibility,
+           url_key: this.productData.url_key,
+           quantity: parseInt(this.productData.quantity),
+           enabled: this.productData.enabled,
+           is_downloadable: this.productData.is_downloadable,
+           default_image_url: this.productData.default_image_url,
+           delete_image_urls: this.productData.delete_image_urls,
+           category_ids: [],
+        }
+
+        for(var i = 0; i < this.selectedCategories.length; i++){ 
+           productReq.category_ids.push(this.selectedCategories[i].id);
+        }
+
+        axios
+        .put(`${this.backendURL}/api/v1/products/${this.$route.params.id}` , productReq)
+        .then(response => (alert(`${response.data.data.id} Product Updated!`)))
+      },
+
+      deleteProduct(){
+        axios
+        .delete(`${this.backendURL}/api/v1/products/${this.productData.id}`)
+        .then(response => (alert(`${response.data.data.id} Product deleted!`)));
+      },
+
+      handleImageUpload(){
+        this.$refs.myVueDropzone.setOption("url" , `${this.backendURL}/api/v1/products/${this.productData.id}/upload`);
+      },
+
+      isBundleID(id){
+        for (var i = 0; i < this.productData.bundle_ids.length; i++){
+          if (this.productData.bundle_ids[i] == id){
+            return true;
+          }
+        }
+        return false;
+      },
       addTag (searchQuery, id) {
           let optionValue = {
             name: searchQuery
@@ -282,7 +357,7 @@ export default {
             <div class="row">
               <div class="col-9">
                 <label class="mt-3">Product Name</label>
-                <b-form-input for="text" value="Product Name"></b-form-input>
+                <b-form-input for="text" v-model="productData.name"></b-form-input>
               </div>
               <div class="col-3">
               <label class="mt-3">Product Type</label>
@@ -295,27 +370,27 @@ export default {
               </div>
               <div class="col-4">
                 <label class="mt-3">Product Price</label>
-                <b-form-input for="text" value="Product Price"></b-form-input>
+                <b-form-input for="text" v-model="productData.price"></b-form-input>
               </div>
               <div class="col-4">
                 <label class="mt-3">Product Cost Price</label>
-                <b-form-input for="text" value="Cost Price"></b-form-input>
+                <b-form-input for="text" v-model="productData.cost_price"></b-form-input>
               </div>
               <div class="col-4">
                 <label class="mt-3">Product Sale Price</label>
-                <b-form-input for="text" value="Sale Price"></b-form-input>
+                <b-form-input for="text" v-model="productData.sale_price"></b-form-input>
               </div>
               <div class="col-4">
                 <label class="mt-3">Qty</label>
-                <b-form-input for="text" value="Qty"></b-form-input>
+                <b-form-input for="text" v-model="productData.quantity"></b-form-input>
               </div>
               <div class="col-4">
                 <label class="mt-3">SKU</label>
-                <b-form-input for="text" value="SKU"></b-form-input>
+                <b-form-input for="text" v-model="productData.sku"></b-form-input>
               </div>
               <div class="col-4">
                 <label class="mt-3">EAN</label>
-                <b-form-input for="text" value="EAN"></b-form-input>
+                <b-form-input for="text" v-model="productData.ean"></b-form-input>
               </div>
             </div>
           </div>
@@ -326,7 +401,7 @@ export default {
           <h4 class="card-title mt-3">Short Description</h4>
           <div class="row">
             <div class="col-12">
-              <ckeditor :editor="editor"></ckeditor>
+              <ckeditor :editor="editor" v-model="productData.short_description"></ckeditor>
             </div>
           </div>
           </div>
@@ -337,7 +412,7 @@ export default {
             <h4 class="card-title mt-3">Full Product Description</h4>
             <div class="row">
               <div class="col-12">
-                <ckeditor :editor="editor"></ckeditor>
+                <ckeditor :editor="editor" v-model="productData.long_description"></ckeditor>
               </div>
             </div>
           </div>
@@ -352,7 +427,8 @@ export default {
                   id="dropzone"
                   ref="myVueDropzone"
                   :use-custom-slot="true"
-                  :options="dropzoneOptions">
+                  :options="dropzoneOptions"
+                  @vdropzone-file-added="handleImageUpload">
                   <div class="dropzone-custom-content">
                     <i class="display-4 text-muted bx bxs-cloud-upload"></i>
                     <h4>Drop files here or click to upload.</h4>
@@ -362,22 +438,12 @@ export default {
                 <div class="col-9">
                   <div class="row">
                     <div class="imagesUploaded mb-2 col-6">
-                      <div class="imageFile highlight-border">
-                          <img src="placeholder.png"/>
+                      <div class="imageFile highlight-border" v-for="(image , index) of productData.images" :key="index">
+                          <img :src="image" />
                           <span class="actions-right cursor-ponter">
-                            <b-button id="tooltip-set-default-1" variant="primary" class="mr-2"><i class="bx bx-image-alt"></i></b-button>
+                            <b-button id="tooltip-set-default-1" variant="primary" class="mr-2" @click="productData.default_image_url = image"><i class="bx bx-image-alt"></i></b-button>
                             <b-tooltip target="tooltip-set-default-1">Set Image As Default</b-tooltip>
-                            <b-button class="mr-1 w-s" variant="danger"><i class="mdi mdi-trash-can d-block"></i></b-button>
-                          </span>
-                      </div>
-                    </div>
-                    <div class="imagesUploaded mb-2 col-6">
-                      <div class="imageFile">
-                          <img src="placeholder.png"/>
-                          <span class="actions-right cursor-ponter">
-                            <b-button id="tooltip-set-default-2" variant="primary" class="mr-2"><i class="bx bx-image-alt"></i></b-button>
-                            <b-tooltip target="tooltip-set-default-2">Set Image As Default</b-tooltip>
-                            <b-button class="mr-1 w-s" variant="danger"><i class="mdi mdi-trash-can d-block"></i></b-button>
+                            <b-button class="mr-1 w-s" variant="danger" @click="productData.delete_image_urls.push(image)"><i class="mdi mdi-trash-can d-block"></i></b-button>
                           </span>
                       </div>
                     </div>
@@ -603,8 +669,14 @@ export default {
                     <!-- Table -->
                     <div class="table-responsive mb-0">
                         <b-table :items="allProductsData" selectable :fields="fields" responsive="sm" :per-page="perPage" :current-page="currentPage" :sort-by.sync="sortBy" :sort-desc.sync="sortDesc" :filter="filter" :filter-included-fields="filterOn" @filtered="onFiltered">
-                      <template #cell(selected)>
-                        <b-form-checkbox switch size="lg" v-model="lgchecked"></b-form-checkbox>
+                      <template #cell(selected)="data">
+                        <b-form-checkbox switch size="lg" :checked="isBundleID(data.item.id)"></b-form-checkbox>
+                      </template>
+                       <template #cell(status)="data">
+                        <span class="badge badge-success font-size-12">
+                          <span v-if="data.item.enabled">Enabled</span>
+                          <span v-else>Disabled</span>
+                        </span>
                       </template>
                         </b-table>
                     </div>
@@ -626,16 +698,16 @@ export default {
             <div class="row">
               <div class="col-md-6">
                 <label class="mb-1 mt-3 font-weight-medium">Meta Title</label>
-                <b-form-input for="text" value=""></b-form-input>
+                <b-form-input for="text" v-model="productData.meta_title"></b-form-input>
               </div>
               <div class="col-md-6">
                  <label class="mb-1 mt-3 font-weight-medium">Meta Keywords</label>
-                <b-form-input for="text" value=""></b-form-input>
+                <b-form-input for="text" v-model="productData.meta_keywords_str"></b-form-input>
               </div>
               <div class="col-md-12">
                  <label class="mb-1 mt-3 font-weight-medium">Meta Description</label>
                 <textarea
-                v-model="textarea"
+                v-model="productData.meta_description"
                 class="form-control"
                 :maxlength="225"
                 rows="3"
@@ -643,7 +715,7 @@ export default {
               ></textarea>
               <div class="text-center">
                 <p
-                  v-if="textarea"
+                  v-if="textarea.meta_description"
                   class="badge position-absolute"
                   :class="{ 'badge-success': textarea.length !== 225,
                             'badge-danger': textarea.length === 225 }"
@@ -667,39 +739,35 @@ export default {
                     <div class="form-group row">
                       <label class="col-md-6 col-form-label">Enabled</label>
                       <div class="col-md-6 align-right">
-                        <b-form-checkbox switch size="lg" v-model="lgchecked" class="text-right"></b-form-checkbox>
+                        <b-form-checkbox switch size="lg" v-model="productData.enabled" class="text-right"></b-form-checkbox>
                       </div>
                     </div>
                     <div class="form-group row">
                       <label class="col-md-6 col-form-label">Visibility</label>
                       <div class="col-md-6 align-right pl-0">
-                        <select class="custom-select">
-                          <option selected>Public</option>
-                          <option value="1">Private</option>
+                        <select class="custom-select" v-model="productData.visibility">
+                          <option selected value="public">Public</option>
+                          <option value="private">Private</option>
                         </select>
                       </div>
                     </div>
                     <div class="form-group row">
                       <label class="col-md-6 col-form-label">Layout</label>
                       <div class="col-md-6 align-right pl-0">
-                        <select class="custom-select">
-                          <option selected>Full Width</option>
-                          <option value="1">1 Column</option>
-                          <option value="2">2 Column Left</option>
-                          <option value="3">2 Column Right</option>
-                          <option value="4">Custom Layout</option>
+                        <select class="custom-select" v-model="productData.layout.id">
+                         <option v-for="layout in layouts" v-bind:value="layout.id" :key="layout.id">{{layout.name}}</option>
                         </select>
                       </div>
                     </div>
                     <div class="form-group row">
                       <label class="col-md-6 col-form-label">URL</label>
                       <div class="col-md-6 align-right pl-0">
-                        <b-form-input for="text" value=""></b-form-input>
+                        <b-form-input for="text" v-model="productData.url_key"></b-form-input>
                       </div>
                     </div>
                     <div class="form-group row">
                       <label class="col-md-6 col-form-label">Categories</label>
-                      <multiselect class="mr-3 ml-2" v-model="value1" :options="categoryvalues" :multiple="true"></multiselect>
+                      <multiselect class="mr-3 ml-2"  v-model="selectedCategories" label="name" track-by="id" :options="categories"  :multiple="true"></multiselect>
                     </div>
                     <div class="row">
                       <div class="col-md-4">
@@ -711,7 +779,7 @@ export default {
                           </b-button>
                         </div>
                         <div class="col-md-12">
-                         <b-button variant="primary" class="btn-block">
+                         <b-button variant="primary" class="btn-block" @click="updateProduct()">
                               <i class="bx bx-check-double font-size-16 align-middle mr-2"></i>
                               Publish
                           </b-button>
@@ -728,7 +796,7 @@ export default {
     <b-modal id="modal-delete-page" centered title="Delete Product" title-class="font-18" hide-footer>
       <p>Are you sure? Pressing Delete will remove this product permenantly.</p>
       <div class="text-right">
-        <b-button variant="danger">Delete</b-button>
+        <b-button variant="danger" @click="deleteProduct()">Delete</b-button>
       </div>
     </b-modal>
   </Layout>

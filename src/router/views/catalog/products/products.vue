@@ -2,7 +2,6 @@
 import Layout from "../../../layouts/main";
 import PageHeader from "@/components/page-header";
 import axios from "axios";
-import { productsData } from "./products-data";
 import appConfig from "@/app.config";
 
 /**
@@ -16,8 +15,10 @@ export default {
   components: { Layout, PageHeader },
   data() {
     return {
+      backendURL: process.env.VUE_APP_BACKEND_URL,
       selectedAll: false,
-      productsData: productsData,
+      productsData: [],
+      currentProduct: {},
       title: "Products",
       items: [
         {
@@ -52,8 +53,9 @@ export default {
               key: "price",
               sortable: true,
           },
-          {
-              key: "qty",
+          { 
+              label: "qty",
+              key: "quantity",
               sortable: true,
           },
           {
@@ -86,11 +88,9 @@ export default {
     }
   },
   mounted() {
-      // Set the initial number of items
-      this.totalRows = this.items.length;
       axios
-      .get('https://api.coindesk.com/v1/bpi/currentprice.json')
-      .then(response => (this.info = response))
+      .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}`)
+      .then(response => (this.productsData = response.data.data));
   },
   methods: {
       /**
@@ -103,6 +103,11 @@ export default {
           // Trigger pagination to update the number of buttons/pages due to filtering
           this.totalRows = filteredItems.length;
           this.currentPage = 1;
+      },
+      deleteProduct(){
+        axios
+        .delete(`${this.backendURL}/api/v1/products/${this.currentProduct.id}`)
+        .then(response => (alert(`${response.data.data.id} Product deleted!`)));
       }
   },
 };
@@ -179,7 +184,8 @@ export default {
                       </template>
                       <template #cell(status)="data">
                         <span class="badge badge-success font-size-12">
-                          {{data.item.status}}
+                          <span v-if="data.item.enabled">Enabled</span>
+                          <span v-else>Disabled</span>
                         </span>
                       </template>
                       <template #cell(actions)="data">
@@ -188,11 +194,11 @@ export default {
                             <i class="mdi mdi-dots-horizontal font-size-18"></i>
                           </template>
 
-                          <b-dropdown-item :href="'/catalog/products/edit/' + data.item.productId">
+                          <b-dropdown-item :href="'/catalog/products/edit/' + data.item.id">
                             <i class="fas fa-pencil-alt text-success mr-1"></i> Edit
                           </b-dropdown-item>
 
-                          <b-dropdown-item v-b-modal.modal-delete-page>
+                          <b-dropdown-item v-b-modal.modal-delete-page @click="currentProduct = data.item">
                             <i class="fas fa-trash-alt text-danger mr-1"></i> Delete
                           </b-dropdown-item>
                         </b-dropdown>
@@ -219,7 +225,7 @@ export default {
     <b-modal id="modal-delete-page" centered title="Delete Product" title-class="font-18" hide-footer>
       <p>Are you sure? Pressing Delete will remove this product permenantly.</p>
       <div class="text-right">
-        <b-button variant="danger">Delete</b-button>
+        <b-button variant="danger" @click="deleteProduct()">Delete</b-button>
       </div>
     </b-modal>
   </Layout>
