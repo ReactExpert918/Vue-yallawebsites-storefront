@@ -2,7 +2,6 @@
 import Layout from "../../../layouts/main";
 import PageHeader from "@/components/page-header";
 import axios from "axios";
-import { ordersData } from "./orders-data";
 import appConfig from "@/app.config";
 
 /**
@@ -16,8 +15,9 @@ export default {
   components: { Layout, PageHeader },
   data() {
     return {
+      backendURL: process.env.VUE_APP_BACKEND_URL,
       selectedAll: false,
-      ordersData: ordersData,
+      ordersData: [],
       title: "Orders",
       items: [
         {
@@ -45,21 +45,22 @@ export default {
           },
           {
               label: "Order ID",
-              key: "orderId",
+              key: "id",
               sortable: true,
           },
           {
               label: "Purchase Date",
-              key: "purchaseDate",
+              key: "created_at",
               sortable: true,
           },
           {
               label: "Ship To",
-              key: "shipToName",
+              key: "customer.name",
               sortable: true,
           },
           {
-              key: "total",
+              label: "Total",
+              key: "total_price",
               sortable: true,
           },
           {
@@ -92,11 +93,9 @@ export default {
     }
   },
   mounted() {
-      // Set the initial number of items
-      this.totalRows = this.items.length;
       axios
-      .get('https://api.coindesk.com/v1/bpi/currentprice.json')
-      .then(response => (this.info = response))
+      .get(`${this.backendURL}/api/v1/orders?per_page=${this.perPage}&page=${this.currentPage}`)
+      .then(response => (this.ordersData = response.data.data))
   },
   methods: {
       /**
@@ -186,7 +185,7 @@ export default {
                       </template>
                       <template #cell(status)="data">
                         <span class="badge badge-success font-size-12">
-                          {{data.item.status}}
+                          {{data.item.status.status}}
                         </span>
                       </template>
                       <template #cell(actions)="data">
