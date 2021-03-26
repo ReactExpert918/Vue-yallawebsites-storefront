@@ -60,7 +60,7 @@ export default {
           },
           {
               label: "Total",
-              key: "total_price",
+              key: "total.net_total",
               sortable: true,
           },
           {
@@ -194,11 +194,11 @@ export default {
                             <i class="mdi mdi-dots-horizontal font-size-18"></i>
                           </template>
 
-                           <b-dropdown-item :href="'/sales/orders/view/' + data.item.orderId">
+                           <b-dropdown-item :href="'/sales/orders/view/' + data.item.id">
                             <i class="bx bx-show-alt"></i> View
                           </b-dropdown-item>
 
-                          <b-dropdown-item :href="'/sales/orders/edit/' + data.item.orderId">
+                          <b-dropdown-item :href="'/sales/orders/edit/' + data.item.id">
                             <i class="fas fa-pencil-alt text-success mr-1"></i> Edit
                           </b-dropdown-item>
 
