@@ -5,8 +5,6 @@ import PageHeader from "@/components/page-header";
 import { viewData } from "./create-data";
 import { paymentData } from "./create-data";
 import { shippingData } from "./create-data";
-import { allProductsData } from "./create-data";
-import { customerData } from "./create-data";
 
 import axios from "axios";
 import appConfig from "@/app.config";
@@ -22,11 +20,12 @@ export default {
   components: { Layout, PageHeader },
   data() {
     return {
+      backendURL: process.env.VUE_APP_BACKEND_URL,
       viewData: viewData,
       paymentData: paymentData,
       shippingData: shippingData,
-      allProductsData: allProductsData,
-      customerData: customerData,
+      products: [],
+      customers: [],
       selectedToogle: "A",
       title: "Create Order",
       items: [
@@ -58,22 +57,22 @@ export default {
           },
           {
               label: "Product",
-              key: "productName",
+              key: "name",
               sortable: true,
           },
           {
               label: "SKU",
-              key: "productSku",
+              key: "sku",
               sortable: true,
           },
           {
               label: "Price",
-              key: "productPrice",
+              key: "price",
               sortable: true,
           },
           {
               label: "Qty",
-              key: "productQty",
+              key: "quantity",
               sortable: true,
           },
           {
@@ -88,17 +87,17 @@ export default {
           },
           {
               label: "ID",
-              key: "customerId",
+              key: "id",
               sortable: true,
           },
           {
               label: "Name",
-              key: "customerName",
+              key: "name",
               sortable: true,
           },
           {
               label: "Email",
-              key: "customerEmail",
+              key: "email",
               sortable: true,
           }
       ],
@@ -109,35 +108,30 @@ export default {
         * Total no. of records
         */
       rows() {
-          return this.allProductsData.length;
+          return this.products.length;
       },
       customerrows() {
-          return this.customerData.length;
+          return this.customers.length;
       },
   },
   watch: {
     selectedAll: function() {
-      const selectedLength = this.allProductsData.filter(data => data.selected);
-      return this.allProductsData.forEach( e => {
+      const selectedLength = this.products.filter(data => data.selected);
+      return this.products.forEach( e => {
         if(this.selectedAll === true) { e.selected = true; }
-        else if (selectedLength.length === this.allProductsData.length) {
+        else if (selectedLength.length === this.products.length) {
           e.selected = false;
         }
       })
     },
   },
   mounted() {
-      // Set the initial number of items
-      this.totalRows = this.items.length;
       axios
-          .get("http://dummy.restapiexample.com/api/v1/employees", {
-              headers: {
-                  "Content-type": "application/json;charset=utf-8",
-              },
-          })
-          .then((res) => {
-              return res;
-          });
+      .get(`${this.backendURL}/api/v1/customers?per_page=${this.perPage}&page=${this.currentPage}&address=true`)
+      .then(response => (this.customers = response.data.data));
+      axios
+      .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}`)
+      .then(response => (this.products = response.data.data));
   },
   methods: {
       /**
@@ -152,7 +146,7 @@ export default {
           this.currentPage = 1;
       },
       addDataToModal(id){
-        this.currentAttribut = this.allProductsData[id]
+        this.currentAttribut = this.products[id]
       },
   },
 };
@@ -254,7 +248,7 @@ export default {
                             <!-- End search -->
                             <!-- Table -->
                             <div class="table-responsive mb-0">
-                                <b-table :items="customerData" 
+                                <b-table :items="customers" 
                                   :fields="customerfields" 
                                   responsive="sm" 
                                   :per-page="perPage" 
@@ -463,7 +457,7 @@ export default {
         <!-- End search -->
         <!-- Table -->
           <div class="table-responsive mb-0">
-              <b-table :items="allProductsData" 
+              <b-table :items="products" 
                 :fields="fields" 
                 responsive="sm" 
                 :per-page="perPage" 
@@ -493,7 +487,8 @@ export default {
                 </template>
                 <template #cell(status)="data">
                   <span class="badge badge-success font-size-12">
-                    {{data.item.status}}
+                    <span v-if="data.item.enabled">Enabled</span>
+                          <span v-else>Disabled</span>
                   </span>
                 </template>
 
