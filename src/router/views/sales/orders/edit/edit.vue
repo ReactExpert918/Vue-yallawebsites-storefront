@@ -2,11 +2,8 @@
 import Layout from "../../../../layouts/main";
 import PageHeader from "@/components/page-header";
 
-import { viewData } from "./edit-data";
 import { paymentData } from "./edit-data";
 import { shippingData } from "./edit-data";
-import { allProductsData } from "./all-products";
-
 import axios from "axios";
 import appConfig from "@/app.config";
 
@@ -21,10 +18,21 @@ export default {
   components: { Layout, PageHeader },
   data() {
     return {
-      viewData: viewData,
+      backendURL: process.env.VUE_APP_BACKEND_URL,
+      order: {
+        total: {},
+        status: {} , 
+        customer: {},
+        currency: {},
+        billing_address: {},
+        shipping_address: {},
+        payment_method: {},
+        shipping_method: {},
+      },
       paymentData: paymentData,
       shippingData: shippingData,
-      allProductsData: allProductsData,
+      products: [],
+      selectedProducts: [],
       selectedToogle: "A",
       title: "Edit Order",
       items: [
@@ -56,22 +64,22 @@ export default {
           },
           {
               label: "Product",
-              key: "productName",
+              key: "name",
               sortable: true,
           },
           {
               label: "SKU",
-              key: "productSku",
+              key: "sku",
               sortable: true,
           },
           {
               label: "Price",
-              key: "productPrice",
+              key: "price",
               sortable: true,
           },
           {
               label: "Qty",
-              key: "productQty",
+              key: "quantity",
               sortable: true,
           },
           {
@@ -86,32 +94,64 @@ export default {
         * Total no. of records
         */
       rows() {
-          return this.allProductsData.length;
+          return this.products.length;
       },
+      console: () => console,
   },
   watch: {
     selectedAll: function() {
-      const selectedLength = this.allProductsData.filter(data => data.selected);
-      return this.allProductsData.forEach( e => {
+      const selectedLength = this.products.filter(data => data.selected);
+      return this.products.forEach( e => {
         if(this.selectedAll === true) { e.selected = true; }
-        else if (selectedLength.length === this.allProductsData.length) {
+        else if (selectedLength.length === this.products.length) {
           e.selected = false;
         }
       })
     }
   },
   mounted() {
-      // Set the initial number of items
-      this.totalRows = this.items.length;
       axios
-          .get("http://dummy.restapiexample.com/api/v1/employees", {
-              headers: {
-                  "Content-type": "application/json;charset=utf-8",
-              },
-          })
-          .then((res) => {
-              return res;
-          });
+      .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}`)
+      .then(response => {
+         this.products = response.data.data;
+         for(var i = 0; i < this.products.length; i++){
+           this.products[i].order_quantity = 1;
+         }
+       });
+       axios
+      .get(`${this.backendURL}/api/v1/orders/${this.$route.params.id}`)
+      .then(response => {
+          this.order = response.data.data
+          if (this.order.status == null){
+            this.order.status = {};
+          }
+          if (this.order.customer == null){
+            this.order.customer = {};
+          }
+          if (this.order.currency == null){
+            this.order.currency = {};
+          }
+          if (this.order.billing_address == null){
+            this.order.billing_address = {};
+          }
+          if (this.order.shipping_address == null){
+            this.order.shipping_address = {};
+          }
+          if (this.order.payment_method == null){
+            this.order.payment_method = {};
+          }
+          if (this.order.shipping_method == null){
+            this.order.shipping_method = {};
+          }
+          
+          for(var i = 0; i < this.order.products.length; i++){
+            var op = this.order.products[i];
+            op.product.order_quantity = op.quantity;
+            op.product.price = op.price;
+            this.selectedProducts.push(op.product);
+          }
+
+      });
   },
   methods: {
       /**
@@ -126,7 +166,33 @@ export default {
           this.currentPage = 1;
       },
       addDataToModal(id){
-        this.currentAttribut = this.allProductsData[id]
+        this.currentAttribut = this.products[id]
+      },
+      getSubTotal(){
+        var subTotal = 0.0;
+        for(var i = 0; i < this.selectedProducts.length; i++){
+          subTotal += (this.selectedProducts[i].price * this.selectedProducts[i].order_quantity);
+        }
+        return subTotal;
+      },
+      getTotal(){
+        return this.getSubTotal() + this.order.total.shipping_cost;
+      },
+      updateOrder(){
+        var payload = {
+          billing_address: this.order.billing_address,
+          shipping_address: this.order.shipping_address,
+          products: []
+        }
+        for (var i = 0; i < this.selectedProducts.length; i++){
+          payload.products.push({
+            id: this.selectedProducts[i].id,
+            quantity: this.selectedProducts[i].order_quantity
+          });
+        }
+        axios
+        .put(`${this.backendURL}/api/v1/orders/${this.$route.params.id}` , payload)
+        .then(response => (alert(`${response.data.data.id} Order Updated!`)));
       }
   },
 };
@@ -138,7 +204,7 @@ export default {
 
     <div class="row">
       <div class="col-12">
-        <div class="card" v-for="order in viewData" :key="order.id">
+        <div class="card" >
           <div class="card-body">
             <div class="row mb-2">
               <div class="col-sm-12">
@@ -146,7 +212,7 @@ export default {
                   <button type="button" class="btn btn btn-rounded mb-2 mr-2" v-b-modal.modal-cancel-order>
                     <i class="mdi mdi-trash mr-1"></i> Cancel Order
                   </button>
-                  <b-button v-b-modal.modal-scrollable variant="primary">
+                  <b-button v-b-modal.modal-scrollable variant="primary" @click="updateOrder()">
                     <i class="mdi mdi-plus mr-1"></i> Save Order
                   </b-button>
                 </div>
@@ -160,37 +226,37 @@ export default {
                           <div class="col-md-6">
                             <h3>Billing Address</h3>
                             <label class="mt-3">Customer First Name</label>
-                            <b-form-input for="text"></b-form-input>
+                            <b-form-input for="text" v-model="order.billing_address.first_name"></b-form-input>
                             <label class="mt-3">Customer Last Name</label>
-                            <b-form-input for="text"></b-form-input>
+                            <b-form-input for="text" v-model="order.billing_address.last_name"></b-form-input>
                             <label class="mt-3">Street Address</label>
-                            <b-form-input for="text"></b-form-input>
+                            <b-form-input for="text" v-model="order.billing_address.street"></b-form-input>
                             <label class="mt-3">City</label>
-                            <b-form-input for="text"></b-form-input>
+                            <b-form-input for="text" v-model="order.billing_address.city"></b-form-input>
                             <label class="mt-3">Postcode / Zip Code</label>
-                            <b-form-input for="text"></b-form-input>
+                            <b-form-input for="text" v-model="order.billing_address.postcode"></b-form-input>
                             <label class="mt-3">Phone Number</label>
-                            <b-form-input for="text"></b-form-input>
+                            <b-form-input for="text" v-model="order.billing_address.phone_number"></b-form-input>
                           </div>
                           <div class="col-md-6">
                             <h3>Shipping Address</h3>
                             <label class="mt-3">Customer First Name</label>
-                            <b-form-input for="text"></b-form-input>
+                            <b-form-input for="text" v-model="order.shipping_address.first_name"></b-form-input>
                             <label class="mt-3">Customer Last Name</label>
-                            <b-form-input for="text"></b-form-input>
+                            <b-form-input for="text" v-model="order.shipping_address.last_name"></b-form-input>
                             <label class="mt-3">Street Address</label>
-                            <b-form-input for="text"></b-form-input>
+                            <b-form-input for="text" v-model="order.shipping_address.street"></b-form-input>
                             <label class="mt-3">City</label>
-                            <b-form-input for="text"></b-form-input>
+                            <b-form-input for="text" v-model="order.shipping_address.city"></b-form-input>
                             <label class="mt-3">Postcode / Zip Code</label>
-                            <b-form-input for="text"></b-form-input>
+                            <b-form-input for="text" v-model="order.shipping_address.postcode"></b-form-input>
                             <label class="mt-3">Phone Number</label>
-                            <b-form-input for="text"></b-form-input>
+                            <b-form-input for="text" v-model="order.shipping_address.phone_number"></b-form-input>
                           </div>
                         </div>
                       </div>
               </div>
-              <div class="col-sm-3">
+              <!-- <div class="col-sm-3">
                 <h5>Billing Address</h5>
                 <p>
                   {{order.billingAddressCustomerName}}<br>
@@ -209,7 +275,7 @@ export default {
                   {{order.shippingAddressCountry}}
                   {{order.shippingAddressTelephoneNumber}}
                 </p>
-              </div>
+              </div> -->
             </div>
             <div class="row card-body">
               <div class="col-sm-12">
@@ -227,14 +293,14 @@ export default {
                       </tr>
                     </thead>
                     <tbody>
-                      <tr v-for="item in order.orderedItems" :key="item.id">
-                        <td><img :src="item.thumbnail"/></td>
-                        <td>{{ item.productName }}</td>
-                        <td>{{ item.productSKU }}</td>
-                        <td>{{ item.unitPrice }}</td>
-                        <td><b-form-input for="text" value="1"></b-form-input></td>
-                        <td>{{ item.totalPrice }}</td>
-                      </tr>
+                      <tr v-for="product in selectedProducts" :key="product.id">
+                        <td><img :src="product.image"/></td>
+                        <td>{{ product.name }}</td>
+                        <td>{{ product.sku }}</td>
+                        <td>{{ product.price }}</td>
+                        <td><b-form-input for="number" :number="true" v-model="product.order_quantity"></b-form-input></td>
+                        <td>{{ product.price * product.order_quantity}}</td>
+                      </tr> 
                     </tbody>
                     <tfoot>
                       <tr>
@@ -247,17 +313,17 @@ export default {
                       <tr>
                         <td colspan="4"></td>
                         <td><b>Subtotal</b></td>
-                        <td>{{ order.orderCurrencySymbol }}{{ order.subtotal }}</td>
+                        <td>{{ order.currency.symbol }}{{ getSubTotal() }}</td>
                       </tr>
                       <tr>
                         <td colspan="4"></td>
                         <td><b>Shipping</b></td>
-                        <td>{{ order.orderCurrencySymbol }}{{ order.shippingCost }}</td>
+                        <td>{{ order.currency.sumbol }}{{ order.total.shipping_cost }}</td>
                       </tr>
                       <tr>
                         <td colspan="4"></td>
                         <td><b>Total</b></td>
-                        <td>{{ order.orderCurrencySymbol }}{{ order.total }}</td>
+                        <td>{{ order.currency.symbol }}{{ getTotal() }}</td>
                       </tr>
                     </tfoot>
                   </table>
@@ -322,7 +388,7 @@ export default {
             </div>
             <div class="row card-body">
               <div class="col-sm-12 text-sm-right">
-                <b-button variant="primary">
+                <b-button variant="primary" @click="updateOrder()">
                     <i class="bx bx-check-double font-size-16 align-middle mr-2"></i>
                     Save Order
                 </b-button>
@@ -354,7 +420,7 @@ export default {
         <!-- End search -->
         <!-- Table -->
           <div class="table-responsive mb-0">
-              <b-table :items="allProductsData" 
+              <b-table :items="products" 
                 :fields="fields" 
                 responsive="sm" 
                 :per-page="perPage" 
@@ -375,8 +441,8 @@ export default {
                 <template #cell(selected)="data">
                   <b-form-checkbox
                   @change="uncheckSelectAll"
-                  v-model="data.item.selected"
-                  :value="data.id"
+                  v-model="selectedProducts"
+                  :value="data.item"
                   
                   class="custom-checkbox custom-checkbox-primary"
                   
@@ -384,7 +450,8 @@ export default {
                 </template>
                 <template #cell(status)="data">
                   <span class="badge badge-success font-size-12">
-                    {{data.item.status}}
+                    <span v-if="data.item.enabled">Enabled</span>
+                          <span v-else>Disabled</span>
                   </span>
                 </template>
 

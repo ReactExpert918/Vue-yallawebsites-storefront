@@ -20,7 +20,8 @@ export default {
       customer: {
         group:{},
         billing_addresses:[{} , {}],
-        shipping_addresses: [{} , {}]
+        shipping_addresses: [{} , {}],
+        orders: [],
       },
       customerGroups: [],
       title: "Edit Customer",
@@ -187,13 +188,13 @@ export default {
                     </tr>
                   </thead>
                   <tbody>
-                    <tr v-for="order in customer.previousOrders" :key="order.id">
-                      <td>{{order.orderId}}</td>
-                      <td>{{order.purchaseDate}}</td>
-                      <td>{{order.noOfProducts}}</td>
-                      <td>{{order.totalPrice }}</td>
+                    <tr v-for="order in customer.orders" :key="order.id">
+                      <td>{{order.id}}</td>
+                      <td>{{order.created_at}}</td>
+                      <td>{{order.product_no}}</td>
+                      <td>{{order.total_price }}</td>
                       <td>
-                        <b-button variant="primary">
+                        <b-button variant="primary" >
                             <i class="bx bx-check-double font-size-16 align-middle mr-2"></i>
                             View
                         </b-button>

@@ -5,8 +5,6 @@ import PageHeader from "@/components/page-header";
 import { viewData } from "./create-data";
 import { paymentData } from "./create-data";
 import { shippingData } from "./create-data";
-import { allProductsData } from "./create-data";
-import { customerData } from "./create-data";
 
 import axios from "axios";
 import appConfig from "@/app.config";
@@ -22,11 +20,17 @@ export default {
   components: { Layout, PageHeader },
   data() {
     return {
+      backendURL: process.env.VUE_APP_BACKEND_URL,
       viewData: viewData,
       paymentData: paymentData,
       shippingData: shippingData,
-      allProductsData: allProductsData,
-      customerData: customerData,
+      products: [],
+      customers: [],
+      selectedCustomer: {
+        billing_addresses: [],
+        shipping_addresses: [],
+      },
+      selectedProducts: [],
       selectedToogle: "A",
       title: "Create Order",
       items: [
@@ -58,22 +62,22 @@ export default {
           },
           {
               label: "Product",
-              key: "productName",
+              key: "name",
               sortable: true,
           },
           {
               label: "SKU",
-              key: "productSku",
+              key: "sku",
               sortable: true,
           },
           {
               label: "Price",
-              key: "productPrice",
+              key: "price",
               sortable: true,
           },
           {
               label: "Qty",
-              key: "productQty",
+              key: "quantity",
               sortable: true,
           },
           {
@@ -88,17 +92,17 @@ export default {
           },
           {
               label: "ID",
-              key: "customerId",
+              key: "id",
               sortable: true,
           },
           {
               label: "Name",
-              key: "customerName",
+              key: "name",
               sortable: true,
           },
           {
               label: "Email",
-              key: "customerEmail",
+              key: "email",
               sortable: true,
           }
       ],
@@ -109,35 +113,36 @@ export default {
         * Total no. of records
         */
       rows() {
-          return this.allProductsData.length;
+          return this.products.length;
       },
       customerrows() {
-          return this.customerData.length;
+          return this.customers.length;
       },
+      console: () => console,
   },
   watch: {
-    selectedAll: function() {
-      const selectedLength = this.allProductsData.filter(data => data.selected);
-      return this.allProductsData.forEach( e => {
-        if(this.selectedAll === true) { e.selected = true; }
-        else if (selectedLength.length === this.allProductsData.length) {
-          e.selected = false;
-        }
-      })
-    },
+    // selectedAll: function() {
+    //   const selectedLength = this.products.filter(data => data.selected);
+    //   return this.products.forEach( e => {
+    //     if(this.selectedAll === true) { e.selected = true; }
+    //     else if (selectedLength.length === this.products.length) {
+    //       e.selected = false;
+    //     }
+    //   })
+    // },
   },
   mounted() {
-      // Set the initial number of items
-      this.totalRows = this.items.length;
       axios
-          .get("http://dummy.restapiexample.com/api/v1/employees", {
-              headers: {
-                  "Content-type": "application/json;charset=utf-8",
-              },
-          })
-          .then((res) => {
-              return res;
-          });
+      .get(`${this.backendURL}/api/v1/customers?per_page=${this.perPage}&page=${this.currentPage}&address=true`)
+      .then(response => (this.customers = response.data.data));
+      axios
+      .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}`)
+      .then(response => {
+         this.products = response.data.data;
+         for(var i = 0; i < this.products.length; i++){
+           this.products[i].order_quantity = 1;
+         }
+       });
   },
   methods: {
       /**
@@ -152,8 +157,43 @@ export default {
           this.currentPage = 1;
       },
       addDataToModal(id){
-        this.currentAttribut = this.allProductsData[id]
+        this.currentAttribut = this.products[id]
       },
+      getSubTotal(){
+        var subTotal = 0.0;
+        for(var i = 0; i < this.selectedProducts.length; i++){
+          subTotal += (this.selectedProducts[i].price * this.selectedProducts[i].order_quantity);
+        }
+        return subTotal;
+      },
+      getTotal(){
+        return this.getSubTotal() + 5;
+      },
+      createOrder(){
+        var billingAddress = {}
+        if (this.selectedCustomer.billing_addresses.length > 0){
+          billingAddress  =this.selectedCustomer.billing_addresses[0]
+        }
+         var shippingAddress = {}
+        if (this.selectedCustomer.shipping_addresses.length > 0){
+          shippingAddress  =this.selectedCustomer.shipping_addresses[0]
+        }
+        var payload = {
+          customer_id: this.selectedCustomer.id,
+          billing_address: billingAddress,
+          shipping_address: shippingAddress,
+          products: []
+        }
+        for (var i = 0; i < this.selectedProducts.length; i++){
+          payload.products.push({
+            id: this.selectedProducts[i].id,
+            quantity: this.selectedProducts[i].order_quantity
+          });
+        }
+        axios
+        .post(`${this.backendURL}/api/v1/orders` , payload)
+        .then(response => (alert(`${response.data.data.id} Order Created!`)));
+      }
   },
 };
 </script>
@@ -172,7 +212,7 @@ export default {
                   <button type="button" class="btn btn btn-rounded mb-2 mr-2">
                     <i class="mdi mdi-trash mr-1"></i> Cancel Order
                   </button>
-                  <button type="button" class="btn btn-success btn-rounded mb-2 mr-2">
+                  <button type="button" class="btn btn-success btn-rounded mb-2 mr-2" @click="createOrder">
                     <i class="mdi mdi-plus mr-1"></i> Submit Order
                   </button>
                 </div>
@@ -254,7 +294,7 @@ export default {
                             <!-- End search -->
                             <!-- Table -->
                             <div class="table-responsive mb-0">
-                                <b-table :items="customerData" 
+                                <b-table :items="customers" 
                                   :fields="customerfields" 
                                   responsive="sm" 
                                   :per-page="perPage" 
@@ -269,8 +309,8 @@ export default {
                                   <template #cell(selected)="data">
                                     <b-form-checkbox
                                     @change="uncheckSelectAll"
-                                    v-model="data.item.selected"
-                                    :value="data.id"
+                                    v-model="selectedCustomer"
+                                    :value="data.item"
                                     
                                     class="custom-checkbox custom-checkbox-primary"
                                     
@@ -336,14 +376,14 @@ export default {
                       </tr>
                     </thead>
                     <tbody>
-                      <tr v-for="item in order.orderedItems" :key="item.id">
-                        <td><img :src="item.thumbnail"/></td>
-                        <td>{{ item.productName }}</td>
-                        <td>{{ item.productSKU }}</td>
-                        <td>{{ item.unitPrice }}</td>
-                        <td><b-form-input for="text" value="1"></b-form-input></td>
-                        <td>{{ item.totalPrice }}</td>
-                      </tr>
+                      <tr v-for="product in selectedProducts" :key="product.id">
+                        <td><img :src="product.image"/></td>
+                        <td>{{ product.name }}</td>
+                        <td>{{ product.sku }}</td>
+                        <td>{{ product.price }}</td>
+                        <td><b-form-input for="number" :number="true" v-model="product.order_quantity"></b-form-input></td>
+                        <td>{{ product.price * product.order_quantity}}</td>
+                      </tr> 
                     </tbody>
                     <tfoot>
                       <tr>
@@ -356,7 +396,7 @@ export default {
                       <tr>
                         <td colspan="4"></td>
                         <td><b>Subtotal</b></td>
-                        <td>{{ order.orderCurrencySymbol }}{{ order.subtotal }}</td>
+                        <td>{{ order.orderCurrencySymbol }}{{ getSubTotal() }}</td>
                       </tr>
                       <tr>
                         <td colspan="4"></td>
@@ -366,7 +406,7 @@ export default {
                       <tr>
                         <td colspan="4"></td>
                         <td><b>Total</b></td>
-                        <td>{{ order.orderCurrencySymbol }}{{ order.total }}</td>
+                        <td>{{ order.orderCurrencySymbol }}{{ getTotal() }}</td>
                       </tr>
                     </tfoot>
                   </table>
@@ -431,7 +471,7 @@ export default {
             </div>
             <div class="row card-body">
               <div class="col-sm-12 text-sm-right">
-                <b-button variant="primary">
+                <b-button variant="primary" @click="createOrder">
                     <i class="bx bx-check-double font-size-16 align-middle mr-2"></i>
                     Submit Order
                 </b-button>
@@ -463,7 +503,7 @@ export default {
         <!-- End search -->
         <!-- Table -->
           <div class="table-responsive mb-0">
-              <b-table :items="allProductsData" 
+              <b-table :items="products" 
                 :fields="fields" 
                 responsive="sm" 
                 :per-page="perPage" 
@@ -476,7 +516,6 @@ export default {
               >
                 <template #head(selected)="data">
                   <b-form-checkbox
-                  v-model="selectedAll"
                   v-bind:value='data.id'                                                 
                   class="custom-checkbox custom-checkbox-primary "
                 ></b-form-checkbox>
@@ -484,8 +523,8 @@ export default {
                 <template #cell(selected)="data">
                   <b-form-checkbox
                   @change="uncheckSelectAll"
-                  v-model="data.item.selected"
-                  :value="data.id"
+                  v-model="selectedProducts"
+                  :value="data.item"
                   
                   class="custom-checkbox custom-checkbox-primary"
                   
@@ -493,7 +532,8 @@ export default {
                 </template>
                 <template #cell(status)="data">
                   <span class="badge badge-success font-size-12">
-                    {{data.item.status}}
+                    <span v-if="data.item.enabled">Enabled</span>
+                          <span v-else>Disabled</span>
                   </span>
                 </template>
 
