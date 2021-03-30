@@ -1,3 +1,4 @@
+
 import { authHeader } from './auth-header';
 
 export const userService = {
@@ -7,28 +8,39 @@ export const userService = {
     getAll,
 };
 
+var backendURL = process.env.VUE_APP_BACKEND_URL;
+
+
 function login(email, password) {
 
     const requestOptions = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify({
+            username_or_email: email,
+            password: password
+        })
     };
 
-    return fetch(`/users/authenticate`, requestOptions)
+    return fetch(`${backendURL}/api/auth/login`, requestOptions)
         .then(handleResponse)
-        .then(user => {
+        .then(resp => {
+            var data = JSON.parse(resp).data;
             // login successful if there's a jwt token in the response
-            if (user.token) {
+            if (data.token) {
                 // store user details and jwt token in local storage to keep user logged in between page refreshes
-                localStorage.setItem('user', JSON.stringify(user));
+                localStorage.setItem('user', JSON.stringify(data));
             }
-            return user;
+            return resp;
         });
+
+
+
 }
 
 function logout() {
     // remove user from local storage to log user out
+    alert("Bye Bye world");
     localStorage.removeItem('user');
 }
 
@@ -50,17 +62,16 @@ function getAll() {
 }
 
 function handleResponse(response) {
-    return response.text().then(text => {
-        const data = text && JSON.parse(text);
-        if (!response.ok) {
-            if (response.status === 401) {
-                // auto logout if 401 response returned from api
-                logout();
-                location.reload(true);
-            }
-            const error = (data && data.message) || response.statusText;
-            return Promise.reject(error);
+    const data = response.text();
+    if (!response.ok) {
+        if (response.status === 401) {
+            // auto logout if 401 response returned from api
+            logout();
+            location.reload(true);
         }
-        return data;
-    });
+        const error = (data && data.message) || response.statusText;
+
+        return Promise.reject(error);
+    }
+    return data;
 }

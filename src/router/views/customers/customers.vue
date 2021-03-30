@@ -1,6 +1,9 @@
 <script>
 import Layout from "../../layouts/main";
 import PageHeader from "@/components/page-header";
+import {
+  authHeader,
+} from "@/helpers/authservice/auth-header";
 import axios from "axios";
 import appConfig from "@/app.config";
 
@@ -18,6 +21,11 @@ export default {
       selectedAll: false,
       backendURL: process.env.VUE_APP_BACKEND_URL,
       customersData: [],
+      authConfig: {
+        headers:{
+          authorization: ""
+        }
+      },
       title: "Customers",
       items: [
         {
@@ -79,6 +87,7 @@ export default {
       rows() {
           return this.customersData.length;
       },
+      console: () => console
   },
   watch: {
     selectedAll: function() {
@@ -92,10 +101,11 @@ export default {
     }
   },
   mounted() {
+      this.console.log(authHeader());
       // Set the initial number of items
       this.totalRows = this.items.length;
       axios
-      .get(`${this.backendURL}/api/v1/customers?per_page=${this.perPage}&page=${this.currentPage}`)
+      .get(`${this.backendURL}/api/v1/customers?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
       .then(response => (this.customersData = response.data.data))
   },
   methods: {

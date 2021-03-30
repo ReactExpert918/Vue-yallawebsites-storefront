@@ -1,5 +1,5 @@
 <script>
-import axios from "axios";
+//import axios from "axios";
 
 import Layout from "../../layouts/auth";
 import {
@@ -52,6 +52,7 @@ export default {
     notification() {
       return this.$store ? this.$store.state.notification : null;
     },
+    console: () => console,
   },
   methods: {
     ...authMethods,
@@ -64,54 +65,67 @@ export default {
       // stop here if form is invalid
       this.$v.$touch();
 
-      if (this.$v.$invalid) {
+      if (this.$v.invalid){
         return;
-      } else {
-        if (process.env.VUE_APP_DEFAULT_AUTH === "firebase") {
-          this.tryingToLogIn = true;
-          // Reset the authError if it existed.
-          this.authError = null;
-          return (
-            this.logIn({
-              email: this.email,
-              password: this.password,
-            })
-              // eslint-disable-next-line no-unused-vars
-              .then((token) => {
-                this.tryingToLogIn = false;
-                this.isAuthError = false;
-                // Redirect to the originally requested page, or to the home page
-                this.$router.push(
-                  this.$route.query.redirectFrom || {
-                    name: "default",
-                  }
-                );
-              })
-              .catch((error) => {
-                this.tryingToLogIn = false;
-                this.authError = error ? error : "";
-                this.isAuthError = true;
-              })
-          );
-        } else if (process.env.VUE_APP_DEFAULT_AUTH === "fakebackend") {
-          const { email, password } = this;
+      }
+
+      const { email, password } = this;
           if (email && password) {
             this.login({
               email,
               password,
             });
           }
-        } else if (process.env.VUE_APP_DEFAULT_AUTH === "authapi") {
-          axios
-            .post("http://127.0.0.1:8000/api/login", {
-              email: this.email,
-              password: this.password,
-            })
-            .then((res) => {
-              return res;
-            });
-        }
-      }
+
+      // if (this.$v.$invalid) {
+      //   return;
+      // } else {
+      //   if (process.env.VUE_APP_DEFAULT_AUTH === "firebase") {
+      //     this.tryingToLogIn = true;
+      //     // Reset the authError if it existed.
+      //     this.authError = null;
+      //     return (
+      //       this.logIn({
+      //         email: this.email,
+      //         password: this.password,
+      //       })
+      //         // eslint-disable-next-line no-unused-vars
+      //         .then((token) => {
+      //           this.tryingToLogIn = false;
+      //           this.isAuthError = false;
+      //           // Redirect to the originally requested page, or to the home page
+      //           this.$router.push(
+      //             this.$route.query.redirectFrom || {
+      //               name: "default",
+      //             }
+      //           );
+      //         })
+      //         .catch((error) => {
+      //           this.tryingToLogIn = false;
+      //           this.authError = error ? error : "";
+      //           this.isAuthError = true;
+      //         })
+      //     );
+      //   } else if (process.env.VUE_APP_DEFAULT_AUTH === "fakebackend") {
+      //     const { email, password } = this;
+      //     if (email && password) {
+      //       this.login({
+      //         email,
+      //         password,
+      //       });
+      //     }
+      //   } else if (process.env.VUE_APP_DEFAULT_AUTH === "authapi") {
+      //     axios
+      //       .post(`${this.backendURL}/api/auth/login`, {
+      //         username_or_email: this.email,
+      //         password: this.password,
+      //       })
+      //       .then((res) => {
+      //         this.console.log(res);
+      //         return res;
+      //       });
+      //   }
+      // }
     },
   },
   mounted() {},
