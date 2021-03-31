@@ -37,8 +37,25 @@ function login(email, password) {
 
 function logout() {
     // remove user from local storage to log user out
-    alert("Bye Bye world");
-    localStorage.removeItem('user');
+    var user = getLoggedInUser();
+    if (user) {
+        const headers = {
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }
+        localStorage.removeItem('user');
+
+        axios
+            .post(`${backendURL}/api/auth/logout/${user.id}`, headers)
+            .catch(error => {
+                if (error.response) {
+                    window.console.log(error.response.data);
+                }
+            })
+    }
+
+
 }
 
 export function handleAxiosError(error) {
