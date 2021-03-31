@@ -3,6 +3,9 @@ import Layout from "../../layouts/main";
 import PageHeader from "@/components/page-header";
 import axios from "axios";
 import appConfig from "@/app.config";
+import {
+  authHeader,
+} from "@/helpers/authservice/auth-header";
 
 /**
  * Pages component
@@ -98,7 +101,7 @@ export default {
       // Set the initial number of items
       this.totalRows = this.items.length;
      axios
-      .get(`${this.backendURL}/api/v1/customers/groups?per_page=${this.perPage}&page=${this.currentPage}`)
+      .get(`${this.backendURL}/api/v1/customers/groups?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
       .then(response => (this.customerGroupsData = response.data.data));
   },
   methods: {
@@ -115,26 +118,26 @@ export default {
       },
       fetchTaxClasses(){
         axios
-      .get(`${this.backendURL}/api/v1/tax/classes`)
+      .get(`${this.backendURL}/api/v1/tax/classes` , authHeader())
       .then(response => (this.taxClasses = response.data.data));
       },
       deleteCustomerGroup(id){
         axios
-        .delete(`${this.backendURL}/api/v1/customers/groups/${id}`)
+        .delete(`${this.backendURL}/api/v1/customers/groups/${id}` , authHeader())
         .then(alert("Deleted!"))
       },
       createCustomerGroup(e){
         e.preventDefault();
         this.createGroupPayload.rule.value = parseFloat(this.createGroupPayload.rule.value);
         axios
-        .post(`${this.backendURL}/api/v1/customers/groups` , this.createGroupPayload)
+        .post(`${this.backendURL}/api/v1/customers/groups` , this.createGroupPayload , authHeader())
         .then(response => (alert(`${response.data.data.id} Created!`)))
       },
       updateCustomerGroup(e){
         e.preventDefault();
         this.currentGroup.rule.value = parseFloat(this.currentGroup.rule.value);
         axios
-        .put(`${this.backendURL}/api/v1/customers/groups/${this.currentGroup.id}` , this.currentGroup)
+        .put(`${this.backendURL}/api/v1/customers/groups/${this.currentGroup.id}` , this.currentGroup , authHeader())
         .then(response => (alert(`${response.data.data.id} Updated!`)))
       },
   },

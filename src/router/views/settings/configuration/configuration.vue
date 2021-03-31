@@ -4,7 +4,9 @@ import PageHeader from "@/components/page-header";
 import appConfig from "@/app.config";
 import axios from "axios";
 import vue2Dropzone from "vue2-dropzone";
-
+import {
+  authHeader,
+} from "@/helpers/authservice/auth-header";
 
 export default {
   page: {
@@ -166,8 +168,8 @@ export default {
         url: `${process.env.VUE_APP_BACKEND_URL}/api/v1/stores/catalog/upload`,
         // thumbnailWidth: 75,
         paramName: "product_placeholder_image",
-        maxFilesize: 200
-        // headers: {"SomeHeader": "some value"},
+        maxFilesize: 200,
+        headers: authHeader().headers,
       }
     };
   },
@@ -175,7 +177,7 @@ export default {
   },
   mounted() {
     axios
-    .get(`${this.backendURL}/api/v1/stores/general`)
+    .get(`${this.backendURL}/api/v1/stores/general` , authHeader())
     .then(response => {
       this.general_config = response.data.data
       if (this.general_config.domain == null){
@@ -198,7 +200,7 @@ export default {
       }
      });
      axios
-    .get(`${this.backendURL}/api/v1/stores/catalog`)
+    .get(`${this.backendURL}/api/v1/stores/catalog` ,authHeader())
     .then(response => {
         this.catalog_config = response.data.data
         if (this.catalog_config.layout == null){
@@ -213,7 +215,7 @@ export default {
 
     });
      axios
-    .get(`${this.backendURL}/api/v1/stores/sales`)
+    .get(`${this.backendURL}/api/v1/stores/sales` , authHeader())
     .then(response => {
         this.sales_config = response.data.data;
         if (this.sales_config.tax_rate_based_on == null){
@@ -261,7 +263,7 @@ export default {
 
      });
     axios
-    .get(`${this.backendURL}/api/v1/stores/customer`)
+    .get(`${this.backendURL}/api/v1/stores/customer` , authHeader())
     .then(response => {
         this.customer_config = response.data.data
         if (this.customer_config.group == null){
@@ -269,43 +271,43 @@ export default {
         }
     });
     axios
-    .get(`${this.backendURL}/api/v1/stores/advanced`)
+    .get(`${this.backendURL}/api/v1/stores/advanced` , authHeader())
     .then(response => (this.advanced_config = response.data.data));
     axios
-    .get(`${this.backendURL}/api/v1/domains?per_page=-1`)
+    .get(`${this.backendURL}/api/v1/domains?per_page=-1` , authHeader())
     .then(response => (this.domains = response.data.data));
     axios
-    .get(`${this.backendURL}/api/v1/pages?per_page=-1`)
+    .get(`${this.backendURL}/api/v1/pages?per_page=-1` , authHeader())
     .then(response => (this.pages = response.data.data));
     axios
-    .get(`${this.backendURL}/api/v1/areas/countries`)
+    .get(`${this.backendURL}/api/v1/areas/countries` , authHeader())
     .then(response => (this.countries = response.data.data));
     axios
-    .get(`${this.backendURL}/api/v1/currencies`)
+    .get(`${this.backendURL}/api/v1/currencies` , authHeader())
     .then(response => (this.currencies = response.data.data));
     axios
-    .get(`${this.backendURL}/api/v1/customers/groups?per_page=-1`)
+    .get(`${this.backendURL}/api/v1/customers/groups?per_page=-1` , authHeader())
     .then(response => (this.customerGroups = response.data.data))
     axios
-    .get(`${this.backendURL}/api/v1/pages/layouts`)
+    .get(`${this.backendURL}/api/v1/pages/layouts` , authHeader())
     .then(response => (this.layouts = response.data.data))
     axios
-    .get(`${this.backendURL}/api/v1/pages/sort-options`)
+    .get(`${this.backendURL}/api/v1/pages/sort-options` , authHeader())
     .then(response => (this.sortOptions = response.data.data))
     axios
-    .get(`${this.backendURL}/api/v1/tax/displays`)
+    .get(`${this.backendURL}/api/v1/tax/displays` , authHeader())
     .then(response => (this.taxDisplayOptions = response.data.data))
     axios
-    .get(`${this.backendURL}/api/v1/tax/rate-bases`)
+    .get(`${this.backendURL}/api/v1/tax/rate-bases` , authHeader())
     .then(response => (this.taxRateBasedOns = response.data.data))
     axios
-    .get(`${this.backendURL}/api/v1/tax/calculation-bases`)
+    .get(`${this.backendURL}/api/v1/tax/calculation-bases` , authHeader())
     .then(response => (this.taxCalculationBasedOns = response.data.data))
     axios
-    .get(`${this.backendURL}/api/v1/tax/discount-calculations`)
+    .get(`${this.backendURL}/api/v1/tax/discount-calculations` , authHeader())
     .then(response => (this.taxDiscountCalculations = response.data.data))
     axios
-    .get(`${this.backendURL}/api/v1/shipping/services`)
+    .get(`${this.backendURL}/api/v1/shipping/services` , authHeader())
     .then(response => (this.shippingServiceData = response.data.data))
   },
   methods:{
@@ -356,7 +358,7 @@ export default {
       }
       
       axios
-      .post(`${this.backendURL}/api/v1/stores/general` , this.configData)
+      .post(`${this.backendURL}/api/v1/stores/general` , this.configData , authHeader())
       .then(response => {
         this.configData = {};
         alert(`${response.data.data.id} Updated General Configuration!`);
@@ -388,7 +390,7 @@ export default {
       }
 
       axios
-      .post(`${this.backendURL}/api/v1/stores/catalog` , this.configData)
+      .post(`${this.backendURL}/api/v1/stores/catalog` , this.configData , authHeader())
       .then(response => {
         this.configData = {};
         alert(`${response.data.data.id} Updated Catalog Configuration!`);
@@ -430,7 +432,7 @@ export default {
       }
 
       axios
-      .post(`${this.backendURL}/api/v1/stores/sales` , this.configData)
+      .post(`${this.backendURL}/api/v1/stores/sales` , this.configData , authHeader())
       .then(response => {
           this.configData = {};
           alert(`${response.data.data.id} Updated Sales Configuration!`);
@@ -443,12 +445,10 @@ export default {
        if (this.tableRateFile != ''){
             let formData = new FormData();
             formData.append('rate_file' , this.tableRateFile);
+            var header = authHeader();
+            header.headers["Content-Type"] = 'multipart/form-data';
             axios
-            .post(`${this.backendURL}/api/v1/stores/sales/upload` , formData , {
-                headers:{
-                  'Content-Type': 'multipart/form-data'
-                }
-              })
+            .post(`${this.backendURL}/api/v1/stores/sales/upload` , formData , header)
             .then(response => {
               alert(`${response.data.data.id} Upload Sales Configuration Table Rate File!`);
               });
@@ -463,7 +463,7 @@ export default {
         dashboard_redirection_enabled: this.customer_config.dashboard_redirection_enabled
       }
       axios
-      .post(`${this.backendURL}/api/v1/stores/customer` , this.configData)
+      .post(`${this.backendURL}/api/v1/stores/customer` , this.configData , authHeader())
       .then(response => {
         this.configData = {};
         alert(`${response.data.data.id} Updated Customer Configuration!`);
@@ -480,7 +480,7 @@ export default {
         minify_css: this.advanced_config.minify_css
       }
       axios
-      .post(`${this.backendURL}/api/v1/stores/advanced` , this.configData)
+      .post(`${this.backendURL}/api/v1/stores/advanced` , this.configData , authHeader())
       .then(response => {
         this.configData = {};
         alert(`${response.data.data.id} Updated Advanced Configuration!`);

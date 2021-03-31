@@ -75,3 +75,7 @@ function handleResponse(response) {
     }
     return data;
 }
+
+export function getLoggedInUser() {
+    return JSON.parse(localStorage.getItem('user'));
+}

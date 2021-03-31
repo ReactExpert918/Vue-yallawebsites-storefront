@@ -2,7 +2,9 @@
 import Layout from "../../../layouts/main";
 import PageHeader from "@/components/page-header";
 import axios from "axios";
-
+import {
+  authHeader,
+} from "@/helpers/authservice/auth-header";
 import appConfig from "@/app.config";
 
 /**
@@ -82,7 +84,7 @@ export default {
       // Set the initial number of items
       this.totalRows = this.items.length;
       axios
-      .get(`${this.backendURL}/api/v1/domains?per_page=${this.perPage}&page=${this.currentPage}`)
+      .get(`${this.backendURL}/api/v1/domains?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
       .then(response => (this.domainsData = response.data.data))
   },
   methods: {
@@ -99,7 +101,7 @@ export default {
       },
       verifyDomain(){
         axios
-        .get(`${this.backendURL}/api/v1/domains/${this.currentDomain.id}/verify`)
+        .get(`${this.backendURL}/api/v1/domains/${this.currentDomain.id}/verify` , authHeader())
         .then(response => {
           var resp = response.data.data
           if (resp.verified){
@@ -111,12 +113,12 @@ export default {
       },
       addDomain(){
          axios
-        .post(`${this.backendURL}/api/v1/domains` , this.newDomainData)
+        .post(`${this.backendURL}/api/v1/domains` , this.newDomainData , authHeader())
         .then(response => (alert(`${response.data.data.id} Domain created!`)));
       },
       deleteDomain(){
         axios
-        .delete(`${this.backendURL}/api/v1/domains/${this.currentDomain.id}`)
+        .delete(`${this.backendURL}/api/v1/domains/${this.currentDomain.id}` , authHeader())
         .then(response => (alert(`${response.data.data.id} Domain deleted!`)));
       }
   },

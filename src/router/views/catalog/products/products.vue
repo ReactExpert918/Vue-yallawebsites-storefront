@@ -3,6 +3,9 @@ import Layout from "../../../layouts/main";
 import PageHeader from "@/components/page-header";
 import axios from "axios";
 import appConfig from "@/app.config";
+import {
+  authHeader,
+} from "@/helpers/authservice/auth-header";
 
 /**
  * Pages component
@@ -89,7 +92,7 @@ export default {
   },
   mounted() {
       axios
-      .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}`)
+      .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
       .then(response => (this.productsData = response.data.data));
   },
   methods: {
@@ -106,7 +109,7 @@ export default {
       },
       deleteProduct(){
         axios
-        .delete(`${this.backendURL}/api/v1/products/${this.currentProduct.id}`)
+        .delete(`${this.backendURL}/api/v1/products/${this.currentProduct.id}` , authHeader())
         .then(response => (alert(`${response.data.data.id} Product deleted!`)));
       }
   },

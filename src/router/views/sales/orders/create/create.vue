@@ -5,6 +5,9 @@ import PageHeader from "@/components/page-header";
 import { viewData } from "./create-data";
 import { paymentData } from "./create-data";
 import { shippingData } from "./create-data";
+import {
+  authHeader,
+} from "@/helpers/authservice/auth-header";
 
 import axios from "axios";
 import appConfig from "@/app.config";
@@ -133,10 +136,10 @@ export default {
   },
   mounted() {
       axios
-      .get(`${this.backendURL}/api/v1/customers?per_page=${this.perPage}&page=${this.currentPage}&address=true`)
+      .get(`${this.backendURL}/api/v1/customers?per_page=${this.perPage}&page=${this.currentPage}&address=true` , authHeader())
       .then(response => (this.customers = response.data.data));
       axios
-      .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}`)
+      .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
       .then(response => {
          this.products = response.data.data;
          for(var i = 0; i < this.products.length; i++){
@@ -191,7 +194,7 @@ export default {
           });
         }
         axios
-        .post(`${this.backendURL}/api/v1/orders` , payload)
+        .post(`${this.backendURL}/api/v1/orders` , payload , authHeader())
         .then(response => (alert(`${response.data.data.id} Order Created!`)));
       }
   },

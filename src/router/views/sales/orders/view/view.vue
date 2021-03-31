@@ -3,6 +3,9 @@ import Layout from "../../../../layouts/main";
 import PageHeader from "@/components/page-header";
 import axios from "axios";
 import appConfig from "@/app.config";
+import {
+  authHeader,
+} from "@/helpers/authservice/auth-header";
 
 /**
  * Pages component
@@ -43,7 +46,7 @@ export default {
   },
   mounted(){
     axios
-    .get(`${this.backendURL}/api/v1/orders/${this.$route.params.id}`)
+    .get(`${this.backendURL}/api/v1/orders/${this.$route.params.id}`, authHeader())
     .then(response => {
         this.order = response.data.data
         if (this.order.status == null){

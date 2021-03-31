@@ -5,12 +5,18 @@ import i18n from "../i18n";
 
 import simplebar from "simplebar-vue";
 
+import {
+  getLoggedInUser
+} from "@/helpers/authservice/user.service";
+
 /**
  * Nav-bar Component
  */
 export default {
   data() {
     return {
+      backendURL: process.env.VUE_APP_BACKEND_URL,
+      user: {},
       languages: [
         {
           flag: require("@/assets/images/flags/us.jpg"),
@@ -49,6 +55,7 @@ export default {
     this.value = this.languages.find((x) => x.language === i18n.locale);
     this.text = this.value.title;
     this.flag = this.value.flag;
+    this.user = getLoggedInUser();
   },
   methods: {
     toggleMenu() {
@@ -636,7 +643,7 @@ export default {
               alt="Header Avatar"
             />
             <span class="d-none d-xl-inline-block ml-1">{{
-              $t("navbar.dropdown.customer.text")
+              user.name
             }}</span>
             <i class="mdi mdi-chevron-down d-none d-xl-inline-block"></i>
           </template>

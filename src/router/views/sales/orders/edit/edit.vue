@@ -6,6 +6,9 @@ import { paymentData } from "./edit-data";
 import { shippingData } from "./edit-data";
 import axios from "axios";
 import appConfig from "@/app.config";
+import {
+  authHeader,
+} from "@/helpers/authservice/auth-header";
 
 /**
  * Pages component
@@ -111,7 +114,7 @@ export default {
   },
   mounted() {
       axios
-      .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}`)
+      .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
       .then(response => {
          this.products = response.data.data;
          for(var i = 0; i < this.products.length; i++){
@@ -119,7 +122,7 @@ export default {
          }
        });
        axios
-      .get(`${this.backendURL}/api/v1/orders/${this.$route.params.id}`)
+      .get(`${this.backendURL}/api/v1/orders/${this.$route.params.id}` , authHeader())
       .then(response => {
           this.order = response.data.data
           if (this.order.status == null){
@@ -191,7 +194,7 @@ export default {
           });
         }
         axios
-        .put(`${this.backendURL}/api/v1/orders/${this.$route.params.id}` , payload)
+        .put(`${this.backendURL}/api/v1/orders/${this.$route.params.id}` , payload , authHeader())
         .then(response => (alert(`${response.data.data.id} Order Updated!`)));
       }
   },

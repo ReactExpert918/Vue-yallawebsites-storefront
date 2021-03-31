@@ -7,6 +7,9 @@ import PageHeader from "@/components/page-header";
 import draggable from 'vuedraggable'
 import axios from "axios";
 import vue2Dropzone from "vue2-dropzone";
+import {
+  authHeader,
+} from "@/helpers/authservice/auth-header";
 
 
 /**
@@ -50,8 +53,8 @@ export default {
         url: `${process.env.VUE_APP_BACKEND_URL}/api/v1/categories/upload`,
         // thumbnailWidth: 75,
         paramName: "category_image",
-        maxFilesize: 200
-        // headers: {"SomeHeader": "some value"},
+        maxFilesize: 200,
+        headers: authHeader().headers,
       }
     };
   },
@@ -60,7 +63,7 @@ export default {
   },
   mounted(){
     axios
-    .get(`${this.backendURL}/api/v1/categories?tree=true`)
+    .get(`${this.backendURL}/api/v1/categories?tree=true` , authHeader())
     .then(response => (this.categoriesData = response.data.data));
   },
   methods: {
@@ -70,7 +73,7 @@ export default {
 
       if (!(this.currentCategory.id in this.productMap)){
          axios
-         .get(`${this.backendURL}/api/v1/categories/${this.currentCategory.id}/products`)
+         .get(`${this.backendURL}/api/v1/categories/${this.currentCategory.id}/products` , authHeader())
          .then(response => {
             this.currentProducts = response.data.data;
             this.productMap[this.currentCategory.id] = this.currentProducts;
@@ -86,7 +89,7 @@ export default {
         this.catPayload.meta_keywords = [];
       } 
       axios
-      .post(`${this.backendURL}/api/v1/categories` , this.catPayload)
+      .post(`${this.backendURL}/api/v1/categories` , this.catPayload , authHeader())
       .then(response => (alert(`${response.data.data.id} Category Created!`)));
     },
     updateCategory(){
@@ -96,7 +99,7 @@ export default {
       } 
 
       axios
-      .put(`${this.backendURL}/api/v1/categories/${this.currentCategory.id}` , this.currentCategory)
+      .put(`${this.backendURL}/api/v1/categories/${this.currentCategory.id}` , this.currentCategory , authHeader())
       .then(response => (alert(`${response.data.data.id} Category Updated!`)));
     },
     handleImageUpload(){
@@ -104,7 +107,7 @@ export default {
     },
     deleteCategory(){
       axios
-      .delete(`${this.backendURL}/api/v1/categories/${this.currentCategory.id}`)
+      .delete(`${this.backendURL}/api/v1/categories/${this.currentCategory.id}` , authHeader())
       .then(response => (alert(`${response.data.data.id} Category deleted!`)));
     }
   },

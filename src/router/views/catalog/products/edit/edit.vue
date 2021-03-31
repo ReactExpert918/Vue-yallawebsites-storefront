@@ -10,6 +10,9 @@ import PageHeader from "@/components/page-header";
 import { variationsData } from "./variations-data";
 import axios from "axios";
 import appConfig from "@/app.config";
+import {
+  authHeader,
+} from "@/helpers/authservice/auth-header";
 
 /**
  * Pages component
@@ -133,8 +136,8 @@ export default {
         url: `${process.env.VUE_APP_BACKEND_URL}/api/v1/products/upload`,
         // thumbnailWidth: 75,
         paramName: "product_image",
-        maxFilesize: 200
-        // headers: {"SomeHeader": "some value"},
+        maxFilesize: 200,
+        headers: authHeader().headers,
       },
       textarea: '',
       lgchecked: '',
@@ -149,13 +152,13 @@ export default {
   },
   mounted() {
       axios
-      .get(`${this.backendURL}/api/v1/pages/layouts`)
+      .get(`${this.backendURL}/api/v1/pages/layouts` , authHeader())
       .then(response => (this.layouts = response.data.data));
       axios
-      .get(`${this.backendURL}/api/v1/categories`)
+      .get(`${this.backendURL}/api/v1/categories` , authHeader())
       .then(response => (this.categories = response.data.data));
       axios
-      .get(`${this.backendURL}/api/v1/products/${this.$route.params.id}`)
+      .get(`${this.backendURL}/api/v1/products/${this.$route.params.id}` , authHeader())
       .then(response => {
           this.productData = response.data.data;
           this.productData.meta_keywords_str = "";
@@ -171,7 +174,7 @@ export default {
           this.productData.delete_image_urls = [];
       });
       axios
-      .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}&without=${this.$route.params.id}`)
+      .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}&without=${this.$route.params.id}` , authHeader())
       .then(response => (this.allProductsData = response.data.data));
   },
   methods: {
@@ -209,13 +212,13 @@ export default {
         }
 
         axios
-        .put(`${this.backendURL}/api/v1/products/${this.$route.params.id}` , productReq)
+        .put(`${this.backendURL}/api/v1/products/${this.$route.params.id}` , productReq , authHeader())
         .then(response => (alert(`${response.data.data.id} Product Updated!`)))
       },
 
       deleteProduct(){
         axios
-        .delete(`${this.backendURL}/api/v1/products/${this.productData.id}`)
+        .delete(`${this.backendURL}/api/v1/products/${this.productData.id}` , authHeader())
         .then(response => (alert(`${response.data.data.id} Product deleted!`)));
       },
 

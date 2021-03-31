@@ -4,6 +4,9 @@ import PageHeader from "@/components/page-header";
 
 import axios from "axios";
 import appConfig from "@/app.config";
+import {
+  authHeader,
+} from "@/helpers/authservice/auth-header";
 
 /**
  * Pages component
@@ -43,13 +46,13 @@ export default {
   },
   mounted(){
     axios
-    .get(`${this.backendURL}/api/v1/customers/groups?per_page=-1`)
+    .get(`${this.backendURL}/api/v1/customers/groups?per_page=-1` , authHeader())
     .then(response => (this.customerGroups = response.data.data))
   },
   methods:{
     createCustomer(){
         axios
-        .post(`${this.backendURL}/api/v1/customers` , this.createCustomerPayload)
+        .post(`${this.backendURL}/api/v1/customers` , this.createCustomerPayload , authHeader())
         .then(response => (alert(`${response.data.data.id} Created!`)))
       },
   }
