@@ -6,6 +6,10 @@ import Layout from "../../../../layouts/main";
 import PageHeader from "@/components/page-header";
 import axios from "axios";
 import appConfig from "@/app.config";
+import {
+  authHeader,
+} from "@/helpers/authservice/auth-header";
+import {handleAxiosError} from "@/helpers/authservice/user.service";
 
 /**
  * Pages component
@@ -60,14 +64,16 @@ export default {
   },
   mounted(){
      axios
-    .get(`${this.backendURL}/api/v1/blocks/${this.$route.params.id}`)
-    .then(response => (this.blockData = response.data.data));
+    .get(`${this.backendURL}/api/v1/blocks/${this.$route.params.id}` , authHeader())
+    .then(response => (this.blockData = response.data.data))
+    .catch(handleAxiosError);
   },
   methods:{
     editBlock(){
       axios
-      .put(`${this.backendURL}/api/v1/blocks/${this.$route.params.id}` , this.blockData)
+      .put(`${this.backendURL}/api/v1/blocks/${this.$route.params.id}` , this.blockData , authHeader())
       .then(response => (alert(`${response.data.data.id} Updated!`)))
+      .catch(handleAxiosError);
     }
   }
 };

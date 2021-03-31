@@ -6,6 +6,10 @@ import Layout from "../../../../layouts/main";
 import PageHeader from "@/components/page-header";
 import axios from "axios";
 import appConfig from "@/app.config";
+import {
+  authHeader,
+} from "@/helpers/authservice/auth-header";
+import {handleAxiosError} from "@/helpers/authservice/user.service";
 
 /**
  * Pages component
@@ -62,10 +66,11 @@ export default {
   },
   mounted(){
     axios
-    .get(`${this.backendURL}/api/v1/pages/layouts`)
+    .get(`${this.backendURL}/api/v1/pages/layouts` , authHeader())
     .then(response => (this.layouts = response.data.data))
+    .catch(handleAxiosError);
      axios
-    .get(`${this.backendURL}/api/v1/pages/${this.$route.params.id}`)
+    .get(`${this.backendURL}/api/v1/pages/${this.$route.params.id}` , authHeader())
     .then(response => {
       this.pageData = response.data.data;
       this.pageData.meta_keywords_str = "";
@@ -78,7 +83,8 @@ export default {
           this.pageData.meta_keywords_str += " ";
         }
       }
-    });
+    })
+    .catch(handleAxiosError);
   },
   methods:{
     editPage(){
@@ -88,8 +94,9 @@ export default {
         this.pageData.meta_keywords = [];
       } 
       axios
-      .put(`${this.backendURL}/api/v1/pages/${this.$route.params.id}` , this.pageData)
+      .put(`${this.backendURL}/api/v1/pages/${this.$route.params.id}` , this.pageData , authHeader())
       .then(response => (alert(`${response.data.data.id} Updated!`)))
+      .catch(handleAxiosError);
     }
   }
 };

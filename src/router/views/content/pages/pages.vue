@@ -3,6 +3,10 @@ import Layout from "../../../layouts/main";
 import PageHeader from "@/components/page-header";
 import axios from "axios";
 import appConfig from "@/app.config";
+import {
+  authHeader,
+} from "@/helpers/authservice/auth-header";
+import {handleAxiosError} from "@/helpers/authservice/user.service";
 
 /**
  * Pages component
@@ -96,8 +100,9 @@ export default {
   },
   mounted() {
       axios
-      .get(`${this.backendURL}/api/v1/pages?per_page=${this.perPage}&page=${this.currentPage}`)
+      .get(`${this.backendURL}/api/v1/pages?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
       .then(response => (this.pagesData = response.data.data))
+      .catch(handleAxiosError);
   },
   methods: {
       /**
@@ -113,8 +118,9 @@ export default {
       },
       deletePage(){
         axios
-        .delete(`${this.backendURL}/api/v1/pages/${this.page.id}`)
-        .then(response => (alert(`${response.data.data.id} Page deleted!`)));
+        .delete(`${this.backendURL}/api/v1/pages/${this.page.id}` , authHeader())
+        .then(response => (alert(`${response.data.data.id} Page deleted!`)))
+        .catch(handleAxiosError);
       }
   },
 };

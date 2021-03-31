@@ -3,6 +3,10 @@ import Layout from "../../../layouts/main";
 import PageHeader from "@/components/page-header";
 import axios from "axios";
 import appConfig from "@/app.config";
+import {
+  authHeader,
+} from "@/helpers/authservice/auth-header";
+import { handleAxiosError } from "@/helpers/authservice/user.service"
 
 /**
  * Users component
@@ -104,11 +108,13 @@ export default {
       // Set the initial number of items
       this.totalRows = this.items.length;
        axios
-      .get(`${this.backendURL}/api/v1/users?per_page=${this.perPage}&page=${this.currentPage}`)
+      .get(`${this.backendURL}/api/v1/users?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
       .then(response => (this.usersData = response.data.data))
+      .catch(handleAxiosError);
       axios
-      .get(`${this.backendURL}/api/v1/users/roles`)
+      .get(`${this.backendURL}/api/v1/users/roles` , authHeader())
       .then(response => (this.rolesData = response.data.data))
+      .catch(handleAxiosError);
   },
   methods: {
       /**
@@ -124,27 +130,31 @@ export default {
       },
       fetchRoleContents(){
         axios
-      .get(`${this.backendURL}/api/v1/users/roles/${this.currentRoleID}/contents`)
+      .get(`${this.backendURL}/api/v1/users/roles/${this.currentRoleID}/contents` , authHeader())
       .then(response => (this.roleContents = response.data.data))
+      .catch(handleAxiosError);
       },
       deleteUser(id){
         axios
-        .delete(`${this.backendURL}/api/v1/users/${id}`)
+        .delete(`${this.backendURL}/api/v1/users/${id}` , authHeader())
         .then(alert("Deleted!"))
+        .catch(handleAxiosError);
       },
       createUser(e){
         e.preventDefault();
         this.createUserPayload.role_id = this.currentRoleID
         axios
-        .post(`${this.backendURL}/api/v1/users` , this.createUserPayload)
+        .post(`${this.backendURL}/api/v1/users` , this.createUserPayload , authHeader())
         .then(response => (alert(`${response.data.data.id} Created!`)))
+        .catch(handleAxiosError);
       },
       updateUser(e){
         e.preventDefault();
         this.currentUser.role_id = this.currentRoleID
         axios
-        .put(`${this.backendURL}/api/v1/users/${this.currentUser.id}` , this.currentUser)
+        .put(`${this.backendURL}/api/v1/users/${this.currentUser.id}` , this.currentUser , authHeader())
         .then(response => (alert(`${response.data.data.id} Updated!`)))
+        .catch(handleAxiosError);
       },
   },
 };

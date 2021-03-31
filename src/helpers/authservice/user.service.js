@@ -1,4 +1,6 @@
+
 import { authHeader } from './auth-header';
+import axios from "axios";
 
 export const userService = {
     login,
@@ -7,29 +9,67 @@ export const userService = {
     getAll,
 };
 
+var backendURL = process.env.VUE_APP_BACKEND_URL;
+
+
 function login(email, password) {
 
-    const requestOptions = {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-    };
 
-    return fetch(`/users/authenticate`, requestOptions)
-        .then(handleResponse)
-        .then(user => {
-            // login successful if there's a jwt token in the response
+    const payload = {
+        username_or_email: email,
+        password: password
+    }
+    const headers = {
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    }
+
+    return axios
+        .post(`${backendURL}/api/auth/login`, payload, headers)
+        .then(response => {
+            var user = response.data.data;
             if (user.token) {
-                // store user details and jwt token in local storage to keep user logged in between page refreshes
                 localStorage.setItem('user', JSON.stringify(user));
             }
-            return user;
-        });
+        }).catch(handleAxiosError);
 }
 
 function logout() {
     // remove user from local storage to log user out
-    localStorage.removeItem('user');
+    var user = getLoggedInUser();
+    if (user) {
+        const headers = {
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }
+        localStorage.removeItem('user');
+
+        axios
+            .post(`${backendURL}/api/auth/logout/${user.id}`, headers)
+            .catch(error => {
+                if (error.response) {
+                    window.console.log(error.response.data);
+                }
+            })
+    }
+
+
+}
+
+export function handleAxiosError(error) {
+    if (error.response) {
+        var data = error.response.data;
+        if (error.response.status === 401) {
+            // auto logout if 401 response returned from api
+            logout();
+            location.reload(true);
+        }
+        const errorMsg = (data && data.message) || error.response.statusText;
+
+        return Promise.reject(errorMsg);
+    }
 }
 
 function register(user) {
@@ -50,17 +90,20 @@ function getAll() {
 }
 
 function handleResponse(response) {
-    return response.text().then(text => {
-        const data = text && JSON.parse(text);
-        if (!response.ok) {
-            if (response.status === 401) {
-                // auto logout if 401 response returned from api
-                logout();
-                location.reload(true);
-            }
-            const error = (data && data.message) || response.statusText;
-            return Promise.reject(error);
+    const data = response.text();
+    if (!response.ok) {
+        if (response.status === 401) {
+            // auto logout if 401 response returned from api
+            logout();
+            location.reload(true);
         }
-        return data;
-    });
+        const error = (data && data.message) || response.statusText;
+
+        return Promise.reject(error);
+    }
+    return data;
+}
+
+export function getLoggedInUser() {
+    return JSON.parse(localStorage.getItem('user'));
 }

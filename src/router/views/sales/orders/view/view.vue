@@ -3,6 +3,10 @@ import Layout from "../../../../layouts/main";
 import PageHeader from "@/components/page-header";
 import axios from "axios";
 import appConfig from "@/app.config";
+import {
+  authHeader,
+} from "@/helpers/authservice/auth-header";
+import {handleAxiosError} from "@/helpers/authservice/user.service";
 
 /**
  * Pages component
@@ -43,7 +47,7 @@ export default {
   },
   mounted(){
     axios
-    .get(`${this.backendURL}/api/v1/orders/${this.$route.params.id}`)
+    .get(`${this.backendURL}/api/v1/orders/${this.$route.params.id}`, authHeader())
     .then(response => {
         this.order = response.data.data
         if (this.order.status == null){
@@ -67,7 +71,8 @@ export default {
         if (this.order.shipping_method == null){
           this.order.shipping_method = {};
         }
-    });
+    }).catch(handleAxiosError);
+
   }
 };
 </script>

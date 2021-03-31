@@ -10,6 +10,10 @@ import PageHeader from "@/components/page-header";
 import { variationsData } from "./variations-data";
 import axios from "axios";
 import appConfig from "@/app.config";
+import {
+  authHeader,
+} from "@/helpers/authservice/auth-header";
+import {handleAxiosError} from "@/helpers/authservice/user.service";
 
 /**
  * Pages component
@@ -133,8 +137,8 @@ export default {
         url: `${process.env.VUE_APP_BACKEND_URL}/api/v1/products/upload`,
         // thumbnailWidth: 75,
         paramName: "product_image",
-        maxFilesize: 200
-        // headers: {"SomeHeader": "some value"},
+        maxFilesize: 200,
+        headers: authHeader().headers,
       },
       textarea: '',
       lgchecked: '',
@@ -149,13 +153,15 @@ export default {
   },
   mounted() {
       axios
-      .get(`${this.backendURL}/api/v1/pages/layouts`)
-      .then(response => (this.layouts = response.data.data));
+      .get(`${this.backendURL}/api/v1/pages/layouts` , authHeader())
+      .then(response => (this.layouts = response.data.data))
+      .catch(handleAxiosError);
       axios
-      .get(`${this.backendURL}/api/v1/categories`)
-      .then(response => (this.categories = response.data.data));
+      .get(`${this.backendURL}/api/v1/categories` , authHeader())
+      .then(response => (this.categories = response.data.data))
+      .catch(handleAxiosError);
       axios
-      .get(`${this.backendURL}/api/v1/products/${this.$route.params.id}`)
+      .get(`${this.backendURL}/api/v1/products/${this.$route.params.id}` , authHeader())
       .then(response => {
           this.productData = response.data.data;
           this.productData.meta_keywords_str = "";
@@ -169,10 +175,12 @@ export default {
             }
           }
           this.productData.delete_image_urls = [];
-      });
+      })
+      .catch(handleAxiosError);
       axios
-      .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}&without=${this.$route.params.id}`)
-      .then(response => (this.allProductsData = response.data.data));
+      .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}&without=${this.$route.params.id}` , authHeader())
+      .then(response => (this.allProductsData = response.data.data))
+      .catch(handleAxiosError);
   },
   methods: {
 
@@ -209,14 +217,16 @@ export default {
         }
 
         axios
-        .put(`${this.backendURL}/api/v1/products/${this.$route.params.id}` , productReq)
+        .put(`${this.backendURL}/api/v1/products/${this.$route.params.id}` , productReq , authHeader())
         .then(response => (alert(`${response.data.data.id} Product Updated!`)))
+        .catch(handleAxiosError);
       },
 
       deleteProduct(){
         axios
-        .delete(`${this.backendURL}/api/v1/products/${this.productData.id}`)
-        .then(response => (alert(`${response.data.data.id} Product deleted!`)));
+        .delete(`${this.backendURL}/api/v1/products/${this.productData.id}` , authHeader())
+        .then(response => (alert(`${response.data.data.id} Product deleted!`)))
+        .catch(handleAxiosError);
       },
 
       handleImageUpload(){

@@ -2,7 +2,10 @@
 import Layout from "../../../layouts/main";
 import PageHeader from "@/components/page-header";
 import axios from "axios";
-
+import {
+  authHeader,
+} from "@/helpers/authservice/auth-header";
+import {handleAxiosError} from "@/helpers/authservice/user.service";
 import appConfig from "@/app.config";
 
 /**
@@ -82,8 +85,9 @@ export default {
       // Set the initial number of items
       this.totalRows = this.items.length;
       axios
-      .get(`${this.backendURL}/api/v1/domains?per_page=${this.perPage}&page=${this.currentPage}`)
+      .get(`${this.backendURL}/api/v1/domains?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
       .then(response => (this.domainsData = response.data.data))
+      .catch(handleAxiosError);
   },
   methods: {
       /**
@@ -99,7 +103,7 @@ export default {
       },
       verifyDomain(){
         axios
-        .get(`${this.backendURL}/api/v1/domains/${this.currentDomain.id}/verify`)
+        .get(`${this.backendURL}/api/v1/domains/${this.currentDomain.id}/verify` , authHeader())
         .then(response => {
           var resp = response.data.data
           if (resp.verified){
@@ -108,16 +112,19 @@ export default {
             alert("Domain is not verified!");
           }
         })
+        .catch(handleAxiosError);
       },
       addDomain(){
          axios
-        .post(`${this.backendURL}/api/v1/domains` , this.newDomainData)
-        .then(response => (alert(`${response.data.data.id} Domain created!`)));
+        .post(`${this.backendURL}/api/v1/domains` , this.newDomainData , authHeader())
+        .then(response => (alert(`${response.data.data.id} Domain created!`)))
+        .catch(handleAxiosError);
       },
       deleteDomain(){
         axios
-        .delete(`${this.backendURL}/api/v1/domains/${this.currentDomain.id}`)
-        .then(response => (alert(`${response.data.data.id} Domain deleted!`)));
+        .delete(`${this.backendURL}/api/v1/domains/${this.currentDomain.id}` , authHeader())
+        .then(response => (alert(`${response.data.data.id} Domain deleted!`)))
+        .catch(handleAxiosError);
       }
   },
 };

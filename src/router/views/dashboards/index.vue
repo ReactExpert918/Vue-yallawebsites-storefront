@@ -4,9 +4,12 @@ import appConfig from "@/app.config";
 import PageHeader from "@/components/page-header";
 import Sellingchart from "./sellingchart";
 
+import {
+  getLoggedInUser
+} from "@/helpers/authservice/user.service";
+
 import simplebar from "simplebar-vue";
 import { required } from "vuelidate/lib/validators";
-
 import { earningLineChart, salesAnalyticsDonutChart, ChatData } from "./data";
 
 /**
@@ -30,9 +33,11 @@ export default {
   },
   data() {
     return {
+      backendURL: process.env.VUE_APP_BACKEND_URL,
       earningLineChart: earningLineChart,
       salesAnalyticsDonutChart: salesAnalyticsDonutChart,
       ChatData: ChatData,
+      user: {},
       title: "Dashboard",
       items: [
         {
@@ -97,6 +102,8 @@ export default {
       "#containerElement .simplebar-content-wrapper"
     );
     container2.scrollTo({ top: 500, behavior: "smooth" });
+
+    this.user = getLoggedInUser();
   },
 };
 </script>
@@ -121,7 +128,7 @@ export default {
                   <div class="media-body align-self-center">
                     <div class="text-muted">
                       <p class="mb-2">Welcome to YallaWebsites dashboard</p>
-                      <h5 class="mb-1">Michael Figg</h5>
+                      <h5 class="mb-1">{{user.name}}</h5>
                       <p class="mb-0">UI / UX Designer</p>
                     </div>
                   </div>

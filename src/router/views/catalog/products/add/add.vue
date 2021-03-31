@@ -8,6 +8,11 @@ import Layout from "../../../../layouts/main";
 import PageHeader from "@/components/page-header";
 import axios from "axios";
 import appConfig from "@/app.config";
+import {
+  authHeader,
+} from "@/helpers/authservice/auth-header";
+import {handleAxiosError} from "@/helpers/authservice/user.service";
+
 /**
  * Pages component
  */
@@ -159,14 +164,17 @@ export default {
   },
   mounted() {
       axios
-      .get(`${this.backendURL}/api/v1/pages/layouts`)
-      .then(response => (this.layouts = response.data.data));
+      .get(`${this.backendURL}/api/v1/pages/layouts` , authHeader())
+      .then(response => (this.layouts = response.data.data))
+      .catch(handleAxiosError);
       axios
-      .get(`${this.backendURL}/api/v1/categories`)
-      .then(response => (this.categories = response.data.data));
+      .get(`${this.backendURL}/api/v1/categories` , authHeader())
+      .then(response => (this.categories = response.data.data))
+      .catch(handleAxiosError);
       axios
-      .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}`)
-      .then(response => (this.allProductsData = response.data.data));
+      .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
+      .then(response => (this.allProductsData = response.data.data))
+      .catch(handleAxiosError);
   },
   methods: {
       createProduct(){
@@ -184,8 +192,9 @@ export default {
         this.newProduct.quantity = parseInt(this.newProduct.quantity);
 
         axios
-        .post(`${this.backendURL}/api/v1/products` , this.newProduct)
+        .post(`${this.backendURL}/api/v1/products` , this.newProduct , authHeader())
         .then(response => (alert(`${response.data.data.id} Product Created!`)))
+        .catch(handleAxiosError);
       },
       addTag (searchQuery, id) {
           let optionValue = {

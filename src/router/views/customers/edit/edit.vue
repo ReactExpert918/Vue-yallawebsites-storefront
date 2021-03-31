@@ -4,6 +4,10 @@ import PageHeader from "@/components/page-header";
 
 import axios from "axios";
 import appConfig from "@/app.config";
+import {
+  authHeader,
+} from "@/helpers/authservice/auth-header";
+import {handleAxiosError} from "@/helpers/authservice/user.service";
 
 /**
  * Pages component
@@ -38,7 +42,7 @@ export default {
   },
   mounted() {
       axios
-      .get(`${this.backendURL}/api/v1/customers/${this.$route.params.id}`)
+      .get(`${this.backendURL}/api/v1/customers/${this.$route.params.id}` , authHeader())
       .then(response => {
           this.customer = response.data.data
           if (this.customer.billing_addresses.length == 0){
@@ -57,15 +61,18 @@ export default {
             this.customer.group = {};
           }
         })
+        .catch(handleAxiosError);
       axios
-      .get(`${this.backendURL}/api/v1/customers/groups?per_page=-1`)
+      .get(`${this.backendURL}/api/v1/customers/groups?per_page=-1` , authHeader())
       .then(response => (this.customerGroups = response.data.data))
+      .catch(handleAxiosError);
   },
   methods:{
      updateCustomer(){
         axios
-        .put(`${this.backendURL}/api/v1/customers/${this.$route.params.id}` , this.customer)
+        .put(`${this.backendURL}/api/v1/customers/${this.$route.params.id}` , this.customer , authHeader())
         .then(response => (alert(`${response.data.data.id} Updated!`)))
+        .catch(handleAxiosError);
       },
   }
 };
