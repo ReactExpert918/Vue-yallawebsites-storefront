@@ -9,6 +9,7 @@ import appConfig from "@/app.config";
 import {
   authHeader,
 } from "@/helpers/authservice/auth-header";
+import {handleAxiosError} from "@/helpers/authservice/user.service";
 
 /**
  * Pages component
@@ -67,6 +68,7 @@ export default {
     axios
     .get(`${this.backendURL}/api/v1/pages/layouts` , authHeader())
     .then(response => (this.layouts = response.data.data))
+    .catch(handleAxiosError);
      axios
     .get(`${this.backendURL}/api/v1/pages/${this.$route.params.id}` , authHeader())
     .then(response => {
@@ -81,7 +83,8 @@ export default {
           this.pageData.meta_keywords_str += " ";
         }
       }
-    });
+    })
+    .catch(handleAxiosError);
   },
   methods:{
     editPage(){
@@ -93,6 +96,7 @@ export default {
       axios
       .put(`${this.backendURL}/api/v1/pages/${this.$route.params.id}` , this.pageData , authHeader())
       .then(response => (alert(`${response.data.data.id} Updated!`)))
+      .catch(handleAxiosError);
     }
   }
 };

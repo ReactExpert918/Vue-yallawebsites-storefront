@@ -6,6 +6,7 @@ import appConfig from "@/app.config";
 import {
   authHeader,
 } from "@/helpers/authservice/auth-header";
+import {handleAxiosError} from "@/helpers/authservice/user.service";
 
 /**
  * Pages component
@@ -70,7 +71,8 @@ export default {
         if (this.order.shipping_method == null){
           this.order.shipping_method = {};
         }
-    });
+    }).catch(handleAxiosError);
+
   }
 };
 </script>

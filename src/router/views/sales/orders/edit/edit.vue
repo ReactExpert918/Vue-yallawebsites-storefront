@@ -9,6 +9,7 @@ import appConfig from "@/app.config";
 import {
   authHeader,
 } from "@/helpers/authservice/auth-header";
+import {handleAxiosError} from "@/helpers/authservice/user.service";
 
 /**
  * Pages component
@@ -120,7 +121,8 @@ export default {
          for(var i = 0; i < this.products.length; i++){
            this.products[i].order_quantity = 1;
          }
-       });
+       })
+       .catch(handleAxiosError);
        axios
       .get(`${this.backendURL}/api/v1/orders/${this.$route.params.id}` , authHeader())
       .then(response => {
@@ -154,7 +156,8 @@ export default {
             this.selectedProducts.push(op.product);
           }
 
-      });
+      })
+      .catch(handleAxiosError);
   },
   methods: {
       /**
@@ -195,7 +198,8 @@ export default {
         }
         axios
         .put(`${this.backendURL}/api/v1/orders/${this.$route.params.id}` , payload , authHeader())
-        .then(response => (alert(`${response.data.data.id} Order Updated!`)));
+        .then(response => (alert(`${response.data.data.id} Order Updated!`)))
+        .catch(handleAxiosError);
       }
   },
 };

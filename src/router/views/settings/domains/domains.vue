@@ -5,6 +5,7 @@ import axios from "axios";
 import {
   authHeader,
 } from "@/helpers/authservice/auth-header";
+import {handleAxiosError} from "@/helpers/authservice/user.service";
 import appConfig from "@/app.config";
 
 /**
@@ -86,6 +87,7 @@ export default {
       axios
       .get(`${this.backendURL}/api/v1/domains?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
       .then(response => (this.domainsData = response.data.data))
+      .catch(handleAxiosError);
   },
   methods: {
       /**
@@ -110,16 +112,19 @@ export default {
             alert("Domain is not verified!");
           }
         })
+        .catch(handleAxiosError);
       },
       addDomain(){
          axios
         .post(`${this.backendURL}/api/v1/domains` , this.newDomainData , authHeader())
-        .then(response => (alert(`${response.data.data.id} Domain created!`)));
+        .then(response => (alert(`${response.data.data.id} Domain created!`)))
+        .catch(handleAxiosError);
       },
       deleteDomain(){
         axios
         .delete(`${this.backendURL}/api/v1/domains/${this.currentDomain.id}` , authHeader())
-        .then(response => (alert(`${response.data.data.id} Domain deleted!`)));
+        .then(response => (alert(`${response.data.data.id} Domain deleted!`)))
+        .catch(handleAxiosError);
       }
   },
 };

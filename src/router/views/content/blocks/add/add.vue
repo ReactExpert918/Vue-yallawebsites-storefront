@@ -9,6 +9,7 @@ import appConfig from "@/app.config";
 import {
   authHeader,
 } from "@/helpers/authservice/auth-header";
+import {handleAxiosError} from "@/helpers/authservice/user.service";
 
 /**
  * Pages component
@@ -71,6 +72,7 @@ export default {
       axios
       .post(`${this.backendURL}/api/v1/blocks` , this.blockData , authHeader())
       .then(response => (alert(`${response.data.data.id} Created!`)))
+      .catch(handleAxiosError);
     }
   }
 };

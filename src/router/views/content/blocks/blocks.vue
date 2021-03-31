@@ -6,6 +6,7 @@ import appConfig from "@/app.config";
 import {
   authHeader,
 } from "@/helpers/authservice/auth-header";
+import {handleAxiosError} from "@/helpers/authservice/user.service";
 
 /**
  * Block component
@@ -98,6 +99,7 @@ export default {
       axios
       .get(`${this.backendURL}/api/v1/blocks?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
       .then(response => (this.blockData = response.data.data))
+      .catch(handleAxiosError);
   },
   methods: {
       /**
@@ -114,7 +116,8 @@ export default {
       deleteBlock(){
         axios
         .delete(`${this.backendURL}/api/v1/blocks/${this.block.id}` , authHeader())
-        .then(response => (alert(`${response.data.data.id} Block deleted!`)));
+        .then(response => (alert(`${response.data.data.id} Block deleted!`)))
+        .catch(handleAxiosError);
       }
   },
 };

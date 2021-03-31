@@ -13,6 +13,7 @@ import appConfig from "@/app.config";
 import {
   authHeader,
 } from "@/helpers/authservice/auth-header";
+import {handleAxiosError} from "@/helpers/authservice/user.service";
 
 /**
  * Pages component
@@ -153,10 +154,12 @@ export default {
   mounted() {
       axios
       .get(`${this.backendURL}/api/v1/pages/layouts` , authHeader())
-      .then(response => (this.layouts = response.data.data));
+      .then(response => (this.layouts = response.data.data))
+      .catch(handleAxiosError);
       axios
       .get(`${this.backendURL}/api/v1/categories` , authHeader())
-      .then(response => (this.categories = response.data.data));
+      .then(response => (this.categories = response.data.data))
+      .catch(handleAxiosError);
       axios
       .get(`${this.backendURL}/api/v1/products/${this.$route.params.id}` , authHeader())
       .then(response => {
@@ -172,10 +175,12 @@ export default {
             }
           }
           this.productData.delete_image_urls = [];
-      });
+      })
+      .catch(handleAxiosError);
       axios
       .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}&without=${this.$route.params.id}` , authHeader())
-      .then(response => (this.allProductsData = response.data.data));
+      .then(response => (this.allProductsData = response.data.data))
+      .catch(handleAxiosError);
   },
   methods: {
 
@@ -214,12 +219,14 @@ export default {
         axios
         .put(`${this.backendURL}/api/v1/products/${this.$route.params.id}` , productReq , authHeader())
         .then(response => (alert(`${response.data.data.id} Product Updated!`)))
+        .catch(handleAxiosError);
       },
 
       deleteProduct(){
         axios
         .delete(`${this.backendURL}/api/v1/products/${this.productData.id}` , authHeader())
-        .then(response => (alert(`${response.data.data.id} Product deleted!`)));
+        .then(response => (alert(`${response.data.data.id} Product deleted!`)))
+        .catch(handleAxiosError);
       },
 
       handleImageUpload(){

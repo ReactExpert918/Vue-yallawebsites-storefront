@@ -5,6 +5,7 @@ import axios from "axios";
 import {
   authHeader,
 } from "@/helpers/authservice/auth-header";
+import {handleAxiosError} from "@/helpers/authservice/user.service";
 
 import appConfig from "@/app.config";
 
@@ -142,12 +143,14 @@ export default {
             this.attributesData.default_option = {};
           }
        })
+       .catch(handleAxiosError);
       axios
       .get(`${this.backendURL}/api/v1/products/attributes/groups` , authHeader())
       .then(response => (this.attributeGroups = response.data.data))
        axios
       .get(`${this.backendURL}/api/v1/products/attributes/types` , authHeader())
       .then(response => (this.attrTypes = response.data.data))
+      .catch(handleAxiosError);
   },
   methods: {
       /**
@@ -216,6 +219,7 @@ export default {
              alert(`${response.data.data.id} attribute Created!`);
              this.newAttr = {options: []};
          })
+         .catch(handleAxiosError);
       },
       updateAttribute(){
         this.newAttr = {
@@ -238,11 +242,13 @@ export default {
              alert(`${response.data.data.id} attribute Updated!`);
              this.newAttr = {options: []};
          })
+         .catch(handleAxiosError);
       },
       deleteAttribute(){
         axios
         .delete(`${this.backendURL}/api/v1/products/attributes/${this.currentAttribute.id}` , authHeader())
         .then(response => (alert(`${response.data.data.id} attribute deleted!`)))
+        .catch(handleAxiosError);
       },
       addOption(){
         axios
@@ -256,6 +262,7 @@ export default {
           })
           this.newOption = {};
         })
+        .catch(handleAxiosError);
       },
       handleProductOptionDelete(name , arr){
             for( var i = 0; i < arr.length; i++){ 
@@ -272,8 +279,9 @@ export default {
         .delete(`${this.backendURL}/api/v1/products/attributes/options/${opt.id}` , authHeader())
         .then(response => {
            alert(`${response.data.data.id} option deleted!`);
-           this.handleProductOptionDelete(opt.name , this.currentAttribute.options);
+           this.handleProductOptionDelete(opt.name , this.currentAttribute.options)
         })
+        .catch(handleAxiosError);
       },
       addAttributeGroup(){
         axios
@@ -282,6 +290,7 @@ export default {
             alert(`${response.data.data.id} attribute group Created!`);
             this.newGroup = {};
         })
+        .catch(handleAxiosError);
       },
       deleteAttributeGroup(group){
         axios
@@ -289,6 +298,7 @@ export default {
         .then(response => {
            alert(`${response.data.data.id} attribute group deleted!`);
         })
+        .catch(handleAxiosError);
       }
   },
 };

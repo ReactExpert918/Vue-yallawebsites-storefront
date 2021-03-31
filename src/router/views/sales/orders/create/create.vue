@@ -8,6 +8,7 @@ import { shippingData } from "./create-data";
 import {
   authHeader,
 } from "@/helpers/authservice/auth-header";
+import {handleAxiosError} from "@/helpers/authservice/user.service";
 
 import axios from "axios";
 import appConfig from "@/app.config";
@@ -137,7 +138,8 @@ export default {
   mounted() {
       axios
       .get(`${this.backendURL}/api/v1/customers?per_page=${this.perPage}&page=${this.currentPage}&address=true` , authHeader())
-      .then(response => (this.customers = response.data.data));
+      .then(response => (this.customers = response.data.data))
+      .catch(handleAxiosError);
       axios
       .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
       .then(response => {
@@ -145,7 +147,8 @@ export default {
          for(var i = 0; i < this.products.length; i++){
            this.products[i].order_quantity = 1;
          }
-       });
+       })
+       .catch(handleAxiosError);
   },
   methods: {
       /**
@@ -195,7 +198,8 @@ export default {
         }
         axios
         .post(`${this.backendURL}/api/v1/orders` , payload , authHeader())
-        .then(response => (alert(`${response.data.data.id} Order Created!`)));
+        .then(response => (alert(`${response.data.data.id} Order Created!`)))
+        .catch(handleAxiosError);
       }
   },
 };

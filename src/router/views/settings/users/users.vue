@@ -6,6 +6,7 @@ import appConfig from "@/app.config";
 import {
   authHeader,
 } from "@/helpers/authservice/auth-header";
+import { handleAxiosError } from "@/helpers/authservice/user.service"
 
 /**
  * Users component
@@ -109,9 +110,11 @@ export default {
        axios
       .get(`${this.backendURL}/api/v1/users?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
       .then(response => (this.usersData = response.data.data))
+      .catch(handleAxiosError);
       axios
       .get(`${this.backendURL}/api/v1/users/roles` , authHeader())
       .then(response => (this.rolesData = response.data.data))
+      .catch(handleAxiosError);
   },
   methods: {
       /**
@@ -129,11 +132,13 @@ export default {
         axios
       .get(`${this.backendURL}/api/v1/users/roles/${this.currentRoleID}/contents` , authHeader())
       .then(response => (this.roleContents = response.data.data))
+      .catch(handleAxiosError);
       },
       deleteUser(id){
         axios
         .delete(`${this.backendURL}/api/v1/users/${id}` , authHeader())
         .then(alert("Deleted!"))
+        .catch(handleAxiosError);
       },
       createUser(e){
         e.preventDefault();
@@ -141,6 +146,7 @@ export default {
         axios
         .post(`${this.backendURL}/api/v1/users` , this.createUserPayload , authHeader())
         .then(response => (alert(`${response.data.data.id} Created!`)))
+        .catch(handleAxiosError);
       },
       updateUser(e){
         e.preventDefault();
@@ -148,6 +154,7 @@ export default {
         axios
         .put(`${this.backendURL}/api/v1/users/${this.currentUser.id}` , this.currentUser , authHeader())
         .then(response => (alert(`${response.data.data.id} Updated!`)))
+        .catch(handleAxiosError);
       },
   },
 };

@@ -1,5 +1,6 @@
 
 import { authHeader } from './auth-header';
+import axios from "axios";
 
 export const userService = {
     login,
@@ -13,35 +14,45 @@ var backendURL = process.env.VUE_APP_BACKEND_URL;
 
 function login(email, password) {
 
-    const requestOptions = {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            username_or_email: email,
-            password: password
-        })
-    };
 
-    return fetch(`${backendURL}/api/auth/login`, requestOptions)
-        .then(handleResponse)
-        .then(resp => {
-            var data = JSON.parse(resp).data;
-            // login successful if there's a jwt token in the response
-            if (data.token) {
-                // store user details and jwt token in local storage to keep user logged in between page refreshes
-                localStorage.setItem('user', JSON.stringify(data));
+    const payload = {
+        username_or_email: email,
+        password: password
+    }
+    const headers = {
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    }
+
+    return axios
+        .post(`${backendURL}/api/auth/login`, payload, headers)
+        .then(response => {
+            var user = response.data.data;
+            if (user.token) {
+                localStorage.setItem('user', JSON.stringify(user));
             }
-            return resp;
-        });
-
-
-
+        }).catch(handleAxiosError);
 }
 
 function logout() {
     // remove user from local storage to log user out
     alert("Bye Bye world");
     localStorage.removeItem('user');
+}
+
+export function handleAxiosError(error) {
+    if (error.response) {
+        var data = error.response.data;
+        if (error.response.status === 401) {
+            // auto logout if 401 response returned from api
+            logout();
+            location.reload(true);
+        }
+        const errorMsg = (data && data.message) || error.response.statusText;
+
+        return Promise.reject(errorMsg);
+    }
 }
 
 function register(user) {

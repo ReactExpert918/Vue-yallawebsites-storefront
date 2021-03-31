@@ -7,6 +7,7 @@ import appConfig from "@/app.config";
 import {
   authHeader,
 } from "@/helpers/authservice/auth-header";
+import {handleAxiosError} from "@/helpers/authservice/user.service";
 
 /**
  * Pages component
@@ -60,15 +61,18 @@ export default {
             this.customer.group = {};
           }
         })
+        .catch(handleAxiosError);
       axios
       .get(`${this.backendURL}/api/v1/customers/groups?per_page=-1` , authHeader())
       .then(response => (this.customerGroups = response.data.data))
+      .catch(handleAxiosError);
   },
   methods:{
      updateCustomer(){
         axios
         .put(`${this.backendURL}/api/v1/customers/${this.$route.params.id}` , this.customer , authHeader())
         .then(response => (alert(`${response.data.data.id} Updated!`)))
+        .catch(handleAxiosError);
       },
   }
 };

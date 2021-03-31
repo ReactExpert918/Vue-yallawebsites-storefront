@@ -9,6 +9,7 @@ import appConfig from "@/app.config";
 import {
   authHeader,
 } from "@/helpers/authservice/auth-header";
+import {handleAxiosError} from "@/helpers/authservice/user.service";
 
 /**
  * Pages component
@@ -77,6 +78,7 @@ export default {
       axios
       .get(`${this.backendURL}/api/v1/pages/layouts` , authHeader())
       .then(response => (this.layouts = response.data.data))
+      .catch(handleAxiosError);
   },
   methods:{
     addPage(){
@@ -87,6 +89,7 @@ export default {
       axios
       .post(`${this.backendURL}/api/v1/pages` , this.pageData , authHeader())
       .then(response => (alert(`${response.data.data.id} Created!`)))
+      .catch(handleAxiosError);
     }
   }
 };

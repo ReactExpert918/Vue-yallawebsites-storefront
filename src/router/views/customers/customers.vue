@@ -6,6 +6,7 @@ import {
 } from "@/helpers/authservice/auth-header";
 import axios from "axios";
 import appConfig from "@/app.config";
+import {handleAxiosError} from "@/helpers/authservice/user.service";
 
 /**
  * Pages component
@@ -101,12 +102,12 @@ export default {
     }
   },
   mounted() {
-      this.console.log(authHeader());
       // Set the initial number of items
       this.totalRows = this.items.length;
       axios
       .get(`${this.backendURL}/api/v1/customers?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
       .then(response => (this.customersData = response.data.data))
+      .catch(handleAxiosError);
   },
   methods: {
       /**
@@ -123,8 +124,9 @@ export default {
 
       deleteCustomer(id){
         axios
-        .delete(`${this.backendURL}/api/v1/customers/${id}`)
+        .delete(`${this.backendURL}/api/v1/customers/${id}` , authHeader())
         .then(alert("Deleted!"))
+        .catch(handleAxiosError);
       }
   },
 };

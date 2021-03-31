@@ -10,6 +10,7 @@ import vue2Dropzone from "vue2-dropzone";
 import {
   authHeader,
 } from "@/helpers/authservice/auth-header";
+import {handleAxiosError} from "@/helpers/authservice/user.service";
 
 
 /**
@@ -64,7 +65,8 @@ export default {
   mounted(){
     axios
     .get(`${this.backendURL}/api/v1/categories?tree=true` , authHeader())
-    .then(response => (this.categoriesData = response.data.data));
+    .then(response => (this.categoriesData = response.data.data))
+    .catch(handleAxiosError);
   },
   methods: {
     currentCategoryData(category){
@@ -77,7 +79,8 @@ export default {
          .then(response => {
             this.currentProducts = response.data.data;
             this.productMap[this.currentCategory.id] = this.currentProducts;
-          });
+          })
+          .catch(handleAxiosError);
       }else{
         this.currentProducts = this.productMap[this.currentCategory.id];
       }
@@ -90,7 +93,8 @@ export default {
       } 
       axios
       .post(`${this.backendURL}/api/v1/categories` , this.catPayload , authHeader())
-      .then(response => (alert(`${response.data.data.id} Category Created!`)));
+      .then(response => (alert(`${response.data.data.id} Category Created!`)))
+      .catch(handleAxiosError);
     },
     updateCategory(){
       this.currentCategory.meta_keywords = this.currentCategory.meta_keywords_str.split(" ");
@@ -100,7 +104,8 @@ export default {
 
       axios
       .put(`${this.backendURL}/api/v1/categories/${this.currentCategory.id}` , this.currentCategory , authHeader())
-      .then(response => (alert(`${response.data.data.id} Category Updated!`)));
+      .then(response => (alert(`${response.data.data.id} Category Updated!`)))
+      .catch(handleAxiosError);
     },
     handleImageUpload(){
       this.$refs.myVueDropzone.setOption("url" , `${this.backendURL}/api/v1/categories/${this.currentCategory.id}/upload`);
@@ -108,7 +113,8 @@ export default {
     deleteCategory(){
       axios
       .delete(`${this.backendURL}/api/v1/categories/${this.currentCategory.id}` , authHeader())
-      .then(response => (alert(`${response.data.data.id} Category deleted!`)));
+      .then(response => (alert(`${response.data.data.id} Category deleted!`)))
+      .catch(handleAxiosError);
     }
   },
 };

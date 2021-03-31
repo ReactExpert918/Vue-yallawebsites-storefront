@@ -11,6 +11,8 @@ import appConfig from "@/app.config";
 import {
   authHeader,
 } from "@/helpers/authservice/auth-header";
+import {handleAxiosError} from "@/helpers/authservice/user.service";
+
 /**
  * Pages component
  */
@@ -163,13 +165,16 @@ export default {
   mounted() {
       axios
       .get(`${this.backendURL}/api/v1/pages/layouts` , authHeader())
-      .then(response => (this.layouts = response.data.data));
+      .then(response => (this.layouts = response.data.data))
+      .catch(handleAxiosError);
       axios
       .get(`${this.backendURL}/api/v1/categories` , authHeader())
-      .then(response => (this.categories = response.data.data));
+      .then(response => (this.categories = response.data.data))
+      .catch(handleAxiosError);
       axios
       .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
-      .then(response => (this.allProductsData = response.data.data));
+      .then(response => (this.allProductsData = response.data.data))
+      .catch(handleAxiosError);
   },
   methods: {
       createProduct(){
@@ -189,6 +194,7 @@ export default {
         axios
         .post(`${this.backendURL}/api/v1/products` , this.newProduct , authHeader())
         .then(response => (alert(`${response.data.data.id} Product Created!`)))
+        .catch(handleAxiosError);
       },
       addTag (searchQuery, id) {
           let optionValue = {

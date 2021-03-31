@@ -6,6 +6,7 @@ import appConfig from "@/app.config";
 import {
   authHeader,
 } from "@/helpers/authservice/auth-header";
+import {handleAxiosError} from "@/helpers/authservice/user.service";
 
 /**
  * Pages component
@@ -93,7 +94,8 @@ export default {
   mounted() {
       axios
       .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
-      .then(response => (this.productsData = response.data.data));
+      .then(response => (this.productsData = response.data.data))
+      .catch(handleAxiosError);
   },
   methods: {
       /**
@@ -110,7 +112,8 @@ export default {
       deleteProduct(){
         axios
         .delete(`${this.backendURL}/api/v1/products/${this.currentProduct.id}` , authHeader())
-        .then(response => (alert(`${response.data.data.id} Product deleted!`)));
+        .then(response => (alert(`${response.data.data.id} Product deleted!`)))
+        .catch(handleAxiosError);
       }
   },
 };
