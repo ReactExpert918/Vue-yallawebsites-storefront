@@ -26,7 +26,7 @@ export default {
     return {
       backendURL: process.env.VUE_APP_BACKEND_URL,
       categoriesData: [],
-      currentCategory: {},
+      currentCategory: {product_sorts: []},
       currentProducts: [],
       catPayload: {
          name: "",
@@ -39,6 +39,7 @@ export default {
          meta_keywords_str: "",
       },
       productMap: {},
+      productSortMap: {},
       pageTitle: "Catalog",
       items: [
         {
@@ -71,6 +72,7 @@ export default {
   methods: {
     currentCategoryData(category){
       this.currentCategory = category
+      this.currentCategory.product_sorts = [];
       this.currentProducts = []
 
       if (!(this.currentCategory.id in this.productMap)){
@@ -102,6 +104,13 @@ export default {
         this.currentCategory.meta_keywords = [];
       } 
 
+      for (const [productID, sortOrder] of Object.entries(this.productSortMap)) {
+        this.currentCategory.product_sorts.push({
+          product_id: productID,
+          sort_order: parseInt(sortOrder)
+        })
+      }
+
       axios
       .put(`${this.backendURL}/api/v1/categories/${this.currentCategory.id}` , this.currentCategory , authHeader())
       .then(response => (alert(`${response.data.data.id} Category Updated!`)))
@@ -115,6 +124,9 @@ export default {
       .delete(`${this.backendURL}/api/v1/categories/${this.currentCategory.id}` , authHeader())
       .then(response => (alert(`${response.data.data.id} Category deleted!`)))
       .catch(handleAxiosError);
+    },
+    productSortChange(product){
+        this.productSortMap[product.id] = product.sort_order;
     }
   },
 };
@@ -199,7 +211,7 @@ export default {
                     v-for="products of currentProducts" 
                     :key="products.index"
                   >
-                    <th scope="row"><input type="text" class="form-control" v-model="products.sort_order" /></th>
+                    <th scope="row"><input type="text" class="form-control" @change="productSortChange(products)" v-model="products.sort_order" /></th>
                     <td>{{products.name}}</td>
                     <td>{{products.sku}}</td>
                   </tr>
