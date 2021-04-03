@@ -57,6 +57,7 @@ export default {
         paramName: "category_image",
         maxFilesize: 200,
         headers: authHeader().headers,
+        autoProcessQueue: false,
       }
     };
   },
@@ -95,7 +96,11 @@ export default {
       } 
       axios
       .post(`${this.backendURL}/api/v1/categories` , this.catPayload , authHeader())
-      .then(response => (alert(`${response.data.data.id} Category Created!`)))
+      .then(response => {
+          alert(`${response.data.data.id} Category Created!`);
+          this.$refs.vueCreateDropzone.setOption("url" , `${this.backendURL}/api/v1/categories/${response.data.data.id}/upload`);
+          this.$refs.vueCreateDropzone.processQueue();
+       })
       .catch(handleAxiosError);
     },
     updateCategory(){
@@ -113,7 +118,10 @@ export default {
 
       axios
       .put(`${this.backendURL}/api/v1/categories/${this.currentCategory.id}` , this.currentCategory , authHeader())
-      .then(response => (alert(`${response.data.data.id} Category Updated!`)))
+      .then(response => {
+          alert(`${response.data.data.id} Category Updated!`);
+          this.$refs.myVueDropzone.processQueue();
+       })
       .catch(handleAxiosError);
     },
     handleImageUpload(){
@@ -325,7 +333,17 @@ export default {
         </div>
         <div class="col-md-12">
           <label class="mt-3">Image</label>
-          <div id="dropzone" class="vue-dropzone dropzone dz-clickable"><div class="dz-message"><div class="dropzone-custom-content"><div><i class="display-4 text-muted bx bxs-cloud-upload"></i></div></div></div></div>
+          <vue-dropzone
+                        id="createDropzone"
+                        ref="vueCreateDropzone"
+                        :use-custom-slot="true"
+                        :options="dropzoneOptions"
+                      >
+                        <div class="dropzone-custom-content">
+                          <i class="display-4 text-muted bx bxs-cloud-upload"></i>
+                          <h4>Drop files here or click to upload.</h4>
+                        </div>
+                      </vue-dropzone>
         </div>
         <div class="col-md-12">
           <!--IMAGE PLACEHOLDER-->
