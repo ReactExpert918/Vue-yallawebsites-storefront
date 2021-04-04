@@ -55,6 +55,7 @@ export default {
       currentPage: 1,
       perPage: 10,
       pageOptions: [10, 25, 50, 100],
+      productQuantityGreaterThan: 1,
       filter: null,
       filterOn: [],
       selected: [],
@@ -115,7 +116,7 @@ export default {
   },
   mounted() {
       axios
-      .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
+      .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}&quantity_greater_than=${this.productQuantityGreaterThan}` , authHeader())
       .then(response => {
          this.products = response.data.data;
          for(var i = 0; i < this.products.length; i++){
