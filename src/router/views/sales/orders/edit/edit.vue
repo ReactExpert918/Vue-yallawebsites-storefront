@@ -55,6 +55,7 @@ export default {
       currentPage: 1,
       perPage: 10,
       pageOptions: [10, 25, 50, 100],
+      productQuantityGreaterThan: 1,
       filter: null,
       filterOn: [],
       selected: [],
@@ -115,7 +116,7 @@ export default {
   },
   mounted() {
       axios
-      .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
+      .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}&quantity_greater_than=${this.productQuantityGreaterThan}&with_disabled=false` , authHeader())
       .then(response => {
          this.products = response.data.data;
          for(var i = 0; i < this.products.length; i++){
@@ -153,6 +154,7 @@ export default {
             var op = this.order.products[i];
             op.product.order_quantity = op.quantity;
             op.product.price = op.price;
+            op.product.order_product_id = op.id;
             this.selectedProducts.push(op.product);
           }
 
@@ -191,10 +193,14 @@ export default {
           products: []
         }
         for (var i = 0; i < this.selectedProducts.length; i++){
-          payload.products.push({
+          var productPayload = {
             id: this.selectedProducts[i].id,
             quantity: this.selectedProducts[i].order_quantity
-          });
+          }
+          if (this.selectedProducts[i].order_product_id){
+            productPayload.order_product_id = this.selectedProducts[i].order_product_id;
+          }
+          payload.products.push(productPayload);
         }
         axios
         .put(`${this.backendURL}/api/v1/orders/${this.$route.params.id}` , payload , authHeader())

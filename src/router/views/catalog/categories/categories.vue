@@ -26,7 +26,7 @@ export default {
     return {
       backendURL: process.env.VUE_APP_BACKEND_URL,
       categoriesData: [],
-      currentCategory: {},
+      currentCategory: {product_sorts: []},
       currentProducts: [],
       catPayload: {
          name: "",
@@ -39,6 +39,7 @@ export default {
          meta_keywords_str: "",
       },
       productMap: {},
+      productSortMap: {},
       pageTitle: "Catalog",
       items: [
         {
@@ -56,6 +57,7 @@ export default {
         paramName: "category_image",
         maxFilesize: 200,
         headers: authHeader().headers,
+        autoProcessQueue: false,
       }
     };
   },
@@ -71,6 +73,7 @@ export default {
   methods: {
     currentCategoryData(category){
       this.currentCategory = category
+      this.currentCategory.product_sorts = [];
       this.currentProducts = []
 
       if (!(this.currentCategory.id in this.productMap)){
@@ -93,7 +96,11 @@ export default {
       } 
       axios
       .post(`${this.backendURL}/api/v1/categories` , this.catPayload , authHeader())
-      .then(response => (alert(`${response.data.data.id} Category Created!`)))
+      .then(response => {
+          alert(`${response.data.data.id} Category Created!`);
+          this.$refs.vueCreateDropzone.setOption("url" , `${this.backendURL}/api/v1/categories/${response.data.data.id}/upload`);
+          this.$refs.vueCreateDropzone.processQueue();
+       })
       .catch(handleAxiosError);
     },
     updateCategory(){
@@ -102,9 +109,19 @@ export default {
         this.currentCategory.meta_keywords = [];
       } 
 
+      for (const [productID, sortOrder] of Object.entries(this.productSortMap)) {
+        this.currentCategory.product_sorts.push({
+          product_id: productID,
+          sort_order: parseInt(sortOrder)
+        })
+      }
+
       axios
       .put(`${this.backendURL}/api/v1/categories/${this.currentCategory.id}` , this.currentCategory , authHeader())
-      .then(response => (alert(`${response.data.data.id} Category Updated!`)))
+      .then(response => {
+          alert(`${response.data.data.id} Category Updated!`);
+          this.$refs.myVueDropzone.processQueue();
+       })
       .catch(handleAxiosError);
     },
     handleImageUpload(){
@@ -115,6 +132,9 @@ export default {
       .delete(`${this.backendURL}/api/v1/categories/${this.currentCategory.id}` , authHeader())
       .then(response => (alert(`${response.data.data.id} Category deleted!`)))
       .catch(handleAxiosError);
+    },
+    productSortChange(product){
+        this.productSortMap[product.id] = product.sort_order;
     }
   },
 };
@@ -199,7 +219,7 @@ export default {
                     v-for="products of currentProducts" 
                     :key="products.index"
                   >
-                    <th scope="row"><input type="text" class="form-control" v-model="products.sort_order" /></th>
+                    <th scope="row"><input type="text" class="form-control" @change="productSortChange(products)" v-model="products.sort_order" /></th>
                     <td>{{products.name}}</td>
                     <td>{{products.sku}}</td>
                   </tr>
@@ -313,7 +333,17 @@ export default {
         </div>
         <div class="col-md-12">
           <label class="mt-3">Image</label>
-          <div id="dropzone" class="vue-dropzone dropzone dz-clickable"><div class="dz-message"><div class="dropzone-custom-content"><div><i class="display-4 text-muted bx bxs-cloud-upload"></i></div></div></div></div>
+          <vue-dropzone
+                        id="createDropzone"
+                        ref="vueCreateDropzone"
+                        :use-custom-slot="true"
+                        :options="dropzoneOptions"
+                      >
+                        <div class="dropzone-custom-content">
+                          <i class="display-4 text-muted bx bxs-cloud-upload"></i>
+                          <h4>Drop files here or click to upload.</h4>
+                        </div>
+                      </vue-dropzone>
         </div>
         <div class="col-md-12">
           <!--IMAGE PLACEHOLDER-->

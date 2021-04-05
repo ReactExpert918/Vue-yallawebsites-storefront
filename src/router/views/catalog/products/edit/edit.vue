@@ -139,6 +139,7 @@ export default {
         paramName: "product_image",
         maxFilesize: 200,
         headers: authHeader().headers,
+        autoProcessQueue: false,
       },
       textarea: '',
       lgchecked: '',
@@ -218,7 +219,10 @@ export default {
 
         axios
         .put(`${this.backendURL}/api/v1/products/${this.$route.params.id}` , productReq , authHeader())
-        .then(response => (alert(`${response.data.data.id} Product Updated!`)))
+        .then(response => {
+          alert(`${response.data.data.id} Product Updated!`);
+          this.$refs.myVueDropzone.processQueue();
+        })
         .catch(handleAxiosError);
       },
 

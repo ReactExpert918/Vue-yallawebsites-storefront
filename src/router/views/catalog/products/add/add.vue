@@ -139,10 +139,12 @@ export default {
         ],
       },
       dropzoneOptions: {
-        url: "https://httpbin.org/post",
-        thumbnailWidth: 150,
-        maxFilesize: 0.5,
-        headers: { "My-Awesome-Header": "header value" }
+        url: `${process.env.VUE_APP_BACKEND_URL}/api/v1/products/upload`,
+        // thumbnailWidth: 75,
+        paramName: "product_image",
+        maxFilesize: 200,
+        headers: authHeader().headers,
+        autoProcessQueue: false,
       },
       textarea: '',
       lgchecked: '',
@@ -193,7 +195,11 @@ export default {
 
         axios
         .post(`${this.backendURL}/api/v1/products` , this.newProduct , authHeader())
-        .then(response => (alert(`${response.data.data.id} Product Created!`)))
+        .then(response => {
+          alert(`${response.data.data.id} Product Created!`);
+          this.$refs.myVueDropzone.setOption("url" , `${this.backendURL}/api/v1/products/${response.data.data.id}/upload`);
+          this.$refs.myVueDropzone.processQueue();
+         })
         .catch(handleAxiosError);
       },
       addTag (searchQuery, id) {
