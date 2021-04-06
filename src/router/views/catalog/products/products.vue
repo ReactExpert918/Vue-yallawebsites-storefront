@@ -32,7 +32,7 @@ export default {
       ],
       totalRows: 1,
       currentPage: 1,
-      perPage: 10,
+      perPage: 20,
       pageOptions: [10, 25, 50, 100],
       filter: null,
       filterOn: [],
@@ -76,9 +76,9 @@ export default {
       /**
         * Total no. of records
         */
-      rows() {
-          return this.productsData.length;
-      },
+      // rows() {
+      //     return this.productsData.length;
+      // },
   },
   watch: {
     selectedAll: function() {
@@ -216,7 +216,7 @@ export default {
                         <div class="dataTables_paginate paging_simple_numbers float-right">
                             <ul class="pagination pagination-rounded mb-0">
                                 <!-- pagination -->
-                                <b-pagination v-model="currentPage" :total-rows="rows" :per-page="perPage"></b-pagination>
+                                <b-pagination v-model="currentPage"  :per-page="perPage"></b-pagination>
                             </ul>
                         </div>
                     </div>

@@ -46,6 +46,7 @@ export default {
            enabled: false,
            is_downloadable: false,
            category_ids: [],
+           bundle_ids: [],
       },
       layouts: [],
       categories: [],
@@ -174,7 +175,7 @@ export default {
       .then(response => (this.categories = response.data.data))
       .catch(handleAxiosError);
       axios
-      .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
+      .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}&with_disabled=false` , authHeader())
       .then(response => (this.allProductsData = response.data.data))
       .catch(handleAxiosError);
   },
@@ -201,6 +202,13 @@ export default {
           this.$refs.myVueDropzone.processQueue();
          })
         .catch(handleAxiosError);
+      },
+      addBundle(selected , id){
+        if (!selected){
+          this.newProduct.bundle_ids.splice(this.newProduct.bundle_ids.indexOf(id) , 1);
+          return;
+        }
+        this.newProduct.bundle_ids.push(id);
       },
       addTag (searchQuery, id) {
           let optionValue = {
@@ -663,8 +671,8 @@ export default {
                     <!-- Table -->
                     <div class="table-responsive mb-0">
                         <b-table :items="allProductsData" selectable :fields="fields" responsive="sm" :per-page="perPage" :current-page="currentPage" :sort-by.sync="sortBy" :sort-desc.sync="sortDesc" :filter="filter" :filter-included-fields="filterOn" @filtered="onFiltered">
-                      <template #cell(selected)>
-                        <b-form-checkbox switch size="lg" v-model="lgchecked"></b-form-checkbox>
+                      <template #cell(selected)="data">
+                        <b-form-checkbox switch size="lg" v-model="selected" v-on:change="addBundle(selected,data.item.id)"></b-form-checkbox>
                       </template>
                        <template #cell(status)="data">
                         <span class="badge badge-success font-size-12">
