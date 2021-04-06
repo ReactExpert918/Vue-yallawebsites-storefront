@@ -203,8 +203,11 @@ export default {
          })
         .catch(handleAxiosError);
       },
-      addBundle(selected , id){
-        if (!selected){
+      isBundleID(id){
+        return this.newProduct.bundle_ids.indexOf(id) > -1;
+      },
+      addBundle(id){
+        if (this.isBundleID(id)){
           this.newProduct.bundle_ids.splice(this.newProduct.bundle_ids.indexOf(id) , 1);
           return;
         }
@@ -672,7 +675,7 @@ export default {
                     <div class="table-responsive mb-0">
                         <b-table :items="allProductsData" selectable :fields="fields" responsive="sm" :per-page="perPage" :current-page="currentPage" :sort-by.sync="sortBy" :sort-desc.sync="sortDesc" :filter="filter" :filter-included-fields="filterOn" @filtered="onFiltered">
                       <template #cell(selected)="data">
-                        <b-form-checkbox switch size="lg" v-model="selected" v-on:change="addBundle(selected,data.item.id)"></b-form-checkbox>
+                        <b-form-checkbox switch size="lg"  v-on:change="addBundle(data.item.id)"></b-form-checkbox>
                       </template>
                        <template #cell(status)="data">
                         <span class="badge badge-success font-size-12">

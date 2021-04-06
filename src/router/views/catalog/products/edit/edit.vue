@@ -76,7 +76,7 @@ export default {
       ],
       totalRows: 1,
       currentPage: 1,
-      perPage: 20,
+      perPage: 10,
       pageOptions: [10, 25, 50, 100],
       filter: null,
       filterOn: [],
@@ -179,7 +179,7 @@ export default {
       })
       .catch(handleAxiosError);
       axios
-      .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}&without=${this.$route.params.id}` , authHeader())
+      .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}&without=${this.$route.params.id}&with_disabled=false` , authHeader())
       .then(response => (this.allProductsData = response.data.data))
       .catch(handleAxiosError);
   },
@@ -211,6 +211,7 @@ export default {
            default_image_url: this.productData.default_image_url,
            delete_image_urls: this.productData.delete_image_urls,
            category_ids: [],
+           bundle_ids: this.productData.bundle_ids,
         }
 
         for(var i = 0; i < this.selectedCategories.length; i++){ 
@@ -238,12 +239,14 @@ export default {
       },
 
       isBundleID(id){
-        for (var i = 0; i < this.productData.bundle_ids.length; i++){
-          if (this.productData.bundle_ids[i] == id){
-            return true;
-          }
+         return this.productData.bundle_ids.indexOf(id) > -1;
+      },
+      addBundle(id){
+        if (this.isBundleID(id)){
+          this.productData.bundle_ids.splice(this.productData.bundle_ids.indexOf(id) , 1);
+          return;
         }
-        return false;
+        this.productData.bundle_ids.push(id);
       },
       addTag (searchQuery, id) {
           let optionValue = {
@@ -684,7 +687,7 @@ export default {
                     <div class="table-responsive mb-0">
                         <b-table :items="allProductsData" selectable :fields="fields" responsive="sm" :per-page="perPage" :current-page="currentPage" :sort-by.sync="sortBy" :sort-desc.sync="sortDesc" :filter="filter" :filter-included-fields="filterOn" @filtered="onFiltered">
                       <template #cell(selected)="data">
-                        <b-form-checkbox switch size="lg" :checked="isBundleID(data.item.id)"></b-form-checkbox>
+                        <b-form-checkbox switch size="lg"   v-on:change="addBundle(data.item.id)" :checked="isBundleID(data.item.id)"></b-form-checkbox>
                       </template>
                        <template #cell(status)="data">
                         <span class="badge badge-success font-size-12">
