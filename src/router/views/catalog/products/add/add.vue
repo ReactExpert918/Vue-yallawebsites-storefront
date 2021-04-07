@@ -26,6 +26,8 @@ export default {
     return {
       backendURL: process.env.VUE_APP_BACKEND_URL,
       allProductsData: [],
+      attrs: [],
+      attrGroups: [],
       preVariation: [],
       newProduct: {
            name: "",
@@ -74,6 +76,8 @@ export default {
         }
       ],
       attributevalues: [],
+      attrGrpMap: {},
+      currentAttrGroup: {},
       categoryvalues: [
         "cat 1",
         "cat 2",
@@ -177,6 +181,50 @@ export default {
       axios
       .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}&with_disabled=false` , authHeader())
       .then(response => (this.allProductsData = response.data.data))
+      .catch(handleAxiosError);
+      axios
+      .get(`${this.backendURL}/api/v1/products/attributes/groups` , authHeader())
+      .then(response => {
+        this.attrGroups = response.data.data;
+        if (this.attrGroups.length > 0){
+          this.currentAttrGroup = this.attrGroups[0];
+        }
+        for(var i = 0; i < this.attrGroups.length; i++){
+          if(!(this.attrGroups[i].id in this.attrGrpMap)){
+            this.attrGroups[i].attributes = [];
+            this.attrGrpMap[this.attrGroups[i].id] = this.attrGroups[i];
+          }
+        }
+        
+      })
+      .catch(handleAxiosError);
+      axios
+      .get(`${this.backendURL}/api/v1/products/attributes?with_disabled=false&all=true` , authHeader())
+      .then(response => {
+        this.attrs = response.data.data;
+        for(var i = 0; i < this.attrs.length; i++){
+          var attr = this.attrs[i];
+
+          if (attr.group == null){
+            attr.group = {};
+          }else{
+            if(!(attr.group.id in this.attrGrpMap)){
+              this.attrGrpMap[attr.group.id].attributes = [];
+            }
+            this.attrGrpMap[attr.group.id].attributes.push(attr);
+          }
+
+          if (attr.type == null){
+            attr.type = {};
+          }
+
+          if (attr.options.length < 1) {
+            attr.options = [];
+          }
+
+        }
+
+      })
       .catch(handleAxiosError);
   },
   methods: {
@@ -452,12 +500,8 @@ export default {
                 <div class="col-sm-9"><h4 class="card-title mt-3">Attributes</h4></div>
                 <div class="col-sm-3">
                   <label>Attribute Group</label>
-                  <select class="custom-select">
-                      <option value="0">Global</option>
-                      <option value="0">Group 1</option>
-                      <option value="1">Group 2</option>
-                      <option value="2">Group 3</option>
-                      <option value="3">Group 4</option>
+                  <select class="custom-select"  v-model="currentAttrGroup">
+                      <option v-for="group in attrGroups" v-bind:value="group" :key="group.id">{{group.name}}</option>
                     </select>
                 </div>
               </div>
@@ -474,31 +518,10 @@ export default {
                       </tr>
                     </thead>
                     <tbody>
-                      <tr>
-                        <td>Manufacturer</td>
+                      <tr v-for="attr in currentAttrGroup.attributes" :key="attr.id">
                         <td>
-                          <select class="custom-select">
-                            <option value="0">Manufacturer 1</option>
-                            <option value="1">Manufacturer 2</option>
-                            <option value="2">Manufacturer 3</option>
-                            <option value="3">Manufacturer 4</option>
-                          </select>
+                          {{attr.name}}
                         </td>
-                        <td></td>
-                      </tr>
-                      <tr>
-                        <td>Length</td>
-                        <td>
-                          <b-form-input for="text" value="Length"></b-form-input>
-                        </td>
-                        <td></td>
-                      </tr>
-                      <tr>
-                        <td>Width</td>
-                        <td>
-                          <b-form-input for="text" value="Width"></b-form-input>
-                        </td>
-                        <td></td>
                       </tr>
                     </tbody>
                   </table>
