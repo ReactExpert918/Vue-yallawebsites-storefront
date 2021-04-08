@@ -39,6 +39,7 @@ export default {
            meta_title: "",
            meta_description: "",
            meta_keywords: [],
+           meta_keywords_str: "",
            layout_id: "",
            ean: "",
            sku: "",
@@ -49,6 +50,8 @@ export default {
            is_downloadable: false,
            category_ids: [],
            bundle_ids: [],
+           attribute_group_id: "",
+           attributes: [],
       },
       layouts: [],
       categories: [],
@@ -211,6 +214,8 @@ export default {
             if(!(attr.group.id in this.attrGrpMap)){
               this.attrGrpMap[attr.group.id].attributes = [];
             }
+            attr.value = "";
+            attr.option_id = "";
             this.attrGrpMap[attr.group.id].attributes.push(attr);
           }
 
@@ -241,6 +246,19 @@ export default {
         this.newProduct.cost_price = parseFloat(this.newProduct.cost_price);
         this.newProduct.sale_price = parseFloat(this.newProduct.sale_price);
         this.newProduct.quantity = parseInt(this.newProduct.quantity);
+        
+        this.newProduct.attribute_group_id = this.currentAttrGroup.id;
+        for(var j = 0; i < this.currentAttrGroup.attributes.length; j++){
+            var attr = this.currentAttrGroup.attributes[j];
+            if (attr){
+              this.newProduct.attributes.push({
+              id: attr.id,
+              value: attr.value,
+              option_id: attr.option_id,
+            });
+          }
+          
+        }
 
         axios
         .post(`${this.backendURL}/api/v1/products` , this.newProduct , authHeader())
@@ -521,6 +539,12 @@ export default {
                       <tr v-for="attr in currentAttrGroup.attributes" :key="attr.id">
                         <td>
                           {{attr.name}}
+                        </td>
+                        <td>
+                          <select class="custom-select" v-if="attr.type.slug=='dropdown'" v-model="attr.option_id">
+                             <option v-for="opt in attr.options" v-bind:value="opt.id" :key="opt.id">{{opt.name}}</option>
+                          </select>
+                          <b-form-input v-else for="text" v-model="attr.value"></b-form-input>
                         </td>
                       </tr>
                     </tbody>
