@@ -35,9 +35,13 @@ export default {
         bundle_ids:[],
         default_image_url: "",
         delete_image_urls: [],
+        attribute_group_id: "",
+        attributes: [],
       },
       variationsData: variationsData,
       allProductsData: [],
+      attrs: [],
+      attrGroups: [],
       preVariation: [],
       layouts: [],
       categories: [],
@@ -62,18 +66,9 @@ export default {
           active: true
         }
       ],
-      attributevalues: [
-        "value 1",
-        "value 2",
-        "value 3",
-        "value 4",
-      ],
-      categoryvalues: [
-        "cat 1",
-        "cat 2",
-        "cat 3",
-        "cat 4",
-      ],
+      attrMap: {},
+      attrGrpMap: {},
+      currentAttrGroup: {},
       totalRows: 1,
       currentPage: 1,
       perPage: 10,
@@ -169,18 +164,109 @@ export default {
           if (this.productData.layout == null){
             this.productData.layout = {};
           }
+          if (this.productData.attributes == null){
+            this.productData.attributes = [];
+          } 
           for (var i  = 0; i < this.productData.meta_keywords.length; i++){
             this.productData.meta_keywords_str += this.productData.meta_keywords[i];
             if ((this.productData.meta_keywords.length - i) > 1){ // adding space seperated words and checking for the last item
               this.productData.meta_keywords_str += " ";
             }
           }
+          for(var j = 0; j < this.productData.attributes.length; j++){
+            var a = this.productData.attributes[j];
+            this.attrMap[a.id] = a;
+          }
+
+
+          if(this.attrs.length > 0){
+            for(var k = 0; k < this.attrs.length; k++){
+              var attr = this.attrs[k];
+              if(attr.id in this.attrMap){
+                if (this.attrMap[attr.id].option){
+                   attr.option_id = this.attrMap[attr.id].option.id;
+                }
+                attr.value = this.attrMap[attr.id].value; 
+              }
+            }
+          }
+
+          if (this.attrGroups.length > 0 && this.productData.attribute_group){
+            var grp = this.attrGroups[this.attrGroups.map(function(e) { return e.id; }).indexOf(this.productData.attribute_group.id)];
+            if (grp){
+              this.currentAttrGroup = grp;
+            }
+         }          
+
           this.productData.delete_image_urls = [];
+
+
       })
       .catch(handleAxiosError);
       axios
       .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}&without=${this.$route.params.id}&with_disabled=false` , authHeader())
       .then(response => (this.allProductsData = response.data.data))
+      .catch(handleAxiosError);
+
+     
+      axios
+      .get(`${this.backendURL}/api/v1/products/attributes?with_disabled=false&all=true` , authHeader())
+      .then(response => {
+        this.attrs = response.data.data;
+        for(var i = 0; i < this.attrs.length; i++){
+
+          var attr = this.attrs[i];
+
+          if (attr.group == null){
+            attr.group = {};
+          }else{
+            if(!(attr.group.id in this.attrGrpMap)){
+              this.attrGrpMap[attr.group.id] = [];
+            }
+            attr.value = "";
+            attr.option_id = "";
+            this.attrGrpMap[attr.group.id].push(attr);
+          }
+
+          if (attr.type == null){
+            attr.type = {};
+          }
+
+          if (attr.options.length < 1) {
+            attr.options = [];
+          }
+
+          if(attr.id in this.attrMap){
+            if (this.attrMap[attr.id].option){
+              attr.option_id = this.attrMap[attr.id].option.id;
+            }
+            attr.value = this.attrMap[attr.id].value; 
+          }
+
+        }
+
+        axios
+          .get(`${this.backendURL}/api/v1/products/attributes/groups` , authHeader())
+          .then(response => {
+            this.attrGroups = response.data.data;
+            if (this.attrGroups.length > 0){
+              this.currentAttrGroup = this.attrGroups[0];
+            }
+            for(var j = 0; j < this.attrGroups.length; j++){
+              this.attrGroups[j].attributes = this.attrGrpMap[this.attrGroups[j].id];
+              var agi = "";
+              if (this.productData.attribute_group){
+                agi = this.productData.attribute_group.id;
+              }
+              if (this.attrGroups[j].id == agi){
+                this.currentAttrGroup = this.attrGroups[j];
+              }
+            }
+            
+          })
+          .catch(handleAxiosError);
+
+      })
       .catch(handleAxiosError);
   },
   methods: {
@@ -212,10 +298,22 @@ export default {
            delete_image_urls: this.productData.delete_image_urls,
            category_ids: [],
            bundle_ids: this.productData.bundle_ids,
+           attributes: [],
         }
 
         for(var i = 0; i < this.selectedCategories.length; i++){ 
            productReq.category_ids.push(this.selectedCategories[i].id);
+        }
+
+        if(this.currentAttrGroup.attributes){
+          for(var j = 0; j < this.currentAttrGroup.attributes.length; j++){
+            var attr = this.currentAttrGroup.attributes[j];
+            productReq.attributes.push({
+              id: attr.id,
+              option_id: attr.option_id,
+              value: attr.value,
+            })
+          }
         }
 
         axios
@@ -485,31 +583,16 @@ export default {
                       </tr>
                     </thead>
                     <tbody>
-                      <tr>
-                        <td>Manufacturer</td>
+                       <tr v-for="attr in currentAttrGroup.attributes" :key="attr.id">
                         <td>
-                          <select class="custom-select">
-                            <option value="0">Manufacturer 1</option>
-                            <option value="1">Manufacturer 2</option>
-                            <option value="2">Manufacturer 3</option>
-                            <option value="3">Manufacturer 4</option>
+                          {{attr.name}}
+                        </td>
+                        <td>
+                          <select class="custom-select" v-if="attr.type.slug =='dropdown'" v-model="attr.option_id">
+                             <option v-for="opt in attr.options" v-bind:value="opt.id" :key="opt.id">{{opt.name}}</option>
                           </select>
+                          <b-form-input v-else for="text" v-model="attr.value"></b-form-input>
                         </td>
-                        <td></td>
-                      </tr>
-                      <tr>
-                        <td>Length</td>
-                        <td>
-                          <b-form-input for="text" value="Length"></b-form-input>
-                        </td>
-                        <td></td>
-                      </tr>
-                      <tr>
-                        <td>Width</td>
-                        <td>
-                          <b-form-input for="text" value="Width"></b-form-input>
-                        </td>
-                        <td></td>
                       </tr>
                     </tbody>
                   </table>

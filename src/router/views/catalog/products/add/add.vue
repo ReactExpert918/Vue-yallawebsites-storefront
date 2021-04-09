@@ -78,15 +78,8 @@ export default {
           active: true
         }
       ],
-      attributevalues: [],
       attrGrpMap: {},
       currentAttrGroup: {},
-      categoryvalues: [
-        "cat 1",
-        "cat 2",
-        "cat 3",
-        "cat 4",
-      ],
       totalRows: 1,
       currentPage: 1,
       perPage: 10,
@@ -185,22 +178,7 @@ export default {
       .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}&with_disabled=false` , authHeader())
       .then(response => (this.allProductsData = response.data.data))
       .catch(handleAxiosError);
-      axios
-      .get(`${this.backendURL}/api/v1/products/attributes/groups` , authHeader())
-      .then(response => {
-        this.attrGroups = response.data.data;
-        if (this.attrGroups.length > 0){
-          this.currentAttrGroup = this.attrGroups[0];
-        }
-        for(var i = 0; i < this.attrGroups.length; i++){
-          if(!(this.attrGroups[i].id in this.attrGrpMap)){
-            this.attrGroups[i].attributes = [];
-            this.attrGrpMap[this.attrGroups[i].id] = this.attrGroups[i];
-          }
-        }
-        
-      })
-      .catch(handleAxiosError);
+      
       axios
       .get(`${this.backendURL}/api/v1/products/attributes?with_disabled=false&all=true` , authHeader())
       .then(response => {
@@ -212,11 +190,11 @@ export default {
             attr.group = {};
           }else{
             if(!(attr.group.id in this.attrGrpMap)){
-              this.attrGrpMap[attr.group.id].attributes = [];
+              this.attrGrpMap[attr.group.id] = [];
             }
             attr.value = "";
             attr.option_id = "";
-            this.attrGrpMap[attr.group.id].attributes.push(attr);
+            this.attrGrpMap[attr.group.id].push(attr);
           }
 
           if (attr.type == null){
@@ -228,6 +206,22 @@ export default {
           }
 
         }
+
+        axios
+        .get(`${this.backendURL}/api/v1/products/attributes/groups` , authHeader())
+        .then(response => {
+          this.attrGroups = response.data.data;
+          if (this.attrGroups.length > 0){
+            this.currentAttrGroup = this.attrGroups[0];
+          }
+          for(var i = 0; i < this.attrGroups.length; i++){
+            if(this.attrGroups[i].id in this.attrGrpMap){
+              this.attrGroups[i].attributes = this.attrGrpMap[this.attrGroups[i].id];
+            }
+         }
+        
+      })
+      .catch(handleAxiosError);
 
       })
       .catch(handleAxiosError);
@@ -248,7 +242,7 @@ export default {
         this.newProduct.quantity = parseInt(this.newProduct.quantity);
         
         this.newProduct.attribute_group_id = this.currentAttrGroup.id;
-        for(var j = 0; i < this.currentAttrGroup.attributes.length; j++){
+        for(var j = 0; j < this.currentAttrGroup.attributes.length; j++){
             var attr = this.currentAttrGroup.attributes[j];
             if (attr){
               this.newProduct.attributes.push({
