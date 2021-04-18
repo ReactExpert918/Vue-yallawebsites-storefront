@@ -332,7 +332,7 @@ export default {
                     saleprice: 0.0,
                     ean: '',
                     specs: [] 
-              }
+            }
           }   
           tag.options = i      
           this.variations.push(tag)  
