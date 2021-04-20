@@ -26,6 +26,8 @@ export default {
     return {
       backendURL: process.env.VUE_APP_BACKEND_URL,
       allProductsData: [],
+      attrs: [],
+      attrGroups: [],
       preVariation: [],
       newProduct: {
            name: "",
@@ -37,6 +39,7 @@ export default {
            meta_title: "",
            meta_description: "",
            meta_keywords: [],
+           meta_keywords_str: "",
            layout_id: "",
            ean: "",
            sku: "",
@@ -46,11 +49,15 @@ export default {
            enabled: false,
            is_downloadable: false,
            category_ids: [],
+           bundle_ids: [],
+           attribute_group_id: "",
+           attributes: [],
+           specifications: [],
+           variations: [],
       },
       layouts: [],
       categories: [],
       selectedCategories: [],
-      VariationOptionsName: ['name1', 'name2', 'name3'],
       id: [],
       variations: [],
       variationValue: 'Variation Name',
@@ -72,13 +79,8 @@ export default {
           active: true
         }
       ],
-      attributevalues: [],
-      categoryvalues: [
-        "cat 1",
-        "cat 2",
-        "cat 3",
-        "cat 4",
-      ],
+      attrGrpMap: {},
+      currentAttrGroup: {},
       totalRows: 1,
       currentPage: 1,
       perPage: 10,
@@ -146,6 +148,14 @@ export default {
         headers: authHeader().headers,
         autoProcessQueue: false,
       },
+      variationDropzoneOptions:{
+         url: `${process.env.VUE_APP_BACKEND_URL}/api/v1/products/upload`,
+        // thumbnailWidth: 75,
+        paramName: "product_variation_image",
+        maxFilesize: 200,
+        headers: authHeader().headers,
+        autoProcessQueue: false,
+      },
       textarea: '',
       lgchecked: '',
       value1: '',
@@ -174,12 +184,60 @@ export default {
       .then(response => (this.categories = response.data.data))
       .catch(handleAxiosError);
       axios
-      .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
+      .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}&with_disabled=false` , authHeader())
       .then(response => (this.allProductsData = response.data.data))
+      .catch(handleAxiosError);
+      
+      axios
+      .get(`${this.backendURL}/api/v1/products/attributes?with_disabled=false&all=true` , authHeader())
+      .then(response => {
+        this.attrs = response.data.data;
+        for(var i = 0; i < this.attrs.length; i++){
+          var attr = this.attrs[i];
+
+          if (attr.group == null){
+            attr.group = {};
+          }else{
+            if(!(attr.group.id in this.attrGrpMap)){
+              this.attrGrpMap[attr.group.id] = [];
+            }
+            attr.value = "";
+            attr.option_id = "";
+            this.attrGrpMap[attr.group.id].push(attr);
+          }
+
+          if (attr.type == null){
+            attr.type = {};
+          }
+
+          if (attr.options.length < 1) {
+            attr.options = [];
+          }
+
+        }
+
+        axios
+        .get(`${this.backendURL}/api/v1/products/attributes/groups` , authHeader())
+        .then(response => {
+          this.attrGroups = response.data.data;
+          if (this.attrGroups.length > 0){
+            this.currentAttrGroup = this.attrGroups[0];
+          }
+          for(var i = 0; i < this.attrGroups.length; i++){
+            if(this.attrGroups[i].id in this.attrGrpMap){
+              this.attrGroups[i].attributes = this.attrGrpMap[this.attrGroups[i].id];
+            }
+         }
+        
+      })
+      .catch(handleAxiosError);
+
+      })
       .catch(handleAxiosError);
   },
   methods: {
       createProduct(){
+
         this.newProduct.meta_keywords = this.newProduct.meta_keywords_str.split(" ");
         if (this.newProduct.meta_keywords[0] == ""){
           this.newProduct.meta_keywords = [];
@@ -192,6 +250,52 @@ export default {
         this.newProduct.cost_price = parseFloat(this.newProduct.cost_price);
         this.newProduct.sale_price = parseFloat(this.newProduct.sale_price);
         this.newProduct.quantity = parseInt(this.newProduct.quantity);
+        
+        this.newProduct.attribute_group_id = this.currentAttrGroup.id;
+        for(var j = 0; j < this.currentAttrGroup.attributes.length; j++){
+            var attr = this.currentAttrGroup.attributes[j];
+            if (attr){
+              this.newProduct.attributes.push({
+              id: attr.id,
+              value: attr.value,
+              option_id: attr.option_id,
+            });
+          }
+        }
+
+        this.variationsData.forEach((v) => {
+          var spec = {
+            name: v.name,
+            values: [],
+          }
+          v.options.forEach((o) => {
+            spec.values.push(o.name);
+          })
+          this.newProduct.specifications.push(spec);
+        })
+
+        this.variations.forEach((v) => {
+          var varReq = {
+            labels: v.options,
+            quantity: parseInt(v.subitem.qty),
+            price: parseFloat(v.subitem.price),
+            cost_price: parseFloat(v.subitem.costprice),
+            sale_price: parseFloat(v.subitem.saleprice),
+            sku: v.subitem.sku,
+            ean: v.subitem.ean,
+          }
+          if (v.image_name){
+            varReq.image_name = v.image_name;
+            varReq.image_content = v.image_content;
+          }
+          if (v.subitem.specs.length > 0) { //TODO: clear up about custom spec selection then un-comment
+            var spec = v.subitem.specs[0];
+            varReq.attribute_id = spec.id;
+            varReq.value = spec.value;
+          }
+          this.newProduct.variations.push(varReq);
+        })
+
 
         axios
         .post(`${this.backendURL}/api/v1/products` , this.newProduct , authHeader())
@@ -201,6 +305,16 @@ export default {
           this.$refs.myVueDropzone.processQueue();
          })
         .catch(handleAxiosError);
+      },
+      isBundleID(id){
+        return this.newProduct.bundle_ids.indexOf(id) > -1;
+      },
+      addBundle(id){
+        if (this.isBundleID(id)){
+          this.newProduct.bundle_ids.splice(this.newProduct.bundle_ids.indexOf(id) , 1);
+          return;
+        }
+        this.newProduct.bundle_ids.push(id);
       },
       addTag (searchQuery, id) {
           let optionValue = {
@@ -218,33 +332,19 @@ export default {
         this.tempArr2 = this.cartesianProduct(this.tempArr)
         this.tempArr2.forEach( i => {
           let tag = {
-          id: 1,
-          name: this.variationsData[id].name,
-          options: [],
-          subitems: [
-              { 
-                  id: 1,
-                  price: '21.20',
-                  qty: '31',
-                  sku: 'SDJA_SD',
-                  costprice: '13.31',
-                  saleprice: '123.41',
-                  ean: 'sadkoskd_s1',
-                  customImage: '/custom.jpg',
-                  specs: [
-                      {
-                          id: 1,
-                          name: 'Manufacturer',
-                          value: '1',
-                      },
-                      {
-                          id: 2,
-                          name: 'Length',
-                          value: '12',
-                      }
-                  ] 
-              }
-            ]
+            id: 1,
+            name: this.variationsData[id].name,
+            options: [],
+            subitem: { 
+                    id: 1,
+                    price: 0.0,
+                    qty: 0,
+                    sku: '',
+                    costprice: 0.0,
+                    saleprice: 0.0,
+                    ean: '',
+                    specs: [] 
+            }
           }   
           tag.options = i      
           this.variations.push(tag)  
@@ -310,6 +410,21 @@ export default {
             })                 
           }
         }
+      },
+      handleVariationImageUpload(file , variation){
+        this.getBase64(file).
+        then(data => {
+          variation.image_name = file.name;
+          variation.image_content = data;
+        });
+      },
+      getBase64(file) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.readAsDataURL(file);
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = error => reject(error);
+        })
       }
   },
 };
@@ -441,12 +556,8 @@ export default {
                 <div class="col-sm-9"><h4 class="card-title mt-3">Attributes</h4></div>
                 <div class="col-sm-3">
                   <label>Attribute Group</label>
-                  <select class="custom-select">
-                      <option value="0">Global</option>
-                      <option value="0">Group 1</option>
-                      <option value="1">Group 2</option>
-                      <option value="2">Group 3</option>
-                      <option value="3">Group 4</option>
+                  <select class="custom-select"  v-model="currentAttrGroup">
+                      <option v-for="group in attrGroups" v-bind:value="group" :key="group.id">{{group.name}}</option>
                     </select>
                 </div>
               </div>
@@ -463,31 +574,16 @@ export default {
                       </tr>
                     </thead>
                     <tbody>
-                      <tr>
-                        <td>Manufacturer</td>
+                      <tr v-for="attr in currentAttrGroup.attributes" :key="attr.id">
                         <td>
-                          <select class="custom-select">
-                            <option value="0">Manufacturer 1</option>
-                            <option value="1">Manufacturer 2</option>
-                            <option value="2">Manufacturer 3</option>
-                            <option value="3">Manufacturer 4</option>
+                          {{attr.name}}
+                        </td>
+                        <td>
+                          <select class="custom-select" v-if="attr.type.slug=='dropdown'" v-model="attr.option_id">
+                             <option v-for="opt in attr.options" v-bind:value="opt.id" :key="opt.id">{{opt.name}}</option>
                           </select>
+                          <b-form-input v-else for="text" v-model="attr.value"></b-form-input>
                         </td>
-                        <td></td>
-                      </tr>
-                      <tr>
-                        <td>Length</td>
-                        <td>
-                          <b-form-input for="text" value="Length"></b-form-input>
-                        </td>
-                        <td></td>
-                      </tr>
-                      <tr>
-                        <td>Width</td>
-                        <td>
-                          <b-form-input for="text" value="Width"></b-form-input>
-                        </td>
-                        <td></td>
                       </tr>
                     </tbody>
                   </table>
@@ -513,7 +609,7 @@ export default {
             <div class="variation" v-for="(item, index) of variationsData" :key="index + 34">
               <div class="row">
                 <div class="col-3">
-                  <b-form-input value="" size="md" v-model="VariationOptionsName[index]"></b-form-input>
+                  <b-form-input value="" size="md" v-model="item.name"></b-form-input>
                 </div>
                 <div class="col-9 mb-1">
                   <multiselect 
@@ -552,48 +648,49 @@ export default {
                           <a v-b-toggle="'accordion-' + index" class="text-dark row" href="javascript: void(0);">
                             <div class="col-4">
                               <i class="bx bx-caret-down mr-3"></i>
-                              <span>{{variation.name}}</span>
+                              <!-- <span>{{variation.name}}</span> -->
                               <span v-for="(i, index) in variation.options" :key="index + 20"> {{i}} /</span>
                             </div>
-                            <div class="col-8 row" v-for="(subitem, index) in variation.subitems" :key="index ">
+                            <div class="col-8 row">
                               <div class="col-4">
                                 <label class="mt-3">Price</label>
-                                <b-form-input for="text" :value="subitem.price"></b-form-input>
+                                <b-form-input for="text" v-model="variation.subitem.price"></b-form-input>
                               </div>
                               <div class="col-4">
                                 <label class="mt-3">Qty</label>
-                                <b-form-input for="text" :value="subitem.qty"></b-form-input>
+                                <b-form-input for="text" v-model="variation.subitem.qty"></b-form-input>
                               </div>
                               <div class="col-4">
                                 <label class="mt-3">SKU</label>
-                                <b-form-input for="text" :value="subitem.sku"></b-form-input>
+                                <b-form-input for="text" v-model="variation.subitem.sku"></b-form-input>
                               </div>
                             </div>
                           </a>
                       </b-card-header>
                       <b-collapse :id="'accordion-' + index" accordion="" role="tabpanel">
-                          <div v-for="(subitem, index) in variation.subitems" :key="index + 131">
+                          <div>
                             <div class="subcategory card-header">
                               <div class="row">
                                 <div class="col-3">
                                   <label class="mt-3">Cost Price</label>
-                                  <b-form-input for="text" :value="subitem.costprice"></b-form-input>
+                                  <b-form-input for="text" v-model="variation.subitem.costprice"></b-form-input>
                                 </div>
                                 <div class="col-3">
                                   <label class="mt-3">Sale Price</label>
-                                  <b-form-input for="text" :value="subitem.saleprice"></b-form-input>
+                                  <b-form-input for="text" v-model="variation.subitem.saleprice"></b-form-input>
                                 </div>
                                 <div class="col-3">
                                   <label class="mt-3">EAN</label>
-                                  <b-form-input for="text" :value="subitem.ean"></b-form-input>
+                                  <b-form-input for="text" v-model="variation.subitem.ean"></b-form-input>
                                 </div>
                                 <div class="col-3">
                                   <label class="mt-3">Custom Image</label>
                                   <vue-dropzone
-                                    id="dropzone"
-                                    ref="myVueDropzone"
+                                    id="vardropzone"
+                                    ref="myVariationVueDropzone"
                                     :use-custom-slot="true"
-                                    :options="dropzoneOptions"
+                                    :options="variationDropzoneOptions"
+                                    @vdropzone-file-added="(file) => handleVariationImageUpload(file,variation)"
                                     url="/"
                                     autoDiscover="false"
                                     >
@@ -614,13 +711,9 @@ export default {
                                         </tr>
                                       </thead>
                                       <tbody>
-                                        <tr>
-                                          <td>{{subitem.specs[0].name}}</td>
-                                          <td>{{subitem.specs[0].value}}</td>
-                                        </tr>
-                                        <tr>
-                                          <td>{{subitem.specs[1].name}}</td>
-                                          <td>{{subitem.specs[1].value}}</td>
+                                        <tr v-for="(spec , index) in variation.subitem.specs" :key="index">
+                                          <td>{{spec.name}}</td>
+                                          <td>{{spec.value}}</td>
                                         </tr>
                                       </tbody>
                                     </table>
@@ -663,8 +756,8 @@ export default {
                     <!-- Table -->
                     <div class="table-responsive mb-0">
                         <b-table :items="allProductsData" selectable :fields="fields" responsive="sm" :per-page="perPage" :current-page="currentPage" :sort-by.sync="sortBy" :sort-desc.sync="sortDesc" :filter="filter" :filter-included-fields="filterOn" @filtered="onFiltered">
-                      <template #cell(selected)>
-                        <b-form-checkbox switch size="lg" v-model="lgchecked"></b-form-checkbox>
+                      <template #cell(selected)="data">
+                        <b-form-checkbox switch size="lg"  v-on:change="addBundle(data.item.id)"></b-form-checkbox>
                       </template>
                        <template #cell(status)="data">
                         <span class="badge badge-success font-size-12">

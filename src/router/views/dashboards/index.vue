@@ -3,11 +3,12 @@ import Layout from "../../layouts/main";
 import appConfig from "@/app.config";
 import PageHeader from "@/components/page-header";
 import Sellingchart from "./sellingchart";
-
+import axios from "axios";
 import {
-  getLoggedInUser
+  getLoggedInUser,
+  handleAxiosError
 } from "@/helpers/authservice/user.service";
-
+import {authHeader} from "@/helpers/authservice/auth-header";
 import simplebar from "simplebar-vue";
 import { required } from "vuelidate/lib/validators";
 import { earningLineChart, salesAnalyticsDonutChart, ChatData } from "./data";
@@ -37,6 +38,9 @@ export default {
       earningLineChart: earningLineChart,
       salesAnalyticsDonutChart: salesAnalyticsDonutChart,
       ChatData: ChatData,
+      analytics: {
+        order: {},
+      },
       user: {},
       title: "Dashboard",
       items: [
@@ -104,6 +108,14 @@ export default {
     container2.scrollTo({ top: 500, behavior: "smooth" });
 
     this.user = getLoggedInUser();
+
+    var d  = new Date();
+    var month = d.getMonth() + 1;
+
+    axios
+    .get(`${this.backendURL}/api/v1/analytics?month=${month}` , authHeader())
+    .then(response => (this.analytics = response.data.data))
+    .catch(handleAxiosError);
   },
 };
 </script>
@@ -224,7 +236,7 @@ export default {
                 </div>
                 <div class="text-muted mt-4">
                   <h4>
-                    1,452
+                    {{analytics.order.order_amount}}
                     <i class="mdi mdi-chevron-up ml-1 text-success"></i>
                   </h4>
                   <div class="d-flex">
