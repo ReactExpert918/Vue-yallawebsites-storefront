@@ -148,6 +148,14 @@ export default {
         headers: authHeader().headers,
         autoProcessQueue: false,
       },
+      variationDropzoneOptions:{
+         url: `${process.env.VUE_APP_BACKEND_URL}/api/v1/products/upload`,
+        // thumbnailWidth: 75,
+        paramName: "product_variation_image",
+        maxFilesize: 200,
+        headers: authHeader().headers,
+        autoProcessQueue: false,
+      },
       textarea: '',
       lgchecked: '',
       value1: '',
@@ -276,6 +284,10 @@ export default {
             sku: v.subitem.sku,
             ean: v.subitem.ean,
           }
+          if (v.image_name){
+            varReq.image_name = v.image_name;
+            varReq.image_content = v.image_content;
+          }
           if (v.subitem.specs.length > 0) { //TODO: clear up about custom spec selection then un-comment
             var spec = v.subitem.specs[0];
             varReq.attribute_id = spec.id;
@@ -398,6 +410,21 @@ export default {
             })                 
           }
         }
+      },
+      handleVariationImageUpload(file , variation){
+        this.getBase64(file).
+        then(data => {
+          variation.image_name = file.name;
+          variation.image_content = data;
+        });
+      },
+      getBase64(file) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.readAsDataURL(file);
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = error => reject(error);
+        })
       }
   },
 };
@@ -659,10 +686,11 @@ export default {
                                 <div class="col-3">
                                   <label class="mt-3">Custom Image</label>
                                   <vue-dropzone
-                                    id="dropzone"
-                                    ref="myVueDropzone"
+                                    id="vardropzone"
+                                    ref="myVariationVueDropzone"
                                     :use-custom-slot="true"
-                                    :options="dropzoneOptions"
+                                    :options="variationDropzoneOptions"
+                                    @vdropzone-file-added="(file) => handleVariationImageUpload(file,variation)"
                                     url="/"
                                     autoDiscover="false"
                                     >

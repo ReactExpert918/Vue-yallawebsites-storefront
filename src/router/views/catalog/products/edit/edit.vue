@@ -136,6 +136,14 @@ export default {
         headers: authHeader().headers,
         autoProcessQueue: false,
       },
+      variationDropzoneOptions:{
+         url: `${process.env.VUE_APP_BACKEND_URL}/api/v1/products/upload`,
+        // thumbnailWidth: 75,
+        paramName: "product_variation_image",
+        maxFilesize: 200,
+        headers: authHeader().headers,
+        autoProcessQueue: false,
+      },
       textarea: '',
       lgchecked: '',
       value1: '',
@@ -202,6 +210,7 @@ export default {
 
           this.productData.specifications.forEach((v) => {
               var vd = {
+                uuid: v.id,
                 name: v.name,
                 options: [],
               }
@@ -215,8 +224,10 @@ export default {
 
           this.productData.variations.forEach((v) =>{
               var varData = {
+                uuid: v.id,
                 options: v.labels,
                 subitem: {
+                  uuid: v.id,
                   qty: v.quantity,
                   price: v.price,
                   costprice: v.cost_price,
@@ -357,6 +368,7 @@ export default {
 
         this.variationsData.forEach((v) => {
           var spec = {
+            id: v.uuid,
             name: v.name,
             values: [],
           }
@@ -368,6 +380,7 @@ export default {
 
         this.variations.forEach((v) => {
           var varReq = {
+            id: v.uuid,
             labels: v.options,
             quantity: parseInt(v.subitem.qty),
             price: parseFloat(v.subitem.price),
@@ -376,6 +389,10 @@ export default {
             sku: v.subitem.sku,
             ean: v.subitem.ean,
           }
+          if (v.image_name){
+            varReq.image_name = v.image_name;
+            varReq.image_content = v.image_content;
+          }
           if (v.subitem.specs.length > 0) { //TODO: clear up about custom spec selection then un-comment
             var spec = v.subitem.specs[0];
             varReq.attribute_id = spec.id;
@@ -383,6 +400,7 @@ export default {
           }
           productReq.variations.push(varReq);
         })
+
 
         axios
         .put(`${this.backendURL}/api/v1/products/${this.$route.params.id}` , productReq , authHeader())
@@ -431,10 +449,12 @@ export default {
           this.tempArr2.forEach( i => {
           let tag = {
           id: 1,
+          uuid: '',
           name: this.variationsData[id].name,
           options: [],
           subitem:  { 
               id: 1,
+              uuid: '',
               price: 0.0,
               qty: 0,
               sku: '',
@@ -458,11 +478,27 @@ export default {
       },
       addVariation(){
         let variation = {
+          uuid: '',
           name: '',
           options: [],
           required: false
         }
         this.variationsData.push(variation)
+      },
+      handleVariationImageUpload(file , variation){
+        this.getBase64(file).
+        then(data => {
+          variation.image_name = file.name;
+          variation.image_content = data;
+        });
+      },
+      getBase64(file) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.readAsDataURL(file);
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = error => reject(error);
+        })
       },
       cartesianProduct(arr) {
           return arr.reduce(function(a,b){
@@ -510,7 +546,8 @@ export default {
             })                 
           }
         }
-      }
+      },
+      
   },
 };
 </script>
@@ -712,7 +749,7 @@ export default {
                           <a v-b-toggle="'accordion-' + index" class="text-dark row" href="javascript: void(0);">
                             <div class="col-4">
                               <i class="bx bx-caret-down mr-3"></i>
-                              <span>{{variation.name}}</span>
+                              <!-- <span>{{variation.name}}</span> -->
                               <span v-for="(i, index) in variation.options" :key="index + 20"> {{i}} /</span>
                             </div>
                             <div class="col-8 row">
@@ -750,10 +787,11 @@ export default {
                                 <div class="col-3">
                                   <label class="mt-3">Custom Image</label>
                                   <vue-dropzone
-                                    id="dropzone"
-                                    ref="myVueDropzone"
+                                    id="vardropzone"
+                                    ref="myVariationVueDropzone"
                                     :use-custom-slot="true"
-                                    :options="dropzoneOptions"
+                                    :options="variationDropzoneOptions"
+                                    @vdropzone-file-added="(file) => handleVariationImageUpload(file,variation)"
                                     url="/"
                                     autoDiscover="false"
                                     >
