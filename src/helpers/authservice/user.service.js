@@ -73,12 +73,26 @@ export function handleAxiosError(error) {
 }
 
 function register(user) {
-    const requestOptions = {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(user)
-    };
-    return fetch(`/users/register`, requestOptions).then(handleResponse);
+
+    const payload = {
+        first_name: user.firstname,
+        last_name: user.lastname,
+        username: user.username,
+        email: user.email,
+        password: user.password,
+        password_confirmation: user.passwordConfirm,
+    }
+    const headers = {
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    }
+
+    return axios
+        .post(`${backendURL}/api/auth/signup`, payload, headers)
+        .then(response => {
+            alert(`User(${response.data.data.id}) signup successful`);
+        }).catch(handleAxiosError);
 }
 
 function getAll() {
