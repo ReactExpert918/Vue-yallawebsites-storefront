@@ -7,6 +7,7 @@ import {
 import axios from "axios";
 import appConfig from "@/app.config";
 import {handleAxiosError} from "@/helpers/authservice/user.service";
+import {roleService} from "@/helpers/authservice/roles";
 
 /**
  * Pages component
@@ -20,6 +21,7 @@ export default {
   data() {
     return {
       selectedAll: false,
+      pageIdentity: "customers",
       backendURL: process.env.VUE_APP_BACKEND_URL,
       customersData: [],
       authConfig: {
@@ -123,6 +125,12 @@ export default {
       },
 
       deleteCustomer(id){
+
+        if (!roleService.hasDeletePermission(this.pageIdentity)){
+          alert("You do no have the permission to perform this action!")
+          return;
+        }
+
         axios
         .delete(`${this.backendURL}/api/v1/customers/${id}` , authHeader())
         .then(alert("Deleted!"))
