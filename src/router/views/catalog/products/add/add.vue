@@ -12,6 +12,7 @@ import {
   authHeader,
 } from "@/helpers/authservice/auth-header";
 import {handleAxiosError} from "@/helpers/authservice/user.service";
+import {roleService} from "@/helpers/authservice/roles";
 
 /**
  * Pages component
@@ -24,6 +25,7 @@ export default {
   components: { Layout, PageHeader, ckeditor: CKEditor.component, vueDropzone: vue2Dropzone, Multiselect },
   data() {
     return {
+      pageIdentity: "products",
       backendURL: process.env.VUE_APP_BACKEND_URL,
       allProductsData: [],
       attrs: [],
@@ -237,7 +239,10 @@ export default {
   },
   methods: {
       createProduct(){
-
+        if (!roleService.hasCreatePermission(this.pageIdentity)){
+          alert("You do no have the permission to perform this action!")
+          return;
+        }
         this.newProduct.meta_keywords = this.newProduct.meta_keywords_str.split(" ");
         if (this.newProduct.meta_keywords[0] == ""){
           this.newProduct.meta_keywords = [];

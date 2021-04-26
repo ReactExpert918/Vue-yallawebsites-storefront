@@ -8,6 +8,7 @@ import {
   authHeader,
 } from "@/helpers/authservice/auth-header";
 import {handleAxiosError} from "@/helpers/authservice/user.service";
+import {roleService} from "@/helpers/authservice/roles";
 
 export default {
   page: {
@@ -21,6 +22,7 @@ export default {
   },
   data() {
     return {
+      pageIdentity: "configurations",
       backendURL: process.env.VUE_APP_BACKEND_URL,
       configData: {},
       general_config: {
@@ -348,6 +350,10 @@ export default {
       return false;
     },
     saveGeneralConfiguration(){
+      if (!roleService.hasEditPermission(this.pageIdentity)){
+          alert("You do no have the permission to perform this action!")
+          return;
+      }
       this.configData = {
         domain_id: this.general_config.domain.id,
         https_enabled: this.general_config.https_enabled,
@@ -384,6 +390,10 @@ export default {
        .catch(handleAxiosError);
     },
     saveCatalogConfiguration(){
+      if (!roleService.hasEditPermission(this.pageIdentity)){
+          alert("You do no have the permission to perform this action!")
+          return;
+      }
        this.configData = {
         layout_id: this.catalog_config.layout.id,
         products_per_page: parseInt(this.catalog_config.products_per_page),
@@ -417,6 +427,10 @@ export default {
         .catch(handleAxiosError);
     },
     saveSalesConfiguration(){
+      if (!roleService.hasEditPermission(this.pageIdentity)){
+          alert("You do no have the permission to perform this action!")
+          return;
+      }
       this.configData = {
           order_emails_enabled: this.sales_config.order_emails_enabled,
           order_email_copy_to: this.sales_config.order_email_copy_to,
@@ -463,6 +477,10 @@ export default {
       
     },
     uploadTableRateFile(){
+      if (!roleService.hasEditPermission(this.pageIdentity)){
+          alert("You do no have the permission to perform this action!")
+          return;
+      }
        if (this.tableRateFile != ''){
             let formData = new FormData();
             formData.append('rate_file' , this.tableRateFile);
@@ -477,6 +495,10 @@ export default {
        }
     },
     saveCustomerConfiguration(){
+      if (!roleService.hasEditPermission(this.pageIdentity)){
+          alert("You do no have the permission to perform this action!")
+          return;
+      }
       this.configData = {
         group_id: this.customer_config.group.id,
         welcome_email_enabled: this.customer_config.welcome_email_enabled,
@@ -493,6 +515,10 @@ export default {
         .catch(handleAxiosError);
     },
     saveAdvancedConfiguration(){
+      if (!roleService.hasEditPermission(this.pageIdentity)){
+          alert("You do no have the permission to perform this action!")
+          return;
+      }
       this.configData = {
         session_lifetime_seconds: parseInt(this.advanced_config.session_lifetime_seconds),
         minify_html: this.advanced_config.minify_html,

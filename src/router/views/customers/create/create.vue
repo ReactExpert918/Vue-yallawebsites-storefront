@@ -8,6 +8,7 @@ import {
   authHeader,
 } from "@/helpers/authservice/auth-header";
 import {handleAxiosError} from "@/helpers/authservice/user.service";
+import {roleService} from "@/helpers/authservice/roles";
 
 /**
  * Pages component
@@ -20,6 +21,7 @@ export default {
   components: { Layout, PageHeader },
   data() {
     return {
+      pageIdentity: "customers",
       title: "Create Customer",
       backendURL: process.env.VUE_APP_BACKEND_URL,
       customerGroups: [],
@@ -53,6 +55,10 @@ export default {
   },
   methods:{
     createCustomer(){
+      if(!roleService.hasCreatePermission(this.pageIdentity)){
+          alert("You do no have the permission to perform this action!")
+          return;
+      }
         axios
         .post(`${this.backendURL}/api/v1/customers` , this.createCustomerPayload , authHeader())
         .then(response => (alert(`${response.data.data.id} Created!`)))

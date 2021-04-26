@@ -10,6 +10,7 @@ import {
   authHeader,
 } from "@/helpers/authservice/auth-header";
 import {handleAxiosError} from "@/helpers/authservice/user.service";
+import {roleService} from "@/helpers/authservice/roles";
 
 /**
  * Pages component
@@ -22,6 +23,7 @@ export default {
   components: { Layout, PageHeader },
   data() {
     return {
+      pageIdentity: "orders",
       backendURL: process.env.VUE_APP_BACKEND_URL,
       order: {
         total: {},
@@ -187,6 +189,10 @@ export default {
         return this.getSubTotal() + this.order.total.shipping_cost;
       },
       updateOrder(){
+        if (!roleService.hasEditPermission(this.pageIdentity)){
+          alert("You do no have the permission to perform this action!")
+          return;
+        }
         var payload = {
           billing_address: this.order.billing_address,
           shipping_address: this.order.shipping_address,

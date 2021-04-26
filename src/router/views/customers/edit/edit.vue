@@ -8,6 +8,7 @@ import {
   authHeader,
 } from "@/helpers/authservice/auth-header";
 import {handleAxiosError} from "@/helpers/authservice/user.service";
+import {roleService} from "@/helpers/authservice/roles";
 
 /**
  * Pages component
@@ -20,6 +21,7 @@ export default {
   components: { Layout, PageHeader },
   data() {
     return {
+      pageIdentity: "customers",
       backendURL: process.env.VUE_APP_BACKEND_URL,
       customer: {
         group:{},
@@ -69,6 +71,10 @@ export default {
   },
   methods:{
      updateCustomer(){
+       if(!roleService.hasEditPermission(this.pageIdentity)){
+          alert("You do no have the permission to perform this action!")
+          return;
+       }
         axios
         .put(`${this.backendURL}/api/v1/customers/${this.$route.params.id}` , this.customer , authHeader())
         .then(response => (alert(`${response.data.data.id} Updated!`)))

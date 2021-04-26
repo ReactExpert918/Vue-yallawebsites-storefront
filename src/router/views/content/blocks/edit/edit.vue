@@ -10,6 +10,7 @@ import {
   authHeader,
 } from "@/helpers/authservice/auth-header";
 import {handleAxiosError} from "@/helpers/authservice/user.service";
+import {roleService} from "@/helpers/authservice/roles";
 
 /**
  * Pages component
@@ -22,6 +23,7 @@ export default {
   components: { Layout, PageHeader, ckeditor: CKEditor.component },
   data() {
     return {
+      pageIdentity: "blocks",
       backendURL: process.env.VUE_APP_BACKEND_URL,
       blockData: {},
       title: "Edit Block",
@@ -70,6 +72,10 @@ export default {
   },
   methods:{
     editBlock(){
+      if (!roleService.hasEditPermission(this.pageIdentity)){
+          alert("You do no have the permission to perform this action!")
+          return;
+      }
       axios
       .put(`${this.backendURL}/api/v1/blocks/${this.$route.params.id}` , this.blockData , authHeader())
       .then(response => (alert(`${response.data.data.id} Updated!`)))

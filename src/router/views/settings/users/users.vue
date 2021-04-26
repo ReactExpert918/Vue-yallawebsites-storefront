@@ -7,6 +7,7 @@ import {
   authHeader,
 } from "@/helpers/authservice/auth-header";
 import { handleAxiosError } from "@/helpers/authservice/user.service"
+import {roleService} from "@/helpers/authservice/roles";
 
 /**
  * Users component
@@ -19,11 +20,17 @@ export default {
   components: { Layout, PageHeader },
   data() {
     return {
+      pageIdentity: "user_management",
       selectedAll: false,
       backendURL: process.env.VUE_APP_BACKEND_URL,
       usersData: [],
       rolesData: [],
-      currentUser: {},
+      currentUser: {
+        role:{
+          contents:[],
+        },
+        role_content_ids: [],
+      },
       currentRoleID: "",
       roleContents: [],
       createUserPayload: {
@@ -33,7 +40,8 @@ export default {
         username: "",
         password: "",
         password_confirmation: "",
-        role_id: ""
+        role_id: "",
+        role_content_ids: [],
       },
       title: "Users",
       items: [
@@ -109,11 +117,30 @@ export default {
       this.totalRows = this.items.length;
        axios
       .get(`${this.backendURL}/api/v1/users?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
-      .then(response => (this.usersData = response.data.data))
+      .then(response => {
+         this.usersData = response.data.data;
+         for(var i = 0; i < this.usersData.length; i++){
+           var user = this.usersData[i];
+           user.role_content_ids = [];
+           if (user.role == null){
+             user.role = {
+               contents: [],
+            }
+           }else{
+             for(var j = 0; j < user.role.contents.length; j++){
+               user.role_content_ids.push(user.role.contents[j].id);
+             }
+           }
+         }
+       })
       .catch(handleAxiosError);
       axios
       .get(`${this.backendURL}/api/v1/users/roles` , authHeader())
       .then(response => (this.rolesData = response.data.data))
+      .catch(handleAxiosError);
+      axios
+      .get(`${this.backendURL}/api/v1/users/roles/contents` , authHeader())
+      .then(response => (this.roleContents = response.data.data))
       .catch(handleAxiosError);
   },
   methods: {
@@ -128,19 +155,21 @@ export default {
           this.totalRows = filteredItems.length;
           this.currentPage = 1;
       },
-      fetchRoleContents(){
-        axios
-      .get(`${this.backendURL}/api/v1/users/roles/${this.currentRoleID}/contents` , authHeader())
-      .then(response => (this.roleContents = response.data.data))
-      .catch(handleAxiosError);
-      },
       deleteUser(id){
+        if (!roleService.hasDeletePermission(this.pageIdentity)){
+          alert("You do no have the permission to perform this action!")
+          return;
+        }
         axios
         .delete(`${this.backendURL}/api/v1/users/${id}` , authHeader())
         .then(alert("Deleted!"))
         .catch(handleAxiosError);
       },
       createUser(e){
+        if (!roleService.hasCreatePermission(this.pageIdentity)){
+          alert("You do no have the permission to perform this action!")
+          return;
+        }
         e.preventDefault();
         this.createUserPayload.role_id = this.currentRoleID
         axios
@@ -149,13 +178,39 @@ export default {
         .catch(handleAxiosError);
       },
       updateUser(e){
+        if (!roleService.hasEditPermission(this.pageIdentity)){
+          alert("You do no have the permission to perform this action!")
+          return;
+        }
         e.preventDefault();
-        this.currentUser.role_id = this.currentRoleID
+        this.currentUser.role_id = this.currentUser.role.id;
         axios
         .put(`${this.backendURL}/api/v1/users/${this.currentUser.id}` , this.currentUser , authHeader())
         .then(response => (alert(`${response.data.data.id} Updated!`)))
         .catch(handleAxiosError);
       },
+      isUserRole(role) {
+        if (role.id == this.currentUser.role.id){
+          return true;
+        }
+        return false;
+      },
+      isUserRoleContent(content){
+        for(var i = 0; i < this.currentUser.role.contents.length; i++){
+          var rc = this.currentUser.role.contents[i];
+          if (rc.id == content.id){
+            return true;
+          }
+        }
+        return false;
+      },
+      addRoleContent(checked , contentID , contentArr){
+        if (checked){
+          contentArr.push(contentID);
+        }else{
+          contentArr.splice(contentArr.indexOf(contentID) , 1);
+        }
+      }
   },
 };
 </script>
@@ -308,8 +363,8 @@ export default {
                 <div class="row mb-3">
                   <div class="col-sm-12">
                    <label class="mt-3">Role</label>
-                   <select class="custom-select" v-model="currentRoleID" @change="fetchRoleContents()">
-                        <option v-for="role in rolesData" v-bind:value="role.id" :key="role.id" :selected="currentUser.role != null && role.id == currentUser.role.id">{{role.name}}</option>
+                   <select class="custom-select" v-model="currentRoleID">
+                        <option v-for="role in rolesData" v-bind:value="role.id" :key="role.id">{{role.name}}</option>
                     </select>
                   </div>
                 </div>
@@ -320,6 +375,7 @@ export default {
                             <b-form-checkbox
                                       class="custom-checkbox-primary float-left"
                                       checked
+                                       @change="(v)=>addRoleContent(v , content.id , createUserPayload.role_content_ids)"
                                     ></b-form-checkbox>
                             <a
                               v-b-toggle="'accordion-' + index"
@@ -337,6 +393,7 @@ export default {
                                 <b-form-checkbox
                                   class="custom-checkbox-primary float-left"
                                   checked
+                                  @change="(v)=>addRoleContent(v , sub_content.id , createUserPayload.role_content_ids)"
                                 ></b-form-checkbox>
                                 {{ sub_content.name }}
                               </div>
@@ -403,8 +460,8 @@ export default {
                 <div class="row mb-3">
                   <div class="col-sm-12">
                    <label class="mt-3">Role</label>
-                   <select class="custom-select" v-model="currentRoleID" @change="fetchRoleContents()">
-                        <option v-for="role in rolesData" v-bind:value="role.id" :key="role.id" :selected="currentUser.role != null && role.id == currentUser.role.id">{{role.name}}</option>
+                   <select class="custom-select" v-model="currentUser.role.id">
+                        <option v-for="role in rolesData" v-bind:value="role.id" :key="role.id" :selected="isUserRole(role)">{{role.name}}</option>
                     </select>
                   </div>
                 </div>
@@ -414,7 +471,8 @@ export default {
                           <div class="slim-tab">
                             <b-form-checkbox
                                       class="custom-checkbox-primary float-left"
-                                      checked
+                                      :checked="isUserRoleContent(content)"
+                                       @change="(v)=>addRoleContent(v , content.id , currentUser.role_content_ids)"
                                     ></b-form-checkbox>
                             <a
                               v-b-toggle="'accordion-' + index"
@@ -431,7 +489,8 @@ export default {
                               <div class="subcategory card-header">
                                 <b-form-checkbox
                                   class="custom-checkbox-primary float-left"
-                                  checked
+                                  @change="(v)=>addRoleContent(v , sub_content.id , currentUser.role_content_ids)"
+                                  :checked="isUserRoleContent(sub_content)"
                                 ></b-form-checkbox>
                                 {{ sub_content.name }}
                               </div>

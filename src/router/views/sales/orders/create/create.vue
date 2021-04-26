@@ -9,6 +9,7 @@ import {
   authHeader,
 } from "@/helpers/authservice/auth-header";
 import {handleAxiosError} from "@/helpers/authservice/user.service";
+import {roleService} from "@/helpers/authservice/roles";
 
 import axios from "axios";
 import appConfig from "@/app.config";
@@ -24,6 +25,7 @@ export default {
   components: { Layout, PageHeader },
   data() {
     return {
+      pageIdentity: "orders",
       backendURL: process.env.VUE_APP_BACKEND_URL,
       viewData: viewData,
       paymentData: paymentData,
@@ -177,6 +179,10 @@ export default {
         return this.getSubTotal() + 5;
       },
       createOrder(){
+        if (!roleService.hasCreatePermission(this.pageIdentity)){
+          alert("You do no have the permission to perform this action!")
+          return;
+        }
         var billingAddress = {}
         if (this.selectedCustomer.billing_addresses.length > 0){
           billingAddress  =this.selectedCustomer.billing_addresses[0]

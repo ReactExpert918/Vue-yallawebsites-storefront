@@ -10,6 +10,7 @@ import {
   authHeader,
 } from "@/helpers/authservice/auth-header";
 import {handleAxiosError} from "@/helpers/authservice/user.service";
+import {roleService} from "@/helpers/authservice/roles";
 
 /**
  * Pages component
@@ -22,6 +23,7 @@ export default {
   components: { Layout, PageHeader, ckeditor: CKEditor.component },
   data() {
     return {
+      pageIdentity: "blocks",
       title: "Add Block",
       backendURL: process.env.VUE_APP_BACKEND_URL,
       blockData: {
@@ -69,6 +71,10 @@ export default {
   },
   methods:{
     addBlock(){
+      if (!roleService.hasCreatePermission(this.pageIdentity)){
+          alert("You do no have the permission to perform this action!")
+          return;
+      }
       axios
       .post(`${this.backendURL}/api/v1/blocks` , this.blockData , authHeader())
       .then(response => (alert(`${response.data.data.id} Created!`)))
