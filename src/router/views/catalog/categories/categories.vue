@@ -11,6 +11,7 @@ import {
   authHeader,
 } from "@/helpers/authservice/auth-header";
 import {handleAxiosError} from "@/helpers/authservice/user.service";
+import {roleService} from "@/helpers/authservice/roles";
 
 
 /**
@@ -24,6 +25,7 @@ export default {
   components: { Layout, PageHeader, draggable , vueDropzone: vue2Dropzone, },
   data() {
     return {
+      pageIdentity: "categories",
       backendURL: process.env.VUE_APP_BACKEND_URL,
       categoriesData: [],
       currentCategory: {product_sorts: []},
@@ -90,6 +92,10 @@ export default {
      
     },
     createCategory(){
+      if (!roleService.hasCreatePermission(this.pageIdentity)){
+          alert("You do no have the permission to perform this action!")
+          return;
+      }
       this.catPayload.meta_keywords = this.catPayload.meta_keywords_str.split(" ");
       if (this.catPayload.meta_keywords[0] == ""){
         this.catPayload.meta_keywords = [];
@@ -104,6 +110,10 @@ export default {
       .catch(handleAxiosError);
     },
     updateCategory(){
+      if (!roleService.hasEditPermission(this.pageIdentity)){
+          alert("You do no have the permission to perform this action!")
+          return;
+      }
       this.currentCategory.meta_keywords = this.currentCategory.meta_keywords_str.split(" ");
       if (this.currentCategory.meta_keywords[0] == ""){
         this.currentCategory.meta_keywords = [];
@@ -128,6 +138,10 @@ export default {
       this.$refs.myVueDropzone.setOption("url" , `${this.backendURL}/api/v1/categories/${this.currentCategory.id}/upload`);
     },
     deleteCategory(){
+      if (!roleService.hasDeletePermission(this.pageIdentity)){
+          alert("You do no have the permission to perform this action!")
+          return;
+      }
       axios
       .delete(`${this.backendURL}/api/v1/categories/${this.currentCategory.id}` , authHeader())
       .then(response => (alert(`${response.data.data.id} Category deleted!`)))

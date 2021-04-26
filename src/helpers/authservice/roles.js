@@ -37,7 +37,7 @@ function hasEditPermission(pageName) {
     if (!(user.role)) {
         return false;
     }
-    if (user.role.slug != roleEditor || user.role.slug != roleAdmin) {
+    if (user.role.slug != roleEditor && user.role.slug != roleAdmin) {
         return false;
     }
     for (var i = 0; i < user.role.contents.length; i++) {

@@ -13,6 +13,7 @@ import {
   authHeader,
 } from "@/helpers/authservice/auth-header";
 import {handleAxiosError} from "@/helpers/authservice/user.service";
+import {roleService} from "@/helpers/authservice/roles";
 
 /**
  * Pages component
@@ -26,6 +27,7 @@ export default {
 
   data() {
     return {
+      pageIdentity: "products",
       backendURL: process.env.VUE_APP_BACKEND_URL,
       productData: {
         layout:{} , 
@@ -320,6 +322,10 @@ export default {
   methods: {
 
       updateProduct(){
+        if (!roleService.hasEditPermission(this.pageIdentity)){
+          alert("You do no have the permission to perform this action!")
+          return;
+        }
         this.productData.meta_keywords = this.productData.meta_keywords_str.split(" ");
         if (this.productData.meta_keywords[0] == ""){
           this.productData.meta_keywords = [];
@@ -412,6 +418,10 @@ export default {
       },
 
       deleteProduct(){
+        if (!roleService.hasDeletePermission(this.pageIdentity)){
+          alert("You do no have the permission to perform this action!")
+          return;
+        }
         axios
         .delete(`${this.backendURL}/api/v1/products/${this.productData.id}` , authHeader())
         .then(response => (alert(`${response.data.data.id} Product deleted!`)))

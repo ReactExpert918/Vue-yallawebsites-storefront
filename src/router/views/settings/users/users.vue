@@ -7,6 +7,7 @@ import {
   authHeader,
 } from "@/helpers/authservice/auth-header";
 import { handleAxiosError } from "@/helpers/authservice/user.service"
+import {roleService} from "@/helpers/authservice/roles";
 
 /**
  * Users component
@@ -19,6 +20,7 @@ export default {
   components: { Layout, PageHeader },
   data() {
     return {
+      pageIdentity: "user_management",
       selectedAll: false,
       backendURL: process.env.VUE_APP_BACKEND_URL,
       usersData: [],
@@ -154,12 +156,20 @@ export default {
           this.currentPage = 1;
       },
       deleteUser(id){
+        if (!roleService.hasDeletePermission(this.pageIdentity)){
+          alert("You do no have the permission to perform this action!")
+          return;
+        }
         axios
         .delete(`${this.backendURL}/api/v1/users/${id}` , authHeader())
         .then(alert("Deleted!"))
         .catch(handleAxiosError);
       },
       createUser(e){
+        if (!roleService.hasCreatePermission(this.pageIdentity)){
+          alert("You do no have the permission to perform this action!")
+          return;
+        }
         e.preventDefault();
         this.createUserPayload.role_id = this.currentRoleID
         axios
@@ -168,6 +178,10 @@ export default {
         .catch(handleAxiosError);
       },
       updateUser(e){
+        if (!roleService.hasEditPermission(this.pageIdentity)){
+          alert("You do no have the permission to perform this action!")
+          return;
+        }
         e.preventDefault();
         this.currentUser.role_id = this.currentUser.role.id;
         axios

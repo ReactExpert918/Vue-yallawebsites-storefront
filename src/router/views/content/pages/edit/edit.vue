@@ -10,6 +10,7 @@ import {
   authHeader,
 } from "@/helpers/authservice/auth-header";
 import {handleAxiosError} from "@/helpers/authservice/user.service";
+import {roleService} from "@/helpers/authservice/roles";
 
 /**
  * Pages component
@@ -22,6 +23,7 @@ export default {
   components: { Layout, PageHeader, ckeditor: CKEditor.component },
   data() {
     return {
+      pageIdentity: "pages",
       backendURL: process.env.VUE_APP_BACKEND_URL,
       pageData: {layout:{} , meta_keywords_str:""},
       layouts: [],
@@ -88,6 +90,10 @@ export default {
   },
   methods:{
     editPage(){
+      if (!roleService.hasEditPermission(this.pageIdentity)){
+          alert("You do no have the permission to perform this action!")
+          return;
+      }
       this.pageData.meta_keywords = this.pageData.meta_keywords_str.split(" ");
       this.pageData.layout_id = this.pageData.layout.id;
       if (this.pageData.meta_keywords[0] == ""){

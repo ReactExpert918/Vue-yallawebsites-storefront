@@ -6,6 +6,7 @@ import {
   authHeader,
 } from "@/helpers/authservice/auth-header";
 import {handleAxiosError} from "@/helpers/authservice/user.service";
+import {roleService} from "@/helpers/authservice/roles";
 
 import appConfig from "@/app.config";
 
@@ -22,6 +23,7 @@ export default {
   components: { Layout, PageHeader, draggable, },
   data() {
     return {
+      pageIdentity: "attributes",
       backendURL: process.env.VUE_APP_BACKEND_URL,
       primarycheck: null, 
       lgchecked: null,
@@ -212,6 +214,10 @@ export default {
         this.newAttr.option_text_label = "";
       },
       addAttribute(){
+        if (!roleService.hasCreatePermission(this.pageIdentity)){
+          alert("You do no have the permission to perform this action!")
+          return;
+        }
           this.newAttr.sort_order = parseInt(this.newAttr.sort_order);
           axios
          .post(`${this.backendURL}/api/v1/products/attributes` , this.newAttr , authHeader())
@@ -222,6 +228,10 @@ export default {
          .catch(handleAxiosError);
       },
       updateAttribute(){
+        if (!roleService.hasEditPermission(this.pageIdentity)){
+          alert("You do no have the permission to perform this action!")
+          return;
+        }
         this.newAttr = {
           name: this.currentAttribute.name,
           required: this.currentAttribute.required,
@@ -245,12 +255,20 @@ export default {
          .catch(handleAxiosError);
       },
       deleteAttribute(){
+        if (!roleService.hasDeletePermission(this.pageIdentity)){
+          alert("You do no have the permission to perform this action!")
+          return;
+        }
         axios
         .delete(`${this.backendURL}/api/v1/products/attributes/${this.currentAttribute.id}` , authHeader())
         .then(response => (alert(`${response.data.data.id} attribute deleted!`)))
         .catch(handleAxiosError);
       },
       addOption(){
+        if (!roleService.hasCreatePermission(this.pageIdentity)){
+          alert("You do no have the permission to perform this action!")
+          return;
+        }
         axios
         .post(`${this.backendURL}/api/v1/products/attributes/${this.currentAttribute.id}/options` , this.newOption , authHeader())
         .then(response => {
@@ -275,6 +293,10 @@ export default {
             }
       },
       deleteProductOption(opt){
+        if (!roleService.hasDeletePermission(this.pageIdentity)){
+          alert("You do no have the permission to perform this action!")
+          return;
+        }
          axios
         .delete(`${this.backendURL}/api/v1/products/attributes/options/${opt.id}` , authHeader())
         .then(response => {
@@ -284,6 +306,10 @@ export default {
         .catch(handleAxiosError);
       },
       addAttributeGroup(){
+        if (!roleService.hasCreatePermission(this.pageIdentity)){
+          alert("You do no have the permission to perform this action!")
+          return;
+        }
         axios
         .post(`${this.backendURL}/api/v1/products/attributes/groups` , this.newGroup , authHeader())
         .then(response => {
@@ -293,6 +319,10 @@ export default {
         .catch(handleAxiosError);
       },
       deleteAttributeGroup(group){
+        if (!roleService.hasDeletePermission(this.pageIdentity)){
+          alert("You do no have the permission to perform this action!")
+          return;
+        }
         axios
         .delete(`${this.backendURL}/api/v1/products/attributes/groups/${group.id}` , authHeader())
         .then(response => {

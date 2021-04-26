@@ -7,6 +7,7 @@ import {
   authHeader,
 } from "@/helpers/authservice/auth-header";
 import {handleAxiosError} from "@/helpers/authservice/user.service";
+import {roleService} from "@/helpers/authservice/roles";
 
 /**
  * Pages component
@@ -19,6 +20,7 @@ export default {
   components: { Layout, PageHeader },
   data() {
     return {
+      pageIdentity: "pages",
       selectedAll: false,
       backendURL: process.env.VUE_APP_BACKEND_URL,
       pagesData: [],
@@ -117,6 +119,10 @@ export default {
           this.currentPage = 1;
       },
       deletePage(){
+        if (!roleService.hasDeletePermission(this.pageIdentity)){
+          alert("You do no have the permission to perform this action!")
+          return;
+        }
         axios
         .delete(`${this.backendURL}/api/v1/pages/${this.page.id}` , authHeader())
         .then(response => (alert(`${response.data.data.id} Page deleted!`)))

@@ -7,6 +7,7 @@ import {
 } from "@/helpers/authservice/auth-header";
 import {handleAxiosError} from "@/helpers/authservice/user.service";
 import appConfig from "@/app.config";
+import {roleService} from "@/helpers/authservice/roles";
 
 /**
  * Domains component
@@ -19,6 +20,7 @@ export default {
   components: { Layout, PageHeader },
   data() {
     return {
+      pageIdentity: "domains",
       selectedAll: false,
       backendURL: process.env.VUE_APP_BACKEND_URL,
       domainsData: [],
@@ -102,6 +104,10 @@ export default {
           this.currentPage = 1;
       },
       verifyDomain(){
+        if (!roleService.hasEditPermission(this.pageIdentity)){
+          alert("You do no have the permission to perform this action!")
+          return;
+      }
         axios
         .get(`${this.backendURL}/api/v1/domains/${this.currentDomain.id}/verify` , authHeader())
         .then(response => {
@@ -115,12 +121,20 @@ export default {
         .catch(handleAxiosError);
       },
       addDomain(){
+        if (!roleService.hasCreatePermission(this.pageIdentity)){
+          alert("You do no have the permission to perform this action!")
+          return;
+        }
          axios
         .post(`${this.backendURL}/api/v1/domains` , this.newDomainData , authHeader())
         .then(response => (alert(`${response.data.data.id} Domain created!`)))
         .catch(handleAxiosError);
       },
       deleteDomain(){
+        if (!roleService.hasDeletePermission(this.pageIdentity)){
+          alert("You do no have the permission to perform this action!")
+          return;
+      }
         axios
         .delete(`${this.backendURL}/api/v1/domains/${this.currentDomain.id}` , authHeader())
         .then(response => (alert(`${response.data.data.id} Domain deleted!`)))
