@@ -212,7 +212,7 @@ export default {
                         id="example-color"
                         label-for="color"
                       >
-                        <b-form-input id="color" type="color" name="Primary Color" v-model="configuration.primar_color"></b-form-input>
+                        <b-form-input id="color" type="color" name="Primary Color" v-model="configuration.primary_color"></b-form-input>
                       </b-form-group>
                     </div>
                     <div class="col-md-3">
