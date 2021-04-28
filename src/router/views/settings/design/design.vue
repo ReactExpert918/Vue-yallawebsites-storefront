@@ -3,7 +3,12 @@ import Layout from "../../../layouts/main";
 import PageHeader from "@/components/page-header";
 import appConfig from "@/app.config";
 import vue2Dropzone from "vue2-dropzone";
-import { themesData } from "./themes-data";
+import {authHeader} from "@/helpers/authservice/auth-header";
+import {handleAxiosError} from "@/helpers/authservice/user.service";
+import {roleService} from "@/helpers/authservice/roles";
+
+import axios from "axios";
+
 
 export default {
   page: {
@@ -17,7 +22,27 @@ export default {
   },
   data() {
     return {
-      themesData: themesData,
+      pageIdentity: "designs",
+      backendURL: process.env.VUE_APP_BACKEND_URL,
+      configuration: {
+          id:"",
+          site_logo:"",
+          favicon:"",
+          primary_color:"",
+          secondary_color:"",
+          button_color_1:"",
+          button_text_1:"",
+          button_color_2:"",
+          button_text_2:"",
+          primary_font_custom:"",
+          secondary_font_custom:"",
+          primary_font:{},
+          secondary_font:{},
+      },
+      fonts: [],
+      themesData: [],
+      primaryFontFile: '',
+      secondaryFontFile: '',
       title: "Configuration",
       items: [
         {
@@ -28,13 +53,100 @@ export default {
           active: true
         }
       ],
-      dropzoneOptions: {
-        url: "https://httpbin.org/post",
-        thumbnailWidth: 75,
-        maxFilesize: 0.5,
-        headers: { "My-Awesome-Header": "header value" }
+      siteLogoDropzoneOptions: {
+        url: `${process.env.VUE_APP_BACKEND_URL}/api/v1/design/configurations/upload`,
+        // thumbnailWidth: 75,
+        paramName: "site_logo",
+        maxFilesize: 200,
+        headers: authHeader().headers,
+        autoProcessQueue: false,
+      },
+      faviconDropzoneOptions: {
+        url: `${process.env.VUE_APP_BACKEND_URL}/api/v1/design/configurations/upload`,
+        // thumbnailWidth: 75,
+        paramName: "favicon",
+        maxFilesize: 200,
+        headers: authHeader().headers,
+        autoProcessQueue: false,
       }
     };
+  },
+  mounted(){
+    axios
+    .get(`${this.backendURL}/api/v1/design/configurations` , authHeader())
+    .then(response => {
+      this.configuration = response.data.data;
+      if (this.configuration.primary_font == null){
+        this.configuration.primary_font = {};
+      }
+      if (this.configuration.secondary_font == null){
+        this.configuration.secondary_font = {};
+      }
+    })
+    .catch(handleAxiosError)
+    axios
+    .get(`${this.backendURL}/api/v1/design/fonts` , authHeader())
+    .then(response => (this.fonts = response.data.data))
+    .catch(handleAxiosError)
+    axios
+    .get(`${this.backendURL}/api/v1/design/themes` , authHeader())
+    .then(response => (this.themesData = response.data.data))
+    .catch(handleAxiosError)
+
+  },
+  methods:{
+    saveDesignConfiguration(){
+      if (!roleService.hasEditPermission(this.pageIdentity)){
+          alert("You do no have the permission to perform this action!")
+          return;
+      }
+      var payload = {
+          primary_color: this.configuration.primary_color,
+          secondary_color: this.configuration.secondary_color,
+          button_color_1: this.configuration.button_color_1,
+          button_text_1: this.configuration.button_text_1,
+          button_color_2: this.configuration.button_color_2,
+          button_text_2: this.configuration.button_text_2,
+          primary_font_id: this.configuration.primary_font.id,
+          secondary_font_id: this.configuration.secondary_font.id,
+      }
+    axios
+    .post(`${this.backendURL}/api/v1/design/configurations` ,payload, authHeader())
+    .then(response => {
+      alert(`${response.data.data.id} Design saved!`);
+      var confID = response.data.data.id;
+      this.$refs.siteLogoDropzone.setOption("url" , `${this.backendURL}/api/v1/design/configurations/${confID}/upload`);
+      this.$refs.faviconDropzone.setOption("url" , `${this.backendURL}/api/v1/design/configurations/${confID}/upload`);
+      this.$refs.siteLogoDropzone.processQueue();
+      this.$refs.faviconDropzone.processQueue();
+
+      if (this.primaryFontFile != '' || this.secondaryFontFile != ''){
+          let formData = new FormData();
+          if (this.primaryFontFile != ''){
+            formData.append('primary_font_custom' , this.primaryFontFile);
+          }
+          if (this.secondaryFontFile != ''){
+            formData.append('secondary_font_custom' , this.secondaryFontFile);
+          }
+          var header = authHeader();
+          header.headers["Content-Type"] = 'multipart/form-data';
+          axios
+          .post(`${this.backendURL}/api/v1/design/configurations/${confID}/upload` , formData , header)
+          .then(response => {
+            alert(`${response.data.data.id} Uploaded Design Configuration Font Files!`);
+            })
+          .catch(handleAxiosError);
+      }
+
+    })
+    .catch(handleAxiosError)
+    },
+    handlePrimaryFontUpload(){
+      this.primaryFontFile = this.$refs.primaryFontFile.files[0];
+    },
+    handleSecondaryFontUpload(){
+      this.secondaryFontFile = this.$refs.secondaryFontFile.files[0];
+    }
   }
 };
 </script>
@@ -55,6 +167,10 @@ export default {
                   </span>
                   <span class="d-none d-sm-inline-block">Configuration</span>
                 </template>
+
+                <b-button v-b-modal.modal-scrollable variant="primary" @click="saveDesignConfiguration()">
+                    <i class="mdi mdi-plus mr-1"></i> Save
+                </b-button>
                 
                 <div class="card-body">
                   <h4 class="card-title mb-3">General</h4>
@@ -63,9 +179,9 @@ export default {
                       <label>Site Logo</label>
                       <vue-dropzone
                         id="dropzone"
-                        ref="myVueDropzone"
+                        ref="siteLogoDropzone"
                         :use-custom-slot="true"
-                        :options="dropzoneOptions"
+                        :options="siteLogoDropzoneOptions"
                       >
                         <div class="dropzone-custom-content">
                           <i class="display-4 text-muted bx bxs-cloud-upload"></i>
@@ -77,9 +193,9 @@ export default {
                       <label>Favicon</label>
                       <vue-dropzone
                         id="dropzone"
-                        ref="myVueDropzone"
+                        ref="faviconDropzone"
                         :use-custom-slot="true"
-                        :options="dropzoneOptions"
+                        :options="faviconDropzoneOptions"
                       >
                         <div class="dropzone-custom-content">
                           <i class="display-4 text-muted bx bxs-cloud-upload"></i>
@@ -96,7 +212,7 @@ export default {
                         id="example-color"
                         label-for="color"
                       >
-                        <b-form-input id="color" type="color" name="Primary Color" value="#556ee6"></b-form-input>
+                        <b-form-input id="color" type="color" name="Primary Color" v-model="configuration.primar_color"></b-form-input>
                       </b-form-group>
                     </div>
                     <div class="col-md-3">
@@ -105,7 +221,7 @@ export default {
                         id="example-color"
                         label-for="color"
                       >
-                        <b-form-input id="color" type="color" name="Primary Color" value="#556ee6"></b-form-input>
+                        <b-form-input id="color" type="color" name="Primary Color" v-model="configuration.secondary_color"></b-form-input>
                       </b-form-group>
                     </div>
                     <div class="col-md-3">
@@ -114,7 +230,7 @@ export default {
                         id="example-color"
                         label-for="color"
                       >
-                        <b-form-input id="color" type="color" name="Primary Color" value="#556ee6"></b-form-input>
+                        <b-form-input id="color" type="color" name="Primary Color" v-model="configuration.button_color_1"></b-form-input>
                       </b-form-group>
                     </div>
                     <div class="col-md-3">
@@ -123,7 +239,7 @@ export default {
                         id="example-color"
                         label-for="color"
                       >
-                        <b-form-input id="color" type="color" name="Primary Color" value="#556ee6"></b-form-input>
+                        <b-form-input id="color" type="color" name="Primary Color" v-model="configuration.button_text_1"></b-form-input>
                       </b-form-group>
                     </div>
                     <div class="col-md-3">
@@ -132,7 +248,7 @@ export default {
                         id="example-color"
                         label-for="color"
                       >
-                        <b-form-input id="color" type="color" name="Primary Color" value="#556ee6"></b-form-input>
+                        <b-form-input id="color" type="color" name="Primary Color" v-model="configuration.button_color_2"></b-form-input>
                       </b-form-group>
                     </div>
                     <div class="col-md-3">
@@ -141,7 +257,7 @@ export default {
                         id="example-color"
                         label-for="color"
                       >
-                        <b-form-input id="color" type="color" name="Primary Color" value="#556ee6"></b-form-input>
+                        <b-form-input id="color" type="color" name="Primary Color" v-model="configuration.button_text_2"></b-form-input>
                       </b-form-group>
                     </div>
                   </div>
@@ -149,32 +265,28 @@ export default {
                   <div class="row">
                     <div class="col-md-3">
                       <label>Primary Font</label>
-                      <select class="form-control">
-                        <option>Font 1</option>
-                        <option>Font 2</option>
-                        <option>Font 3</option>
+                      <select class="form-control" v-model="configuration.primary_font.id">
+                        <option v-for="font in fonts" v-bind:value="font.id" :key="font.id">{{font.name}}</option>
                       </select>
                     </div>
                     <div class="col-md-3">
                       <label>Primary Custom Font</label>
                       <div class="custom-file">
-                        <input id="customFile" type="file" class="custom-file-input" />
-                        <label class="custom-file-label" for="customFile">Choose file</label>
+                        <input id="primaryFontFile" type="file" ref="primaryFontFile" class="custom-file-input" v-on:change="handlePrimaryFontUpload()" />
+                        <label class="custom-file-label" for="primaryFontFile">Choose file</label>
                       </div>
                     </div>
                     <div class="col-md-3">
                       <label>Secondary Font</label>
-                      <select class="form-control">
-                        <option>Font 1</option>
-                        <option>Font 2</option>
-                        <option>Font 3</option>
+                      <select class="form-control" v-model="configuration.secondary_font.id">
+                        <option v-for="font in fonts" v-bind:value="font.id" :key="font.id">{{font.name}}</option>
                       </select>
                     </div>
                     <div class="col-md-3">
                       <label>Seconday Custom Font</label>
                       <div class="custom-file">
-                        <input id="customFile" type="file" class="custom-file-input" />
-                        <label class="custom-file-label" for="customFile">Choose file</label>
+                        <input id="secondaryFontFile" type="file" ref="secondaryFontFile" class="custom-file-input" v-on:change="handleSecondaryFontUpload()" />
+                        <label class="custom-file-label" for="secondaryFontFile">Choose file</label>
                       </div>
                     </div>
                   </div>
@@ -207,7 +319,7 @@ export default {
                     </div>
                     <div v-for="theme in themesData" :key="theme.id" class="col-xl-3 col-sm-6">
                       <div class="card text-center">
-                        <img :src="`${theme.themePreview}`" alt="themePreview" class="card-img-top" />
+                        <img :src="`${theme.image}`" alt="themePreview" class="card-img-top" />
                         <div class="card-body">
                           <h5 class="font-size-15">
                             <a href="javascript: void(0);" class="text-dark">{{theme.name}}</a>

@@ -107,7 +107,7 @@ export default {
         if (!roleService.hasEditPermission(this.pageIdentity)){
           alert("You do no have the permission to perform this action!")
           return;
-      }
+        }
         axios
         .get(`${this.backendURL}/api/v1/domains/${this.currentDomain.id}/verify` , authHeader())
         .then(response => {
