@@ -88,21 +88,6 @@ export default {
             <div class="row mb-2">
               <div class="col-sm-12">
                 <div class="text-sm-right">
-                  <button type="button" class="btn btn btn-rounded mb-2 mr-2">
-                    <i class="mdi mdi-trash mr-1"></i> Cancel Order
-                  </button>
-                  <button type="button" class="btn btn btn-rounded mb-2 mr-2">
-                    <i class="mdi mdi-trash mr-1"></i> Reorder
-                  </button>
-                  <button type="button" class="btn btn btn-rounded mb-2 mr-2">
-                    <i class="mdi mdi-trash mr-1"></i> Hold Order
-                  </button>
-                  <button type="button" class="btn btn btn-rounded mb-2 mr-2">
-                    <i class="mdi mdi-trash mr-1"></i> Invoice Order
-                  </button>
-                  <button type="button" class="btn btn btn-rounded mb-2 mr-2">
-                    <i class="mdi mdi-trash mr-1"></i> Mark As Shipped Order
-                  </button>
                   <b-button v-b-modal.modal-scrollable variant="primary">
                     <i class="mdi mdi-plus mr-1"></i> Edit Order
                   </b-button>

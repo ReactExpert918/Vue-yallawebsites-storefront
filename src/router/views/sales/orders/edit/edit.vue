@@ -34,6 +34,8 @@ export default {
         shipping_address: {},
         payment_method: {},
         shipping_method: {},
+        is_cancelable: false,
+        is_editable: false,
       },
       paymentData: paymentData,
       shippingData: shippingData,
@@ -193,6 +195,10 @@ export default {
           alert("You do no have the permission to perform this action!")
           return;
         }
+        if (!this.order.is_editable){
+          alert("Order cannot be edited");
+          return;
+        }
         var payload = {
           billing_address: this.order.billing_address,
           shipping_address: this.order.shipping_address,
@@ -212,7 +218,22 @@ export default {
         .put(`${this.backendURL}/api/v1/orders/${this.$route.params.id}` , payload , authHeader())
         .then(response => (alert(`${response.data.data.id} Order Updated!`)))
         .catch(handleAxiosError);
-      }
+      },
+      cancelOrder(){
+        if (!roleService.hasEditPermission(this.pageIdentity)){
+          alert("You do no have the permission to perform this action!")
+          return;
+        }
+        if (!this.order.is_cancelable){
+          alert("Order cannot be cancelled");
+          return;
+        }
+        
+        axios
+        .delete(`${this.backendURL}/api/v1/orders/${this.$route.params.id}/cancel`  , authHeader())
+        .then(response => (alert(`${response.data.data.id} Order Cancelled!`)))
+        .catch(handleAxiosError);
+      },
   },
 };
 </script>
@@ -228,10 +249,22 @@ export default {
             <div class="row mb-2">
               <div class="col-sm-12">
                 <div class="text-sm-right">
-                  <button type="button" class="btn btn btn-rounded mb-2 mr-2" v-b-modal.modal-cancel-order>
+                   <button type="button" class="btn btn btn-rounded mb-2 mr-2" :disabled="!order.is_cancelable" v-b-modal.modal-cancel-order>
                     <i class="mdi mdi-trash mr-1"></i> Cancel Order
                   </button>
-                  <b-button v-b-modal.modal-scrollable variant="primary" @click="updateOrder()">
+                  <button type="button" class="btn btn btn-rounded mb-2 mr-2">
+                    <i class="mdi mdi-trash mr-1"></i> Reorder
+                  </button>
+                  <button type="button" class="btn btn btn-rounded mb-2 mr-2">
+                    <i class="mdi mdi-trash mr-1"></i> Hold Order
+                  </button>
+                  <button type="button" class="btn btn btn-rounded mb-2 mr-2">
+                    <i class="mdi mdi-trash mr-1"></i> Invoice Order
+                  </button>
+                  <button type="button" class="btn btn btn-rounded mb-2 mr-2">
+                    <i class="mdi mdi-trash mr-1"></i> Mark As Shipped Order
+                  </button>
+                  <b-button v-b-modal.modal-scrollable variant="primary" :disabled="!order.is_editable" @click="updateOrder()">
                     <i class="mdi mdi-plus mr-1"></i> Save Order
                   </b-button>
                 </div>
@@ -407,7 +440,7 @@ export default {
             </div>
             <div class="row card-body">
               <div class="col-sm-12 text-sm-right">
-                <b-button variant="primary" @click="updateOrder()">
+                <b-button variant="primary" :disabled="!order.is_editable" @click="updateOrder()">
                     <i class="bx bx-check-double font-size-16 align-middle mr-2"></i>
                     Save Order
                 </b-button>
@@ -497,7 +530,7 @@ export default {
     <b-modal id="modal-cancel-order" centered title="Cancel Order" title-class="font-18" hide-footer>
       <p>Are you sure? Pressing Cancel will remove this order permenantly.</p>
       <div class="text-right">
-        <b-button variant="danger">Cancel</b-button>
+        <b-button variant="danger" :disabled="!order.is_cancelable" @click="cancelOrder">Cancel</b-button>
       </div>
     </b-modal>
   </Layout>
