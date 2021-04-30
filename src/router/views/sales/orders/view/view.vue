@@ -21,6 +21,7 @@ export default {
     return {
       backendURL: process.env.VUE_APP_BACKEND_URL,
       order: {
+        order_hash: "",
         total: {},
         status: {} , 
         customer: {},
@@ -29,6 +30,7 @@ export default {
         shipping_address: {},
         payment_method: {},
         shipping_method: {},
+        invoice: {},
       },
       title: "View Order",
       items: [
@@ -71,6 +73,9 @@ export default {
         if (this.order.shipping_method == null){
           this.order.shipping_method = {};
         }
+        if (this.order.invoice == null){
+          this.order.invoice = {};
+        }
     }).catch(handleAxiosError);
 
   }
@@ -98,15 +103,15 @@ export default {
             <div class="row card-body">
               <div class="col-sm-6">
               <p>Status: {{order.status.status}}</p>
-              <h3>#{{order.invoice_no}}</h3>
+              <h3>#{{order.order_hash}}</h3>
               <p>
                 Order Date: {{order.created_at}}<br>
                 Customer Name: {{order.customer.name}}<br>
                 Email: {{order.customer.email}}<br>
               </p>
               <p>
-                Invoice:  {{order.invoice_no}}<br>
-                Invoice Date: {{order.created_at}}<br>
+                Invoice:  {{order.invoice.invoice_hash}}<br>
+                Invoice Date: {{order.invoice.invoiced_at}}<br>
                 Credit Memos:  {{order.creditMemoNumber}}<br>
                 Shipment:  {{order.shipmentNumber}}<br>
                 Shipment Date: {{order.shipmentDate}}

@@ -232,7 +232,7 @@ export default {
         }
         
         axios
-        .delete(`${this.backendURL}/api/v1/orders/${this.$route.params.id}/cancel`  , authHeader())
+        .delete(`${this.backendURL}/api/v1/orders/${this.$route.params.id}/cancel`  ,{}. authHeader())
         .then(response => (alert(`${response.data.data.id} Order Cancelled!`)))
         .catch(handleAxiosError);
       },
@@ -247,7 +247,7 @@ export default {
         }
         
         axios
-        .put(`${this.backendURL}/api/v1/orders/${this.$route.params.id}/ship`  , authHeader())
+        .put(`${this.backendURL}/api/v1/orders/${this.$route.params.id}/ship`  ,{}, authHeader())
         .then(response => (alert(`${response.data.data.id} Order Marked As Shipped!`)))
         .catch(handleAxiosError);
       },
@@ -262,7 +262,7 @@ export default {
         }
         
         axios
-        .put(`${this.backendURL}/api/v1/orders/${this.$route.params.id}/deliver`  , authHeader())
+        .put(`${this.backendURL}/api/v1/orders/${this.$route.params.id}/deliver` ,{}, authHeader())
         .then(response => (alert(`${response.data.data.id} Order Marked As Delivered!`)))
         .catch(handleAxiosError);
       },

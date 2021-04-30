@@ -2,8 +2,9 @@
 import Layout from "../../../layouts/main";
 import PageHeader from "@/components/page-header";
 import axios from "axios";
-import { invoicesData } from "./invoices-data";
 import appConfig from "@/app.config";
+import {authHeader} from "@/helpers/authservice/auth-header";
+import {handleAxiosError} from "@/helpers/authservice/user.service"
 
 /**
  * Pages component
@@ -16,8 +17,9 @@ export default {
   components: { Layout, PageHeader },
   data() {
     return {
+      backendURL: process.env.VUE_APP_BACKEND_URL,
       selectedAll: false,
-      invoicesData: invoicesData,
+      invoicesData: [],
       title: "Invoices",
       items: [
         {
@@ -45,27 +47,27 @@ export default {
           },
           {
               label: "Invoice ID",
-              key: "invoiceId",
+              key: "invoice_hash",
               sortable: true,
           },
           {
               label: "Invoice Date",
-              key: "invoiceDate",
+              key: "invoice_at",
               sortable: true,
           },
           {
               label: "Order ID",
-              key: "orderId",
+              key: "order_id",
               sortable: true,
           },
           {
               label: "Order Date",
-              key: "orderDate",
+              key: "order_date",
               sortable: true,
           },
           {
               label: "Total",
-              key: "total",
+              key: "order_total",
               sortable: true,
           },
           {
@@ -101,8 +103,9 @@ export default {
       // Set the initial number of items
       this.totalRows = this.items.length;
       axios
-      .get('https://api.coindesk.com/v1/bpi/currentprice.json')
-      .then(response => (this.info = response))
+      .get(`${this.backendURL}/api/v1/orders/invoices?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
+      .then(response => (this.invoicesData = response.data.data))
+      .catch(handleAxiosError);
   },
   methods: {
       /**
@@ -192,7 +195,7 @@ export default {
                       </template>
                       <template #cell(status)="data">
                         <span class="badge badge-success font-size-12">
-                          {{data.item.status}}
+                          {{data.item.order_status}}
                         </span>
                       </template>
                       <template #cell(actions)="data">
