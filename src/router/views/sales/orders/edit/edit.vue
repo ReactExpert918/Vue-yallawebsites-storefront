@@ -36,6 +36,7 @@ export default {
         shipping_method: {},
         is_cancelable: false,
         is_editable: false,
+        is_shippable: false,
       },
       paymentData: paymentData,
       shippingData: shippingData,
@@ -234,6 +235,21 @@ export default {
         .then(response => (alert(`${response.data.data.id} Order Cancelled!`)))
         .catch(handleAxiosError);
       },
+      shipOrder(){
+        if (!roleService.hasEditPermission(this.pageIdentity)){
+          alert("You do no have the permission to perform this action!")
+          return;
+        }
+        if (!this.order.is_shippable){
+          alert("Order cannot be marked as shipped");
+          return;
+        }
+        
+        axios
+        .put(`${this.backendURL}/api/v1/orders/${this.$route.params.id}/ship`  , authHeader())
+        .then(response => (alert(`${response.data.data.id} Order Marked As Shipped!`)))
+        .catch(handleAxiosError);
+      },
   },
 };
 </script>
@@ -261,7 +277,7 @@ export default {
                   <button type="button" class="btn btn btn-rounded mb-2 mr-2">
                     <i class="mdi mdi-trash mr-1"></i> Invoice Order
                   </button>
-                  <button type="button" class="btn btn btn-rounded mb-2 mr-2">
+                  <button type="button" class="btn btn btn-rounded mb-2 mr-2" :disabled="!order.is_shippable" v-b-modal.modal-ship-order>
                     <i class="mdi mdi-trash mr-1"></i> Mark As Shipped Order
                   </button>
                   <b-button v-b-modal.modal-scrollable variant="primary" :disabled="!order.is_editable" @click="updateOrder()">
@@ -531,6 +547,12 @@ export default {
       <p>Are you sure? Pressing Cancel will remove this order permenantly.</p>
       <div class="text-right">
         <b-button variant="danger" :disabled="!order.is_cancelable" @click="cancelOrder">Cancel</b-button>
+      </div>
+    </b-modal>
+    <b-modal id="modal-ship-order" centered title="Mark As Shipped Order" title-class="font-18" hide-footer>
+      <p>Are you sure? Pressing Confirm will mark this order as shipped permenantly.</p>
+      <div class="text-right">
+        <b-button variant="danger" :disabled="!order.is_shippable" @click="shipOrder">Confirm</b-button>
       </div>
     </b-modal>
   </Layout>

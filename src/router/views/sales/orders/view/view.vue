@@ -87,11 +87,11 @@ export default {
           <div class="card-body">
             <div class="row mb-2">
               <div class="col-sm-12">
-                <div class="text-sm-right">
+                <!-- <div class="text-sm-right">
                   <b-button v-b-modal.modal-scrollable variant="primary">
                     <i class="mdi mdi-plus mr-1"></i> Edit Order
                   </b-button>
-                </div>
+                </div> -->
               </div>
               <!-- end col-->
             </div>
