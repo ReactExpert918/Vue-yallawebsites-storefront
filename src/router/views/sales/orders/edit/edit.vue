@@ -37,6 +37,7 @@ export default {
         is_cancelable: false,
         is_editable: false,
         is_shippable: false,
+        is_deliverable: false,
       },
       paymentData: paymentData,
       shippingData: shippingData,
@@ -250,6 +251,21 @@ export default {
         .then(response => (alert(`${response.data.data.id} Order Marked As Shipped!`)))
         .catch(handleAxiosError);
       },
+      deliverOrder(){
+        if (!roleService.hasEditPermission(this.pageIdentity)){
+          alert("You do no have the permission to perform this action!")
+          return;
+        }
+        if (!this.order.is_deliverable){
+          alert("Order cannot be marked as delivered");
+          return;
+        }
+        
+        axios
+        .put(`${this.backendURL}/api/v1/orders/${this.$route.params.id}/deliver`  , authHeader())
+        .then(response => (alert(`${response.data.data.id} Order Marked As Delivered!`)))
+        .catch(handleAxiosError);
+      },
   },
 };
 </script>
@@ -274,11 +290,11 @@ export default {
                   <button type="button" class="btn btn btn-rounded mb-2 mr-2">
                     <i class="mdi mdi-trash mr-1"></i> Hold Order
                   </button>
-                  <button type="button" class="btn btn btn-rounded mb-2 mr-2">
-                    <i class="mdi mdi-trash mr-1"></i> Invoice Order
-                  </button>
                   <button type="button" class="btn btn btn-rounded mb-2 mr-2" :disabled="!order.is_shippable" v-b-modal.modal-ship-order>
                     <i class="mdi mdi-trash mr-1"></i> Mark As Shipped Order
+                  </button>
+                   <button type="button" class="btn btn btn-rounded mb-2 mr-2" :disabled="!order.is_deliverable" v-b-modal.modal-deliver-order>
+                    <i class="mdi mdi-trash mr-1"></i> Mark As Delivered Order
                   </button>
                   <b-button v-b-modal.modal-scrollable variant="primary" :disabled="!order.is_editable" @click="updateOrder()">
                     <i class="mdi mdi-plus mr-1"></i> Save Order
@@ -550,9 +566,15 @@ export default {
       </div>
     </b-modal>
     <b-modal id="modal-ship-order" centered title="Mark As Shipped Order" title-class="font-18" hide-footer>
-      <p>Are you sure? Pressing Confirm will mark this order as shipped permenantly.</p>
+      <p>Are you sure? Pressing Confirm will mark this order as shipped.</p>
       <div class="text-right">
         <b-button variant="danger" :disabled="!order.is_shippable" @click="shipOrder">Confirm</b-button>
+      </div>
+    </b-modal>
+    <b-modal id="modal-deliver-order" centered title="Mark As Delivered Order" title-class="font-18" hide-footer>
+      <p>Are you sure? Pressing Confirm will mark this order as delivered permenantly.</p>
+      <div class="text-right">
+        <b-button variant="danger" :disabled="!order.is_deliverable" @click="deliverOrder">Confirm</b-button>
       </div>
     </b-modal>
   </Layout>
