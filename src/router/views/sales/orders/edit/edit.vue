@@ -287,6 +287,32 @@ export default {
         .then(response => (alert(`${response.data.data.id} Order Refunded!`)))
         .catch(handleAxiosError);
       },
+      reOrder(){
+        if (!roleService.hasCreatePermission(this.pageIdentity)){
+          alert("You do no have the permission to perform this action!")
+          return;
+        }
+        var payload = {
+          customer_id: this.order.customer.id,
+          billing_address: this.order.billing_address,
+          shipping_address: this.order.shipping_address,
+          products: []
+        }
+        for (var i = 0; i < this.selectedProducts.length; i++){
+          var productPayload = {
+            id: this.selectedProducts[i].id,
+            quantity: this.selectedProducts[i].order_quantity
+          }
+          if (this.selectedProducts[i].order_product_id){
+            productPayload.order_product_id = this.selectedProducts[i].order_product_id;
+          }
+          payload.products.push(productPayload);
+        }
+        axios
+        .post(`${this.backendURL}/api/v1/orders` , payload , authHeader())
+        .then(response => (alert(`${response.data.data.id} Order Re-Created!`)))
+        .catch(handleAxiosError);
+      }
   },
 };
 </script>
@@ -305,7 +331,7 @@ export default {
                    <button type="button" class="btn btn btn-rounded mb-2 mr-2" :disabled="!order.is_cancelable" v-b-modal.modal-cancel-order>
                     <i class="mdi mdi-trash mr-1"></i> Cancel Order
                   </button>
-                  <button type="button" class="btn btn btn-rounded mb-2 mr-2">
+                  <button type="button" class="btn btn btn-rounded mb-2 mr-2" v-b-modal.modal-reorder-order>
                     <i class="mdi mdi-trash mr-1"></i> Reorder
                   </button>
                   <button type="button" class="btn btn btn-rounded mb-2 mr-2" :disabled="!order.is_refundable" v-b-modal.modal-refund-order>
@@ -606,6 +632,12 @@ export default {
         </div>
       <div class="text-right">
         <b-button variant="danger" :disabled="!order.is_refundable || credit_memo==''" @click="refundOrder">Confirm</b-button>
+      </div>
+    </b-modal>
+    <b-modal id="modal-reorder-order" centered title="Re-Order" title-class="font-18" hide-footer>
+      <p>Are you sure? Pressing Confirm will create a new order from this order.</p>
+      <div class="text-right">
+        <b-button variant="danger"  @click="reOrder">Confirm</b-button>
       </div>
     </b-modal>
   </Layout>
