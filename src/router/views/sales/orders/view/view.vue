@@ -31,6 +31,7 @@ export default {
         payment_method: {},
         shipping_method: {},
         invoice: {},
+        shipment: {},
       },
       title: "View Order",
       items: [
@@ -76,6 +77,9 @@ export default {
         if (this.order.invoice == null){
           this.order.invoice = {};
         }
+        if (this.order.shipment == null){
+          this.order.shipment = {};
+        }
     }).catch(handleAxiosError);
 
   }
@@ -113,8 +117,8 @@ export default {
                 Invoice:  {{order.invoice.invoice_hash}}<br>
                 Invoice Date: {{order.invoice.created_at}}<br>
                 Credit Memos:  {{order.credit_memo}}<br>
-                Shipment:  {{order.shipmentNumber}}<br>
-                Shipment Date: {{order.shipmentDate}}
+                Shipment:  {{order.shipment.shipment_hash}}<br>
+                Shipment Date: {{order.shipment.created_at}}
               </p>
               </div>
               <div class="col-sm-6">
