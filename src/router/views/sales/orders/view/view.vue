@@ -112,7 +112,7 @@ export default {
               <p>
                 Invoice:  {{order.invoice.invoice_hash}}<br>
                 Invoice Date: {{order.invoice.created_at}}<br>
-                Credit Memos:  {{order.creditMemoNumber}}<br>
+                Credit Memos:  {{order.credit_memo}}<br>
                 Shipment:  {{order.shipmentNumber}}<br>
                 Shipment Date: {{order.shipmentDate}}
               </p>

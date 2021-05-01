@@ -38,11 +38,13 @@ export default {
         is_editable: false,
         is_shippable: false,
         is_deliverable: false,
+        is_refundable: false,
       },
       paymentData: paymentData,
       shippingData: shippingData,
       products: [],
       selectedProducts: [],
+      credit_memo: "",
       selectedToogle: "A",
       title: "Edit Order",
       items: [
@@ -266,6 +268,25 @@ export default {
         .then(response => (alert(`${response.data.data.id} Order Marked As Delivered!`)))
         .catch(handleAxiosError);
       },
+      refundOrder(){
+        if (!roleService.hasEditPermission(this.pageIdentity)){
+          alert("You do no have the permission to perform this action!")
+          return;
+        }
+        if (!this.order.is_refundable){
+          alert("Order cannot be marked as refunded");
+          return;
+        }
+
+        const payload = {
+          credit_memo: this.credit_memo,
+        }
+        
+        axios
+        .put(`${this.backendURL}/api/v1/orders/${this.$route.params.id}/refund` ,payload, authHeader())
+        .then(response => (alert(`${response.data.data.id} Order Refunded!`)))
+        .catch(handleAxiosError);
+      },
   },
 };
 </script>
@@ -287,8 +308,8 @@ export default {
                   <button type="button" class="btn btn btn-rounded mb-2 mr-2">
                     <i class="mdi mdi-trash mr-1"></i> Reorder
                   </button>
-                  <button type="button" class="btn btn btn-rounded mb-2 mr-2">
-                    <i class="mdi mdi-trash mr-1"></i> Hold Order
+                  <button type="button" class="btn btn btn-rounded mb-2 mr-2" :disabled="!order.is_refundable" v-b-modal.modal-refund-order>
+                    <i class="mdi mdi-trash mr-1"></i> Refund Order
                   </button>
                   <button type="button" class="btn btn btn-rounded mb-2 mr-2" :disabled="!order.is_shippable" v-b-modal.modal-ship-order>
                     <i class="mdi mdi-trash mr-1"></i> Mark As Shipped Order
@@ -575,6 +596,16 @@ export default {
       <p>Are you sure? Pressing Confirm will mark this order as delivered permenantly.</p>
       <div class="text-right">
         <b-button variant="danger" :disabled="!order.is_deliverable" @click="deliverOrder">Confirm</b-button>
+      </div>
+    </b-modal>
+    <b-modal id="modal-refund-order" centered title="Refund Order" title-class="font-18" hide-footer>
+      <p>Are you sure? Entering the Credit Memo & pressing the confirm button will mark the order as refunded permanently.</p>
+      <div class="col-sm-6">
+          <label class="mt-3">Credit Memo</label>
+          <b-form-input for="text" placeholder="Credit Memo" v-model="credit_memo"></b-form-input>
+        </div>
+      <div class="text-right">
+        <b-button variant="danger" :disabled="!order.is_refundable || credit_memo==''" @click="refundOrder">Confirm</b-button>
       </div>
     </b-modal>
   </Layout>
