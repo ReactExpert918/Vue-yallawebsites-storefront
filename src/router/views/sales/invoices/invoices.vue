@@ -47,27 +47,27 @@ export default {
           },
           {
               label: "Invoice ID",
-              key: "invoice_hash",
+              key: "id",
               sortable: true,
           },
           {
               label: "Invoice Date",
-              key: "invoice_at",
+              key: "created_at",
               sortable: true,
           },
           {
               label: "Order ID",
-              key: "order_id",
+              key: "order.id",
               sortable: true,
           },
           {
               label: "Order Date",
-              key: "order_date",
+              key: "order.created_at",
               sortable: true,
           },
           {
               label: "Total",
-              key: "order_total",
+              key: "order.total_price",
               sortable: true,
           },
           {
@@ -104,7 +104,15 @@ export default {
       this.totalRows = this.items.length;
       axios
       .get(`${this.backendURL}/api/v1/orders/invoices?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
-      .then(response => (this.invoicesData = response.data.data))
+      .then(response => {
+         this.invoicesData = response.data.data;
+         for (var i = 0; i < this.invoicesData.length; i++){
+            var inv = this.invoicesData[i];
+            if (inv.order == null){
+              inv.order = {};
+            }
+         }
+       })
       .catch(handleAxiosError);
   },
   methods: {
@@ -195,7 +203,7 @@ export default {
                       </template>
                       <template #cell(status)="data">
                         <span class="badge badge-success font-size-12">
-                          {{data.item.order_status}}
+                          {{data.item.order.status}}
                         </span>
                       </template>
                       <template #cell(actions)="data">
@@ -204,7 +212,7 @@ export default {
                             <i class="mdi mdi-dots-horizontal font-size-18"></i>
                           </template>
 
-                          <b-dropdown-item :href="'/sales/invoices/view/' + data.item.invoiceId">
+                          <b-dropdown-item :href="'/sales/invoices/view/' + data.item.id">
                             <i class="fas fa-pencil-alt text-success mr-1"></i> View
                           </b-dropdown-item>
                           
