@@ -34,11 +34,17 @@ export default {
         shipping_address: {},
         payment_method: {},
         shipping_method: {},
+        is_cancelable: false,
+        is_editable: false,
+        is_shippable: false,
+        is_deliverable: false,
+        is_refundable: false,
       },
       paymentData: paymentData,
       shippingData: shippingData,
       products: [],
       selectedProducts: [],
+      credit_memo: "",
       selectedToogle: "A",
       title: "Edit Order",
       items: [
@@ -193,6 +199,10 @@ export default {
           alert("You do no have the permission to perform this action!")
           return;
         }
+        if (!this.order.is_editable){
+          alert("Order cannot be edited");
+          return;
+        }
         var payload = {
           billing_address: this.order.billing_address,
           shipping_address: this.order.shipping_address,
@@ -212,6 +222,96 @@ export default {
         .put(`${this.backendURL}/api/v1/orders/${this.$route.params.id}` , payload , authHeader())
         .then(response => (alert(`${response.data.data.id} Order Updated!`)))
         .catch(handleAxiosError);
+      },
+      cancelOrder(){
+        if (!roleService.hasEditPermission(this.pageIdentity)){
+          alert("You do no have the permission to perform this action!")
+          return;
+        }
+        if (!this.order.is_cancelable){
+          alert("Order cannot be cancelled");
+          return;
+        }
+        
+        axios
+        .delete(`${this.backendURL}/api/v1/orders/${this.$route.params.id}/cancel`  ,{}. authHeader())
+        .then(response => (alert(`${response.data.data.id} Order Cancelled!`)))
+        .catch(handleAxiosError);
+      },
+      shipOrder(){
+        if (!roleService.hasEditPermission(this.pageIdentity)){
+          alert("You do no have the permission to perform this action!")
+          return;
+        }
+        if (!this.order.is_shippable){
+          alert("Order cannot be marked as shipped");
+          return;
+        }
+        
+        axios
+        .put(`${this.backendURL}/api/v1/orders/${this.$route.params.id}/ship`  ,{}, authHeader())
+        .then(response => (alert(`${response.data.data.id} Order Marked As Shipped!`)))
+        .catch(handleAxiosError);
+      },
+      deliverOrder(){
+        if (!roleService.hasEditPermission(this.pageIdentity)){
+          alert("You do no have the permission to perform this action!")
+          return;
+        }
+        if (!this.order.is_deliverable){
+          alert("Order cannot be marked as delivered");
+          return;
+        }
+        
+        axios
+        .put(`${this.backendURL}/api/v1/orders/${this.$route.params.id}/deliver` ,{}, authHeader())
+        .then(response => (alert(`${response.data.data.id} Order Marked As Delivered!`)))
+        .catch(handleAxiosError);
+      },
+      refundOrder(){
+        if (!roleService.hasEditPermission(this.pageIdentity)){
+          alert("You do no have the permission to perform this action!")
+          return;
+        }
+        if (!this.order.is_refundable){
+          alert("Order cannot be marked as refunded");
+          return;
+        }
+
+        const payload = {
+          credit_memo: this.credit_memo,
+        }
+        
+        axios
+        .put(`${this.backendURL}/api/v1/orders/${this.$route.params.id}/refund` ,payload, authHeader())
+        .then(response => (alert(`${response.data.data.id} Order Refunded!`)))
+        .catch(handleAxiosError);
+      },
+      reOrder(){
+        if (!roleService.hasCreatePermission(this.pageIdentity)){
+          alert("You do no have the permission to perform this action!")
+          return;
+        }
+        var payload = {
+          customer_id: this.order.customer.id,
+          billing_address: this.order.billing_address,
+          shipping_address: this.order.shipping_address,
+          products: []
+        }
+        for (var i = 0; i < this.selectedProducts.length; i++){
+          var productPayload = {
+            id: this.selectedProducts[i].id,
+            quantity: this.selectedProducts[i].order_quantity
+          }
+          if (this.selectedProducts[i].order_product_id){
+            productPayload.order_product_id = this.selectedProducts[i].order_product_id;
+          }
+          payload.products.push(productPayload);
+        }
+        axios
+        .post(`${this.backendURL}/api/v1/orders` , payload , authHeader())
+        .then(response => (alert(`${response.data.data.id} Order Re-Created!`)))
+        .catch(handleAxiosError);
       }
   },
 };
@@ -228,10 +328,22 @@ export default {
             <div class="row mb-2">
               <div class="col-sm-12">
                 <div class="text-sm-right">
-                  <button type="button" class="btn btn btn-rounded mb-2 mr-2" v-b-modal.modal-cancel-order>
+                   <button type="button" class="btn btn btn-rounded mb-2 mr-2" :disabled="!order.is_cancelable" v-b-modal.modal-cancel-order>
                     <i class="mdi mdi-trash mr-1"></i> Cancel Order
                   </button>
-                  <b-button v-b-modal.modal-scrollable variant="primary" @click="updateOrder()">
+                  <button type="button" class="btn btn btn-rounded mb-2 mr-2" v-b-modal.modal-reorder-order>
+                    <i class="mdi mdi-trash mr-1"></i> Reorder
+                  </button>
+                  <button type="button" class="btn btn btn-rounded mb-2 mr-2" :disabled="!order.is_refundable" v-b-modal.modal-refund-order>
+                    <i class="mdi mdi-trash mr-1"></i> Refund Order
+                  </button>
+                  <button type="button" class="btn btn btn-rounded mb-2 mr-2" :disabled="!order.is_shippable" v-b-modal.modal-ship-order>
+                    <i class="mdi mdi-trash mr-1"></i> Mark As Shipped Order
+                  </button>
+                   <button type="button" class="btn btn btn-rounded mb-2 mr-2" :disabled="!order.is_deliverable" v-b-modal.modal-deliver-order>
+                    <i class="mdi mdi-trash mr-1"></i> Mark As Delivered Order
+                  </button>
+                  <b-button v-b-modal.modal-scrollable variant="primary" :disabled="!order.is_editable" @click="updateOrder()">
                     <i class="mdi mdi-plus mr-1"></i> Save Order
                   </b-button>
                 </div>
@@ -407,7 +519,7 @@ export default {
             </div>
             <div class="row card-body">
               <div class="col-sm-12 text-sm-right">
-                <b-button variant="primary" @click="updateOrder()">
+                <b-button variant="primary" :disabled="!order.is_editable" @click="updateOrder()">
                     <i class="bx bx-check-double font-size-16 align-middle mr-2"></i>
                     Save Order
                 </b-button>
@@ -497,7 +609,35 @@ export default {
     <b-modal id="modal-cancel-order" centered title="Cancel Order" title-class="font-18" hide-footer>
       <p>Are you sure? Pressing Cancel will remove this order permenantly.</p>
       <div class="text-right">
-        <b-button variant="danger">Cancel</b-button>
+        <b-button variant="danger" :disabled="!order.is_cancelable" @click="cancelOrder">Cancel</b-button>
+      </div>
+    </b-modal>
+    <b-modal id="modal-ship-order" centered title="Mark As Shipped Order" title-class="font-18" hide-footer>
+      <p>Are you sure? Pressing Confirm will mark this order as shipped.</p>
+      <div class="text-right">
+        <b-button variant="danger" :disabled="!order.is_shippable" @click="shipOrder">Confirm</b-button>
+      </div>
+    </b-modal>
+    <b-modal id="modal-deliver-order" centered title="Mark As Delivered Order" title-class="font-18" hide-footer>
+      <p>Are you sure? Pressing Confirm will mark this order as delivered permenantly.</p>
+      <div class="text-right">
+        <b-button variant="danger" :disabled="!order.is_deliverable" @click="deliverOrder">Confirm</b-button>
+      </div>
+    </b-modal>
+    <b-modal id="modal-refund-order" centered title="Refund Order" title-class="font-18" hide-footer>
+      <p>Are you sure? Entering the Credit Memo & pressing the confirm button will mark the order as refunded permanently.</p>
+      <div class="col-sm-6">
+          <label class="mt-3">Credit Memo</label>
+          <b-form-input for="text" placeholder="Credit Memo" v-model="credit_memo"></b-form-input>
+        </div>
+      <div class="text-right">
+        <b-button variant="danger" :disabled="!order.is_refundable || credit_memo==''" @click="refundOrder">Confirm</b-button>
+      </div>
+    </b-modal>
+    <b-modal id="modal-reorder-order" centered title="Re-Order" title-class="font-18" hide-footer>
+      <p>Are you sure? Pressing Confirm will create a new order from this order.</p>
+      <div class="text-right">
+        <b-button variant="danger"  @click="reOrder">Confirm</b-button>
       </div>
     </b-modal>
   </Layout>

@@ -21,6 +21,7 @@ export default {
     return {
       backendURL: process.env.VUE_APP_BACKEND_URL,
       order: {
+        order_hash: "",
         total: {},
         status: {} , 
         customer: {},
@@ -29,6 +30,8 @@ export default {
         shipping_address: {},
         payment_method: {},
         shipping_method: {},
+        invoice: {},
+        shipment: {},
       },
       title: "View Order",
       items: [
@@ -71,6 +74,12 @@ export default {
         if (this.order.shipping_method == null){
           this.order.shipping_method = {};
         }
+        if (this.order.invoice == null){
+          this.order.invoice = {};
+        }
+        if (this.order.shipment == null){
+          this.order.shipment = {};
+        }
     }).catch(handleAxiosError);
 
   }
@@ -87,44 +96,29 @@ export default {
           <div class="card-body">
             <div class="row mb-2">
               <div class="col-sm-12">
-                <div class="text-sm-right">
-                  <button type="button" class="btn btn btn-rounded mb-2 mr-2">
-                    <i class="mdi mdi-trash mr-1"></i> Cancel Order
-                  </button>
-                  <button type="button" class="btn btn btn-rounded mb-2 mr-2">
-                    <i class="mdi mdi-trash mr-1"></i> Reorder
-                  </button>
-                  <button type="button" class="btn btn btn-rounded mb-2 mr-2">
-                    <i class="mdi mdi-trash mr-1"></i> Hold Order
-                  </button>
-                  <button type="button" class="btn btn btn-rounded mb-2 mr-2">
-                    <i class="mdi mdi-trash mr-1"></i> Invoice Order
-                  </button>
-                  <button type="button" class="btn btn btn-rounded mb-2 mr-2">
-                    <i class="mdi mdi-trash mr-1"></i> Mark As Shipped Order
-                  </button>
+                <!-- <div class="text-sm-right">
                   <b-button v-b-modal.modal-scrollable variant="primary">
                     <i class="mdi mdi-plus mr-1"></i> Edit Order
                   </b-button>
-                </div>
+                </div> -->
               </div>
               <!-- end col-->
             </div>
             <div class="row card-body">
               <div class="col-sm-6">
               <p>Status: {{order.status.status}}</p>
-              <h3>#{{order.invoice_no}}</h3>
+              <h3>#{{order.order_hash}}</h3>
               <p>
                 Order Date: {{order.created_at}}<br>
                 Customer Name: {{order.customer.name}}<br>
                 Email: {{order.customer.email}}<br>
               </p>
               <p>
-                Invoice:  {{order.invoice_no}}<br>
-                Invoice Date: {{order.created_at}}<br>
-                Credit Memos:  {{order.creditMemoNumber}}<br>
-                Shipment:  {{order.shipmentNumber}}<br>
-                Shipment Date: {{order.shipmentDate}}
+                Invoice:  {{order.invoice.invoice_hash}}<br>
+                Invoice Date: {{order.invoice.created_at}}<br>
+                Credit Memos:  {{order.credit_memo}}<br>
+                Shipment:  {{order.shipment.shipment_hash}}<br>
+                Shipment Date: {{order.shipment.created_at}}
               </p>
               </div>
               <div class="col-sm-6">

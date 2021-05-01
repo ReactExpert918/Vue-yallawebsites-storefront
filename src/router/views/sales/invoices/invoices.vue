@@ -2,8 +2,9 @@
 import Layout from "../../../layouts/main";
 import PageHeader from "@/components/page-header";
 import axios from "axios";
-import { invoicesData } from "./invoices-data";
 import appConfig from "@/app.config";
+import {authHeader} from "@/helpers/authservice/auth-header";
+import {handleAxiosError} from "@/helpers/authservice/user.service"
 
 /**
  * Pages component
@@ -16,8 +17,9 @@ export default {
   components: { Layout, PageHeader },
   data() {
     return {
+      backendURL: process.env.VUE_APP_BACKEND_URL,
       selectedAll: false,
-      invoicesData: invoicesData,
+      invoicesData: [],
       title: "Invoices",
       items: [
         {
@@ -45,27 +47,27 @@ export default {
           },
           {
               label: "Invoice ID",
-              key: "invoiceId",
+              key: "id",
               sortable: true,
           },
           {
               label: "Invoice Date",
-              key: "invoiceDate",
+              key: "created_at",
               sortable: true,
           },
           {
               label: "Order ID",
-              key: "orderId",
+              key: "order.id",
               sortable: true,
           },
           {
               label: "Order Date",
-              key: "orderDate",
+              key: "order.created_at",
               sortable: true,
           },
           {
               label: "Total",
-              key: "total",
+              key: "order.total_price",
               sortable: true,
           },
           {
@@ -101,8 +103,17 @@ export default {
       // Set the initial number of items
       this.totalRows = this.items.length;
       axios
-      .get('https://api.coindesk.com/v1/bpi/currentprice.json')
-      .then(response => (this.info = response))
+      .get(`${this.backendURL}/api/v1/orders/invoices?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
+      .then(response => {
+         this.invoicesData = response.data.data;
+         for (var i = 0; i < this.invoicesData.length; i++){
+            var inv = this.invoicesData[i];
+            if (inv.order == null){
+              inv.order = {};
+            }
+         }
+       })
+      .catch(handleAxiosError);
   },
   methods: {
       /**
@@ -192,7 +203,7 @@ export default {
                       </template>
                       <template #cell(status)="data">
                         <span class="badge badge-success font-size-12">
-                          {{data.item.status}}
+                          {{data.item.order.status}}
                         </span>
                       </template>
                       <template #cell(actions)="data">
@@ -201,7 +212,7 @@ export default {
                             <i class="mdi mdi-dots-horizontal font-size-18"></i>
                           </template>
 
-                          <b-dropdown-item :href="'/sales/invoices/view/' + data.item.invoiceId">
+                          <b-dropdown-item :href="'/sales/invoices/view/' + data.item.id">
                             <i class="fas fa-pencil-alt text-success mr-1"></i> View
                           </b-dropdown-item>
                           
