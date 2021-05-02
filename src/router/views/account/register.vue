@@ -147,8 +147,8 @@ export default {
             <div class="row">
               <div class="col-7">
                 <div class="text-primary p-4">
-                  <h5 class="text-primary">Free Register</h5>
-                  <p>Get your free Skote account now.</p>
+                  <h5 class="text-primary">Register</h5>
+                  <p>Create Your Yallawebsites account now.</p>
                 </div>
               </div>
               <div class="col-5 align-self-end">
@@ -200,6 +200,48 @@ export default {
             </div>
 
             <b-form class="p-2" @submit.prevent="tryToRegisterIn">
+               <b-form-group
+                id="firstname-group"
+                label="First Name"
+                label-for="firstname"
+              >
+                <b-form-input
+                  id="firstname"
+                  v-model="user.firstname"
+                  type="text"
+                  placeholder="Enter first name"
+                  :class="{
+                    'is-invalid': submitted && $v.user.firstname.$error,
+                  }"
+                ></b-form-input>
+                <div
+                  v-if="submitted && !$v.user.firstname.required"
+                  class="invalid-feedback"
+                >
+                  First Name is required.
+                </div>
+              </b-form-group>
+              <b-form-group
+                id="lastname-group"
+                label="Last Name"
+                label-for="lastname"
+              >
+                <b-form-input
+                  id="lastname"
+                  v-model="user.lastname"
+                  type="text"
+                  placeholder="Enter last name"
+                  :class="{
+                    'is-invalid': submitted && $v.user.lastname.$error,
+                  }"
+                ></b-form-input>
+                <div
+                  v-if="submitted && !$v.user.lastname.required"
+                  class="invalid-feedback"
+                >
+                  Last Name is required.
+                </div>
+              </b-form-group>
               <b-form-group
                 id="email-group"
                 label="Username"
@@ -260,6 +302,27 @@ export default {
                   class="invalid-feedback"
                 >
                   Password is required.
+                </div>
+              </b-form-group>
+              <b-form-group
+                id="passwordconfirm-group"
+                label="Password Confirmation"
+                label-for="passwordonfirm"
+              >
+                <b-form-input
+                  id="passwordconfirm"
+                  v-model="user.passwordConfirm"
+                  type="password"
+                  placeholder="Enter password"
+                  :class="{
+                    'is-invalid': submitted && $v.user.passwordConfirm.$error,
+                  }"
+                ></b-form-input>
+                <div
+                  v-if="submitted && !$v.user.passwordConfirm.required"
+                  class="invalid-feedback"
+                >
+                  Password Confirmation is required.
                 </div>
               </b-form-group>
 
