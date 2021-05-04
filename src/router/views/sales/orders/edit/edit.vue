@@ -234,7 +234,7 @@ export default {
         }
         
         axios
-        .delete(`${this.backendURL}/api/v1/orders/${this.$route.params.id}/cancel`  ,{}. authHeader())
+        .delete(`${this.backendURL}/api/v1/orders/${this.$route.params.id}/cancel` , authHeader())
         .then(response => (alert(`${response.data.data.id} Order Cancelled!`)))
         .catch(handleAxiosError);
       },

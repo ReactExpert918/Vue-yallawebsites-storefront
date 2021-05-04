@@ -364,6 +364,9 @@ export default {
         if(this.currentAttrGroup.attributes){
           for(var j = 0; j < this.currentAttrGroup.attributes.length; j++){
             var attr = this.currentAttrGroup.attributes[j];
+            if (attr.option_id == ""){
+              continue;
+            }
             productReq.attributes.push({
               id: attr.id,
               option_id: attr.option_id,
