@@ -28,7 +28,9 @@ export default {
         currency: {},
         billing_address: {},
         shipping_address: {},
-        payment_method: {},
+        payment: {
+          payment_method: {},
+        },
         shipping_method: {},
         invoice: {},
         shipment: {},
@@ -68,8 +70,10 @@ export default {
         if (this.order.shipping_address == null){
           this.order.shipping_address = {};
         }
-        if (this.order.payment_method == null){
-          this.order.payment_method = {};
+        if (this.order.payment == null){
+          this.order.payment = {
+             payment_method: {},
+          };
         }
         if (this.order.shipping_method == null){
           this.order.shipping_method = {};
@@ -144,9 +148,9 @@ export default {
                   <div class="col-sm-6">
                     <h5>Payment Information</h5>
                     <p>
-                      Payment Method: {{order.payment_method.display_name}}<br>
+                      Payment Method: {{order.payment.payment_method.display_name}}<br>
                       Currency: {{order.currency.name}}<br>
-                      Payment Amount: {{order.payment_method.amount}}<br>
+                      Payment Amount: {{order.payment.amount}}<br>
                     </p>
                     <h5>Shipping Information</h5>
                     <p>

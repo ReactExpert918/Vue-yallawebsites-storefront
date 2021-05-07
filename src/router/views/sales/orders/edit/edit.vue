@@ -32,7 +32,9 @@ export default {
         currency: {},
         billing_address: {},
         shipping_address: {},
-        payment_method: {},
+        payment: {
+          payment_method:{},
+        },
         shipping_method: {},
         is_cancelable: false,
         is_editable: false,
@@ -151,8 +153,10 @@ export default {
           if (this.order.shipping_address == null){
             this.order.shipping_address = {};
           }
-          if (this.order.payment_method == null){
-            this.order.payment_method = {};
+          if (this.order.payment == null){
+            this.order.payment = {
+              payment_method: {},
+            };
           }
           if (this.order.shipping_method == null){
             this.order.shipping_method = {};

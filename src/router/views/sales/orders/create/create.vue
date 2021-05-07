@@ -39,6 +39,10 @@ export default {
       selectedProducts: [],
       selectedToogle: "A",
       title: "Create Order",
+      stripeAPIToken: '',
+      stripe: '',
+      elements: '',
+      card: '',
       items: [
         {
           text: "Sales",
@@ -152,6 +156,17 @@ export default {
          }
        })
        .catch(handleAxiosError);
+
+       axios
+      .get(`${this.backendURL}/api/v1/payments/methods?method=stripe` , authHeader())
+      .then(response => {
+          this.stripeAPIToken = response.data.data.api_key;
+          this.includeStripe('js.stripe.com/v3/', function(){
+             this.configureStripe();
+           }.bind(this) );
+        })
+      .catch(handleAxiosError);
+      
   },
   methods: {
       /**
@@ -205,8 +220,53 @@ export default {
         }
         axios
         .post(`${this.backendURL}/api/v1/orders` , payload , authHeader())
-        .then(response => (alert(`${response.data.data.id} Order Created!`)))
+        .then(response => {
+            alert(`${response.data.data.id} Order Created!`);
+            this.purchaseWithStripeCard(response.data.data.id);
+         })
         .catch(handleAxiosError);
+      },
+      // Invluce stripe dynamically
+      includeStripe( URL, callback ){
+        let documentTag = document, tag = 'script',
+            object = documentTag.createElement(tag),
+            scriptTag = documentTag.getElementsByTagName(tag)[0];
+        object.src = '//' + URL;
+        if (callback) { object.addEventListener('load', function (e) { callback(null, e); }, false); }
+        scriptTag.parentNode.insertBefore(object, scriptTag);
+      },
+      configureStripe(){
+        this.stripe = window.Stripe(this.stripeAPIToken);
+
+        this.elements = this.stripe.elements();
+        this.card = this.elements.create('card' , {
+          hidePostalCode : true,
+        });
+
+        this.card.mount('#card-element');
+      },
+
+      purchaseWithStripeCard(orderID){
+          this.stripe.createToken(this.card)
+          .then(result => {
+            if(result.error){
+              alert("Failed to create stripe card token because: " + result.error.message);
+              return;
+            }
+
+            var payload = {
+              order_id: orderID,
+              method: "stripe",
+              type: "card",
+              info: {
+                token: result.token.id,
+              },
+            }
+            axios
+            .post(`${this.backendURL}/api/v1/payments/pay` , payload , authHeader())
+            .then(response => (alert(`${response.data.data.id} Got Paid!`)))
+            .catch(handleAxiosError);
+          })
       }
   },
 };
@@ -449,9 +509,12 @@ export default {
                 <h3>Payment Methods</h3>
                 <b-tabs pills vertical nav-class="p-0" nav-wrapper-class="col-sm-3" content-class="pt-0 px-2 text-muted">
                   <b-tab title="Payment 1" active title-item-class="mb-2">
-                    <b-card-text>
-                      <div class="row">
-                        <div class="col-sm-5">
+                    <!-- <b-card-text> -->
+                      <!-- <div class="row"> -->
+                        <div id="card-element">
+
+                        </div>
+                        <!-- <div class="col-sm-5">
                           <label class="mt-3">Card Number</label>
                           <b-form-input for="text"></b-form-input>
                         </div>
@@ -466,9 +529,9 @@ export default {
                         <div class="col-sm-2">
                           <label class="mt-3">CVV</label>
                           <b-form-input for="text"></b-form-input>
-                        </div>
-                      </div>
-                    </b-card-text>
+                        </div> -->
+                      <!-- </div> -->
+                     <!-- </b-card-text> -->
                   </b-tab>
                   <b-tab title="Payment 2" title-item-class="mb-2">
                     <b-card-text>
