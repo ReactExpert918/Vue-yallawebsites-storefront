@@ -3,7 +3,6 @@ import Layout from "../../../../layouts/main";
 import PageHeader from "@/components/page-header";
 
 import { viewData } from "./create-data";
-import { paymentData } from "./create-data";
 import { shippingData } from "./create-data";
 import {
   authHeader,
@@ -28,7 +27,10 @@ export default {
       pageIdentity: "orders",
       backendURL: process.env.VUE_APP_BACKEND_URL,
       viewData: viewData,
-      paymentData: paymentData,
+      paymentData: [],
+      paymentMap: {},
+      currentPayment:{},
+      currentPaymentType: {},
       shippingData: shippingData,
       products: [],
       customers: [],
@@ -158,12 +160,22 @@ export default {
        .catch(handleAxiosError);
 
        axios
-      .get(`${this.backendURL}/api/v1/payments/methods?method=stripe` , authHeader())
+      .get(`${this.backendURL}/api/v1/payments/methods` , authHeader())
       .then(response => {
-          this.stripeAPIToken = response.data.data.api_key;
-          this.includeStripe('js.stripe.com/v3/', function(){
-             this.configureStripe();
-           }.bind(this) );
+          this.paymentData = response.data.data;
+
+          for(var i = 0; i < this.paymentData.length; i++){
+            var pd = this.paymentData[i];
+            if (!(pd.display_name in this.paymentMap)){
+               this.paymentMap[pd.display_name] = pd;
+            }
+            if (pd.display_name == "stripe"){
+                // include stripe library dynamically
+                this.includeStripe('js.stripe.com/v3/' , function(){
+                  this.configureStripe();
+                }.bind(this));
+            }
+          }          
         })
       .catch(handleAxiosError);
       
@@ -222,7 +234,7 @@ export default {
         .post(`${this.backendURL}/api/v1/orders` , payload , authHeader())
         .then(response => {
             alert(`${response.data.data.id} Order Created!`);
-            this.purchaseWithStripeCard(response.data.data.id);
+            this.purchase(response.data.data.id);
          })
         .catch(handleAxiosError);
       },
@@ -236,7 +248,7 @@ export default {
         scriptTag.parentNode.insertBefore(object, scriptTag);
       },
       configureStripe(){
-        this.stripe = window.Stripe(this.stripeAPIToken);
+        this.stripe = window.Stripe(this.paymentMap["stripe"].api_key);
 
         this.elements = this.stripe.elements();
         this.card = this.elements.create('card' , {
@@ -245,7 +257,13 @@ export default {
 
         this.card.mount('#card-element');
       },
-
+       purchase(orderID){
+        if (this.currentPayment.display_name == 'stripe'){
+          if (this.currentPaymentType.method_slug == 'card_payment'){
+            this.purchaseWithStripeCard(orderID)
+          }
+        }
+       },
       purchaseWithStripeCard(orderID){
           this.stripe.createToken(this.card)
           .then(result => {
@@ -263,11 +281,24 @@ export default {
               },
             }
             axios
-            .post(`${this.backendURL}/api/v1/payments/pay` , payload , authHeader())
+            .post(`${this.backendURL}/api/v1/payments/${this.currentPayment.id}/pay` , payload , authHeader())
             .then(response => (alert(`${response.data.data.id} Got Paid!`)))
             .catch(handleAxiosError);
           })
-      }
+      },
+      checkStripeCard(name , type , enabled){
+        if (enabled && name == "stripe" && type == "card_payment"){
+          return true;
+        }
+        return false;
+      },
+      setCurrentPaymentType(checked , type){
+        if (checked){
+          this.currentPaymentType = type;
+        }else{
+          this.currentPaymentType = {};
+        }
+      },
   },
 };
 </script>
@@ -508,12 +539,24 @@ export default {
               <div class="col-sm-12">
                 <h3>Payment Methods</h3>
                 <b-tabs pills vertical nav-class="p-0" nav-wrapper-class="col-sm-3" content-class="pt-0 px-2 text-muted">
-                  <b-tab title="Payment 1" active title-item-class="mb-2">
+                  <b-tab v-for="payment in paymentData" :key="payment.id" :title="payment.on_screen_name" active title-item-class="mb-2" @click="currentPayment = payment">
                     <!-- <b-card-text> -->
                       <!-- <div class="row"> -->
-                        <div id="card-element">
-
+                        <div v-for="type in payment.types" :key="type.method_slug" v-bind:value="type.method_slug">
+                          <div id="card-element" v-if="checkStripeCard(payment.display_name , type.method_slug, type.enabled)">
+                          </div>
+                          <b-form-checkbox v-if="type.enabled" @change="(v)=>setCurrentPaymentType(v, type)" class="custom-checkbox custom-checkbox-primary"></b-form-checkbox>
                         </div>
+
+                        <b-card-text v-if="payment.display_name == 'paypal'">
+                          <div class="col-sm-12">
+                            <b-button variant="primary">
+                                <i class="bx bx-check-double font-size-16 align-middle mr-2"></i>
+                                Pay With Paypal
+                            </b-button>
+                          </div>
+                        </b-card-text>
+                        <!-- </div> -->
                         <!-- <div class="col-sm-5">
                           <label class="mt-3">Card Number</label>
                           <b-form-input for="text"></b-form-input>
@@ -533,7 +576,7 @@ export default {
                       <!-- </div> -->
                      <!-- </b-card-text> -->
                   </b-tab>
-                  <b-tab title="Payment 2" title-item-class="mb-2">
+                  <!-- <b-tab title="Payment 2" title-item-class="mb-2">
                     <b-card-text>
                       <div class="col-sm-12">
                         <b-button variant="primary">
@@ -542,7 +585,7 @@ export default {
                         </b-button>
                       </div>
                     </b-card-text>
-                  </b-tab>
+                  </b-tab> -->
                 </b-tabs>
               </div>
             </div>
