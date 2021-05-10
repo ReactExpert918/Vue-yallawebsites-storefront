@@ -3,7 +3,6 @@ import Layout from "../../../../layouts/main";
 import PageHeader from "@/components/page-header";
 
 import { viewData } from "./create-data";
-import { shippingData } from "./create-data";
 import {
   authHeader,
 } from "@/helpers/authservice/auth-header";
@@ -31,7 +30,7 @@ export default {
       paymentMap: {},
       currentPayment:{},
       currentPaymentType: {},
-      shippingData: shippingData,
+      shippingData: [],
       products: [],
       customers: [],
       selectedCustomer: {
@@ -177,6 +176,11 @@ export default {
             }
           }          
         })
+      .catch(handleAxiosError);
+
+      axios
+      .get(`${this.backendURL}/api/v1/shipping/methods` , authHeader())
+      .then(response => (this.shippingData = response.data.data))
       .catch(handleAxiosError);
       
   },
@@ -523,15 +527,12 @@ export default {
                 <h3>Shipping</h3>
                    <b-form-group>
                     <b-form-radio
+                      v-for="shipping in shippingData"
+                      :key="shipping.id"
                       v-model="selectedToogle"
                       class="custom-radio mb-3"
-                      value="A"
-                    >Shipping 1</b-form-radio>
-                    <b-form-radio
-                      v-model="selectedToogle"
-                      class="custom-radio mb-3"
-                      value="B"
-                    >Shipping 2</b-form-radio>
+                      :value="shipping.id"
+                    >{{shipping.on_screen_name}}</b-form-radio>
                   </b-form-group>
               </div>
             </div>
