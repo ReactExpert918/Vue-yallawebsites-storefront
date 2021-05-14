@@ -369,7 +369,20 @@ export default {
             this.purchaseWithStripeCard(orderID)
           }
         }
+        if (this.currentPayment.display_name == 'paypal'){
+          this.purchaseWithPaypal(orderID);
+        }
        },
+       purchaseWithPaypal(orderID) {
+        var payload = {
+              order_id: orderID,
+              method: "paypal",
+            }
+        axios
+            .post(`${this.backendURL}/api/v1/payments/${this.currentPayment.id}/pay` , payload , authHeader())
+            .then(response => (alert(`${response.data.data.id} Got Paid!`)))
+            .catch(handleAxiosError);
+      },
       purchaseWithStripeCard(orderID){
           this.stripe.createToken(this.card)
           .then(result => {

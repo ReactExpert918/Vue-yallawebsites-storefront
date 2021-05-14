@@ -267,6 +267,9 @@ export default {
             this.purchaseWithStripeCard(orderID)
           }
         }
+        if(this.currentPayment.display_name == 'paypal'){
+          this.purchaseWithPaypal(orderID);
+        }
        },
       purchaseWithStripeCard(orderID){
           this.stripe.createToken(this.card)
@@ -295,6 +298,16 @@ export default {
           return true;
         }
         return false;
+      },
+      purchaseWithPaypal(orderID) {
+        var payload = {
+              order_id: orderID,
+              method: "paypal",
+            }
+        axios
+            .post(`${this.backendURL}/api/v1/payments/${this.currentPayment.id}/pay` , payload , authHeader())
+            .then(response => (alert(`${response.data.data.id} Got Paid!`)))
+            .catch(handleAxiosError);
       },
       setCurrentPaymentType(checked , type){
         if (checked){
