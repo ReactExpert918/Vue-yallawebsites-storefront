@@ -75,6 +75,15 @@ export default {
           alert("You do no have the permission to perform this action!")
           return;
        }
+       // Using hardcoded country code for now as there is no option in front-end for selecting country from a list now, Need to add that and remove the following loops
+      for(var i = 0; i < this.customer.billing_addresses.length; i++){
+        var bi = this.createCustomerPayload.billing_addresses[i];
+        bi.country_code = "UK";
+      }
+      for(var j = 0; j < this.customer.shipping_addresses.length; j++){
+        var si = this.createCustomerPayload.shipping_addresses[j];
+        si.country_code = "UK";
+      }
         axios
         .put(`${this.backendURL}/api/v1/customers/${this.$route.params.id}` , this.customer , authHeader())
         .then(response => (alert(`${response.data.data.id} Updated!`)))
