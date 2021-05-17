@@ -2,8 +2,6 @@
 import Layout from "../../../../layouts/main";
 import PageHeader from "@/components/page-header";
 
-import { paymentData } from "./edit-data";
-import { shippingData } from "./edit-data";
 import axios from "axios";
 import appConfig from "@/app.config";
 import {
@@ -32,7 +30,9 @@ export default {
         currency: {},
         billing_address: {},
         shipping_address: {},
-        payment_method: {},
+        payment: {
+          payment_method:{},
+        },
         shipping_method: {},
         is_cancelable: false,
         is_editable: false,
@@ -40,8 +40,11 @@ export default {
         is_deliverable: false,
         is_refundable: false,
       },
-      paymentData: paymentData,
-      shippingData: shippingData,
+      paymentData: [],
+      paymentMap: {},
+      currentPayment:{},
+      currentPaymentType: {},
+      shippingData: [],
       products: [],
       selectedProducts: [],
       credit_memo: "",
@@ -151,8 +154,10 @@ export default {
           if (this.order.shipping_address == null){
             this.order.shipping_address = {};
           }
-          if (this.order.payment_method == null){
-            this.order.payment_method = {};
+          if (this.order.payment == null){
+            this.order.payment = {
+              payment_method: {},
+            };
           }
           if (this.order.shipping_method == null){
             this.order.shipping_method = {};
@@ -167,6 +172,31 @@ export default {
           }
 
       })
+      .catch(handleAxiosError);
+
+      axios
+      .get(`${this.backendURL}/api/v1/payments/methods` , authHeader())
+      .then(response => {
+          this.paymentData = response.data.data;
+
+          for(var i = 0; i < this.paymentData.length; i++){
+            var pd = this.paymentData[i];
+            if (!(pd.display_name in this.paymentMap)){
+               this.paymentMap[pd.display_name] = pd;
+            }
+            if (pd.display_name == "stripe"){
+                // include stripe library dynamically
+                this.includeStripe('js.stripe.com/v3/' , function(){
+                  this.configureStripe();
+                }.bind(this));
+            }
+          }          
+        })
+      .catch(handleAxiosError);
+
+      axios
+      .get(`${this.backendURL}/api/v1/shipping/methods` , authHeader())
+      .then(response => (this.shippingData = response.data.data))
       .catch(handleAxiosError);
   },
   methods: {
@@ -234,7 +264,7 @@ export default {
         }
         
         axios
-        .delete(`${this.backendURL}/api/v1/orders/${this.$route.params.id}/cancel`  ,{}. authHeader())
+        .delete(`${this.backendURL}/api/v1/orders/${this.$route.params.id}/cancel` , authHeader())
         .then(response => (alert(`${response.data.data.id} Order Cancelled!`)))
         .catch(handleAxiosError);
       },
@@ -312,7 +342,82 @@ export default {
         .post(`${this.backendURL}/api/v1/orders` , payload , authHeader())
         .then(response => (alert(`${response.data.data.id} Order Re-Created!`)))
         .catch(handleAxiosError);
-      }
+      },
+      // Invluce stripe dynamically
+      includeStripe( URL, callback ){
+        let documentTag = document, tag = 'script',
+            object = documentTag.createElement(tag),
+            scriptTag = documentTag.getElementsByTagName(tag)[0];
+        object.src = '//' + URL;
+        if (callback) { object.addEventListener('load', function (e) { callback(null, e); }, false); }
+        scriptTag.parentNode.insertBefore(object, scriptTag);
+      },
+      configureStripe(){
+        this.stripe = window.Stripe(this.paymentMap["stripe"].api_key);
+
+        this.elements = this.stripe.elements();
+        this.card = this.elements.create('card' , {
+          hidePostalCode : true,
+        });
+
+        this.card.mount('#card-element');
+      },
+       purchase(){
+         var orderID = this.$route.params.id;
+        if (this.currentPayment.display_name == 'stripe'){
+          if (this.currentPaymentType.method_slug == 'card_payment'){
+            this.purchaseWithStripeCard(orderID)
+          }
+        }
+        if (this.currentPayment.display_name == 'paypal'){
+          this.purchaseWithPaypal(orderID);
+        }
+       },
+       purchaseWithPaypal(orderID) {
+        var payload = {
+              order_id: orderID,
+              method: "paypal",
+            }
+        axios
+            .post(`${this.backendURL}/api/v1/payments/${this.currentPayment.id}/pay` , payload , authHeader())
+            .then(response => (alert(`${response.data.data.id} Got Paid!`)))
+            .catch(handleAxiosError);
+      },
+      purchaseWithStripeCard(orderID){
+          this.stripe.createToken(this.card)
+          .then(result => {
+            if(result.error){
+              alert("Failed to create stripe card token because: " + result.error.message);
+              return;
+            }
+
+            var payload = {
+              order_id: orderID,
+              method: "stripe",
+              type: "card",
+              info: {
+                token: result.token.id,
+              },
+            }
+            axios
+            .post(`${this.backendURL}/api/v1/payments/${this.currentPayment.id}/pay` , payload , authHeader())
+            .then(response => (alert(`${response.data.data.id} Got Paid!`)))
+            .catch(handleAxiosError);
+          })
+      },
+      checkStripeCard(name , type , enabled){
+        if (enabled && name == "stripe" && type == "card_payment"){
+          return true;
+        }
+        return false;
+      },
+      setCurrentPaymentType(checked , type){
+        if (checked){
+          this.currentPaymentType = type;
+        }else{
+          this.currentPaymentType = {};
+        }
+      },
   },
 };
 </script>
@@ -466,15 +571,12 @@ export default {
                 <h3>Shipping</h3>
                    <b-form-group>
                     <b-form-radio
+                      v-for="shipping in shippingData"
+                      :key="shipping.id"
                       v-model="selectedToogle"
                       class="custom-radio mb-3"
-                      value="A"
-                    >Shipping 1</b-form-radio>
-                    <b-form-radio
-                      v-model="selectedToogle"
-                      class="custom-radio mb-3"
-                      value="B"
-                    >Shipping 2</b-form-radio>
+                      :value="shipping.id"
+                    >{{shipping.on_screen_name}}</b-form-radio>
                   </b-form-group>
               </div>
             </div>
@@ -482,8 +584,22 @@ export default {
               <div class="col-sm-12">
                 <h3>Payment Methods</h3>
                 <b-tabs pills vertical nav-class="p-0" nav-wrapper-class="col-sm-3" content-class="pt-0 px-2 text-muted">
-                  <b-tab title="Payment 1" active title-item-class="mb-2">
-                    <b-card-text>
+                  <b-tab v-for="payment in paymentData" :key="payment.id" :title="payment.on_screen_name" active title-item-class="mb-2" @click="currentPayment = payment">
+                    <div v-for="type in payment.types" :key="type.method_slug" v-bind:value="type.method_slug">
+                          <div id="card-element" v-if="checkStripeCard(payment.display_name , type.method_slug, type.enabled)">
+                          </div>
+                          <b-form-checkbox v-if="type.enabled" @change="(v)=>setCurrentPaymentType(v, type)" class="custom-checkbox custom-checkbox-primary"></b-form-checkbox>
+                    </div>
+
+                    <b-card-text v-if="payment.display_name == 'paypal'">
+                      <div class="col-sm-12">
+                        <b-button variant="primary">
+                            <i class="bx bx-check-double font-size-16 align-middle mr-2"></i>
+                            Pay With Paypal
+                        </b-button>
+                      </div>
+                    </b-card-text>
+                    <!-- <b-card-text>
                       <div class="row">
                         <div class="col-sm-5">
                           <label class="mt-3">Card Number</label>
@@ -502,9 +618,9 @@ export default {
                           <b-form-input for="text"></b-form-input>
                         </div>
                       </div>
-                    </b-card-text>
+                    </b-card-text> -->
                   </b-tab>
-                  <b-tab title="Payment 2" title-item-class="mb-2">
+                  <!-- <b-tab title="Payment 2" title-item-class="mb-2">
                     <b-card-text>
                       <div class="col-sm-12">
                         <b-button variant="primary">
@@ -513,8 +629,12 @@ export default {
                         </b-button>
                       </div>
                     </b-card-text>
-                  </b-tab>
+                  </b-tab> -->
                 </b-tabs>
+                <b-button variant="primary" :disabled="Object.keys(currentPayment).length === 0 && currentPayment.constructor === Object" v-b-modal.modal-getpaid-order>
+                    <i class="bx bx-check-double font-size-16 align-middle mr-2"></i>
+                    Get Paid
+                </b-button>
               </div>
             </div>
             <div class="row card-body">
@@ -638,6 +758,12 @@ export default {
       <p>Are you sure? Pressing Confirm will create a new order from this order.</p>
       <div class="text-right">
         <b-button variant="danger"  @click="reOrder">Confirm</b-button>
+      </div>
+    </b-modal>
+    <b-modal id="modal-getpaid-order" centered title="Get Paid" title-class="font-18" hide-footer>
+      <p>Are you sure? Pressing Confirm will commence the payment from process with customer.</p>
+      <div class="text-right">
+        <b-button variant="danger"  @click="purchase">Confirm</b-button>
       </div>
     </b-modal>
   </Layout>

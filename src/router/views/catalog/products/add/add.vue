@@ -260,6 +260,9 @@ export default {
         for(var j = 0; j < this.currentAttrGroup.attributes.length; j++){
             var attr = this.currentAttrGroup.attributes[j];
             if (attr){
+              if (attr.option_id == ""){
+                continue;
+              }
               this.newProduct.attributes.push({
               id: attr.id,
               value: attr.value,
