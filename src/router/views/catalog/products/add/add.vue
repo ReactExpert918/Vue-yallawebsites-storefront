@@ -724,7 +724,7 @@ export default {
                                             {{attr.name}}
                                           </td>
                                           <td>
-                                            <b-form-input for="text" v-model="attr.value"></b-form-input>
+                                            <b-form-input for="text" v-model="attr.custom_value"></b-form-input>
                                           </td>
                                         </tr>
                                       </tbody>
