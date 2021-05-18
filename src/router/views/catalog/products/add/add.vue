@@ -719,9 +719,13 @@ export default {
                                         </tr>
                                       </thead>
                                       <tbody>
-                                        <tr v-for="(spec , index) in variation.subitem.specs" :key="index">
-                                          <td>{{spec.name}}</td>
-                                          <td>{{spec.value}}</td>
+                                        <tr v-for="attr in currentAttrGroup.attributes" :key="attr.id">
+                                          <td>
+                                            {{attr.name}}
+                                          </td>
+                                          <td>
+                                            <b-form-input for="text" v-model="attr.value"></b-form-input>
+                                          </td>
                                         </tr>
                                       </tbody>
                                     </table>
