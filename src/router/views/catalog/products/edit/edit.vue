@@ -409,7 +409,7 @@ export default {
             varReq.image_name = v.image_name;
             varReq.image_content = v.image_content;
           }
-          if (v.subitem.specs.length > 0) { //TODO: clear up about custom spec selection then un-comment
+          if (v.subitem.specs.length > 0) { 
             var spec = v.subitem.specs[0];
             varReq.custom_specs.push({
               attribute_id: spec.id,
