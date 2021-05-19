@@ -54,6 +54,7 @@ export default {
       variationValue: 'Variation Name',
       variationOptions: [],
       variationRequired: false,
+      custom_specs: [],
       title: "Edit Product",
       items: [
         {
@@ -206,7 +207,9 @@ export default {
             if (grp){
               this.currentAttrGroup = grp;
             }
-         }          
+         }
+        
+         this.custom_specs = this.currentAttrGroup.attributes;
 
           this.productData.delete_image_urls = [];
 
@@ -240,12 +243,15 @@ export default {
                   specs: [],
                 }
               }
-              if (v.customer_spec){
-                v.specs.push({
-                  id: v.custom_spec.attribute_id,
-                  name: v.custom_spec.attribute_name,
-                  value: v.custom_spec.value,
+              if (v.custom_specs.length > 0){
+                v.custom_specs.forEach((cs) => {
+                  varData.subitem.specs.push({
+                    id: cs.attribute_id,
+                    name: cs.attribute_name,
+                    custom_value: cs.value,
+                  })
                 })
+                
               }
 
               this.variations.push(varData);
@@ -397,6 +403,7 @@ export default {
             sale_price: parseFloat(v.subitem.saleprice),
             sku: v.subitem.sku,
             ean: v.subitem.ean,
+            custom_specs: [],
           }
           if (v.image_name){
             varReq.image_name = v.image_name;
@@ -404,8 +411,10 @@ export default {
           }
           if (v.subitem.specs.length > 0) { //TODO: clear up about custom spec selection then un-comment
             var spec = v.subitem.specs[0];
-            varReq.attribute_id = spec.id;
-            varReq.value = spec.value;
+            varReq.custom_specs.push({
+              attribute_id: spec.id,
+              value: spec.custom_value,
+            });
           }
           productReq.variations.push(varReq);
         })
@@ -497,6 +506,21 @@ export default {
           required: false
         }
         this.variationsData.push(variation)
+      },
+      addVariationSpec(variation , spec, selected){
+        if (selected){
+          variation.subitem.specs.push(spec);
+        }else{
+          variation.subitem.specs = variation.subitem.specs.filter(item => item.id !== spec.id);
+        }
+      },
+      isCustomSpecSelected(specID , varSpecs){
+        for(var i = 0; i < varSpecs.length; i++){
+          if (varSpecs[i].id == specID){
+            return true;
+          }
+        }
+        return false;
       },
       handleVariationImageUpload(file , variation){
         this.getBase64(file).
@@ -820,14 +844,16 @@ export default {
                                     <table class="table table-striped mb-0">
                                       <thead>
                                         <tr>
+                                          <th>Select</th>
                                           <th>Attribute</th>
                                           <th>Value</th>
                                         </tr>
                                       </thead>
                                       <tbody>
-                                        <tr v-for="(spec , index) in variation.subitem.specs" :key="index">
+                                        <tr v-for="spec in custom_specs" :key="spec.id">
+                                          <td><b-form-checkbox switch size="lg" :checked="isCustomSpecSelected(spec.id , variation.subitem.specs)" v-on:change="(selected) => addVariationSpec(variation , spec , selected)"></b-form-checkbox></td>
                                           <td>{{spec.name}}</td>
-                                          <td>{{spec.value}}</td>
+                                          <td><b-form-input for="text" v-model="spec.custom_value"></b-form-input></td>
                                         </tr>
                                       </tbody>
                                     </table>
