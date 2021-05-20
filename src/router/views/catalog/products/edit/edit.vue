@@ -14,6 +14,7 @@ import {
 } from "@/helpers/authservice/auth-header";
 import {handleAxiosError} from "@/helpers/authservice/user.service";
 import {roleService} from "@/helpers/authservice/roles";
+import {copyArrayOfObjects} from "@/helpers/common";
 
 /**
  * Pages component
@@ -241,7 +242,8 @@ export default {
                   ean: v.ean,
                   customImage: v.image,
                   specs: [],
-                }
+                },
+                custom_specs: copyArrayOfObjects(this.custom_specs),
               }
               if (v.custom_specs.length > 0){
                 v.custom_specs.forEach((cs) => {
@@ -419,14 +421,14 @@ export default {
           productReq.variations.push(varReq);
         })
 
-
-        axios
-        .put(`${this.backendURL}/api/v1/products/${this.$route.params.id}` , productReq , authHeader())
-        .then(response => {
-          alert(`${response.data.data.id} Product Updated!`);
-          this.$refs.myVueDropzone.processQueue();
-        })
-        .catch(handleAxiosError);
+        window.console.log(productReq);
+        // axios
+        // .put(`${this.backendURL}/api/v1/products/${this.$route.params.id}` , productReq , authHeader())
+        // .then(response => {
+        //   alert(`${response.data.data.id} Product Updated!`);
+        //   this.$refs.myVueDropzone.processQueue();
+        // })
+        // .catch(handleAxiosError);
       },
 
       deleteProduct(){
@@ -485,6 +487,7 @@ export default {
               ean: '',
               specs: [] 
             },
+            custom_specs: copyArrayOfObjects(this.custom_specs),
           }   
           tag.options = i      
           this.variations.push(tag)  
@@ -850,7 +853,7 @@ export default {
                                         </tr>
                                       </thead>
                                       <tbody>
-                                        <tr v-for="spec in custom_specs" :key="spec.id">
+                                        <tr v-for="spec in variation.custom_specs" :key="spec.id">
                                           <td><b-form-checkbox switch size="lg" :checked="isCustomSpecSelected(spec.id , variation.subitem.specs)" v-on:change="(selected) => addVariationSpec(variation , spec , selected)"></b-form-checkbox></td>
                                           <td>{{spec.name}}</td>
                                           <td><b-form-input for="text" v-model="spec.custom_value"></b-form-input></td>

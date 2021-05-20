@@ -13,6 +13,7 @@ import {
 } from "@/helpers/authservice/auth-header";
 import {handleAxiosError} from "@/helpers/authservice/user.service";
 import {roleService} from "@/helpers/authservice/roles";
+import {copyArrayOfObjects} from "@/helpers/common";
 
 /**
  * Pages component
@@ -185,6 +186,7 @@ export default {
           this.custom_specs = this.currentAttrGroup.attributes;
           for(var i = 0; i < this.variations.length; i++){
             this.variations[i].subitem.specs = [];
+            this.variations[i].custom_specs = copyArrayOfObjects(this.custom_specs);
           }
         }
       }
@@ -321,15 +323,15 @@ export default {
           this.newProduct.variations.push(varReq);
         })
 
-
-        axios
-        .post(`${this.backendURL}/api/v1/products` , this.newProduct , authHeader())
-        .then(response => {
-          alert(`${response.data.data.id} Product Created!`);
-          this.$refs.myVueDropzone.setOption("url" , `${this.backendURL}/api/v1/products/${response.data.data.id}/upload`);
-          this.$refs.myVueDropzone.processQueue();
-         })
-        .catch(handleAxiosError);
+        window.console.log(this.newProduct);
+        // axios
+        // .post(`${this.backendURL}/api/v1/products` , this.newProduct , authHeader())
+        // .then(response => {
+        //   alert(`${response.data.data.id} Product Created!`);
+        //   this.$refs.myVueDropzone.setOption("url" , `${this.backendURL}/api/v1/products/${response.data.data.id}/upload`);
+        //   this.$refs.myVueDropzone.processQueue();
+        //  })
+        // .catch(handleAxiosError);
       },
       isBundleID(id){
         return this.newProduct.bundle_ids.indexOf(id) > -1;
@@ -357,11 +359,11 @@ export default {
         this.tempArr2 = this.cartesianProduct(this.tempArr)
         this.tempArr2.forEach( i => {
           let tag = {
-            id: 1,
+            id: this.variations.length+1,
             name: this.variationsData[id].name,
             options: [],
             subitem: { 
-                    id: 1,
+                    id: this.variations.length+1,
                     price: 0.0,
                     qty: 0,
                     sku: '',
@@ -369,7 +371,8 @@ export default {
                     saleprice: 0.0,
                     ean: '',
                     specs: [], 
-            }
+            },
+            custom_specs: copyArrayOfObjects(this.custom_specs), // this is a temporary one
           }   
           tag.options = i      
           this.variations.push(tag)  
@@ -744,7 +747,7 @@ export default {
                                         </tr>
                                       </thead>
                                       <tbody>
-                                        <tr v-for="spec in custom_specs" :key="spec.id">
+                                        <tr v-for="spec in variation.custom_specs" :key="spec.id">
                                           <td>
                                             <b-form-checkbox switch size="lg" v-on:change="(selected) => addVariationSpec(variation , spec , selected)"></b-form-checkbox>
                                           </td>
