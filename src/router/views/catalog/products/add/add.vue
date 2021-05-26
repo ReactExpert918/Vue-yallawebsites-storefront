@@ -13,6 +13,7 @@ import {
 } from "@/helpers/authservice/auth-header";
 import {handleAxiosError} from "@/helpers/authservice/user.service";
 import {roleService} from "@/helpers/authservice/roles";
+import {copyArrayOfObjects} from "@/helpers/common";
 
 /**
  * Pages component
@@ -65,7 +66,7 @@ export default {
       variationValue: 'Variation Name',
       variationOptions: [],
       variationRequired: false,
-
+      custom_specs: [],
       variationsData: [],
       title: "Add Product",
       items: [
@@ -175,6 +176,20 @@ export default {
       rows() {
           return this.allProductsData.length;
       },
+
+      currentAttributeGroupHandler:{
+        get(){
+          return this.currentAttrGroup;
+        },
+        set(newGrp){
+          this.currentAttrGroup = newGrp;
+          this.custom_specs = this.currentAttrGroup.attributes;
+          for(var i = 0; i < this.variations.length; i++){
+            this.variations[i].subitem.specs = [];
+            this.variations[i].custom_specs = copyArrayOfObjects(this.custom_specs);
+          }
+        }
+      }
   },
   mounted() {
       axios
@@ -230,7 +245,7 @@ export default {
               this.attrGroups[i].attributes = this.attrGrpMap[this.attrGroups[i].id];
             }
          }
-        
+        this.custom_specs = this.currentAttrGroup.attributes;
       })
       .catch(handleAxiosError);
 
@@ -291,28 +306,32 @@ export default {
             sale_price: parseFloat(v.subitem.saleprice),
             sku: v.subitem.sku,
             ean: v.subitem.ean,
+            custom_specs: [],
           }
           if (v.image_name){
             varReq.image_name = v.image_name;
             varReq.image_content = v.image_content;
           }
-          if (v.subitem.specs.length > 0) { //TODO: clear up about custom spec selection then un-comment
-            var spec = v.subitem.specs[0];
-            varReq.attribute_id = spec.id;
-            varReq.value = spec.value;
-          }
+
+          v.subitem.specs.forEach((spec) => {
+            varReq.custom_specs.push({
+              attribute_id: spec.id,
+              value: spec.custom_value,
+            })
+          })
+  
           this.newProduct.variations.push(varReq);
         })
 
-
-        axios
-        .post(`${this.backendURL}/api/v1/products` , this.newProduct , authHeader())
-        .then(response => {
-          alert(`${response.data.data.id} Product Created!`);
-          this.$refs.myVueDropzone.setOption("url" , `${this.backendURL}/api/v1/products/${response.data.data.id}/upload`);
-          this.$refs.myVueDropzone.processQueue();
-         })
-        .catch(handleAxiosError);
+        window.console.log(this.newProduct);
+        // axios
+        // .post(`${this.backendURL}/api/v1/products` , this.newProduct , authHeader())
+        // .then(response => {
+        //   alert(`${response.data.data.id} Product Created!`);
+        //   this.$refs.myVueDropzone.setOption("url" , `${this.backendURL}/api/v1/products/${response.data.data.id}/upload`);
+        //   this.$refs.myVueDropzone.processQueue();
+        //  })
+        // .catch(handleAxiosError);
       },
       isBundleID(id){
         return this.newProduct.bundle_ids.indexOf(id) > -1;
@@ -340,19 +359,20 @@ export default {
         this.tempArr2 = this.cartesianProduct(this.tempArr)
         this.tempArr2.forEach( i => {
           let tag = {
-            id: 1,
+            id: this.variations.length+1,
             name: this.variationsData[id].name,
             options: [],
             subitem: { 
-                    id: 1,
+                    id: this.variations.length+1,
                     price: 0.0,
                     qty: 0,
                     sku: '',
                     costprice: 0.0,
                     saleprice: 0.0,
                     ean: '',
-                    specs: [] 
-            }
+                    specs: [], 
+            },
+            custom_specs: copyArrayOfObjects(this.custom_specs), // this is a temporary one
           }   
           tag.options = i      
           this.variations.push(tag)  
@@ -371,6 +391,13 @@ export default {
           required: false
         }
         this.variationsData.push(variation)
+      },
+      addVariationSpec(variation , spec, selected){
+        if (selected){
+          variation.subitem.specs.push(spec);
+        }else{
+          variation.subitem.specs = variation.subitem.specs.filter(item => item.id !== spec.id);
+        }
       },
       cartesianProduct(arr) {
           return arr.reduce(function(a,b){
@@ -433,7 +460,7 @@ export default {
           reader.onload = () => resolve(reader.result);
           reader.onerror = error => reject(error);
         })
-      }
+      },
   },
 };
 </script>
@@ -564,7 +591,7 @@ export default {
                 <div class="col-sm-9"><h4 class="card-title mt-3">Attributes</h4></div>
                 <div class="col-sm-3">
                   <label>Attribute Group</label>
-                  <select class="custom-select"  v-model="currentAttrGroup">
+                  <select class="custom-select"  v-model="currentAttributeGroupHandler">
                       <option v-for="group in attrGroups" v-bind:value="group" :key="group.id">{{group.name}}</option>
                     </select>
                 </div>
@@ -714,14 +741,22 @@ export default {
                                     <table class="table table-striped mb-0">
                                       <thead>
                                         <tr>
+                                          <th>Select</th>
                                           <th>Attribute</th>
                                           <th>Value</th>
                                         </tr>
                                       </thead>
                                       <tbody>
-                                        <tr v-for="(spec , index) in variation.subitem.specs" :key="index">
-                                          <td>{{spec.name}}</td>
-                                          <td>{{spec.value}}</td>
+                                        <tr v-for="spec in variation.custom_specs" :key="spec.id">
+                                          <td>
+                                            <b-form-checkbox switch size="lg" v-on:change="(selected) => addVariationSpec(variation , spec , selected)"></b-form-checkbox>
+                                          </td>
+                                          <td>
+                                            {{spec.name}}
+                                          </td>
+                                          <td>
+                                            <b-form-input for="text" v-model="spec.custom_value"></b-form-input>
+                                          </td>
                                         </tr>
                                       </tbody>
                                     </table>

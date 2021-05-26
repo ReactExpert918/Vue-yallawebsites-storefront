@@ -5,9 +5,10 @@ import i18n from "../i18n";
 
 import simplebar from "simplebar-vue";
 
+import { getLoggedInUser , handleAxiosError} from "@/helpers/authservice/user.service";
 import {
-  getLoggedInUser
-} from "@/helpers/authservice/user.service";
+  authHeader,
+} from "@/helpers/authservice/auth-header";
 
 /**
  * Nav-bar Component
@@ -16,6 +17,12 @@ export default {
   data() {
     return {
       backendURL: process.env.VUE_APP_BACKEND_URL,
+      notifications: [],
+      notificationCount: 0,
+      notificationsPerPage: 5,
+      notificationsCurrentPage: 1,
+      interval: undefined,
+      notificationInterval: 60000, //milliseconds
       user: {},
       languages: [
         {
@@ -56,6 +63,20 @@ export default {
     this.text = this.value.title;
     this.flag = this.value.flag;
     this.user = getLoggedInUser();
+
+    
+    axios
+    .get(`${this.backendURL}/api/v1/notifications/unseen/count` , authHeader())
+    .then(response => (this.notificationCount = response.data.data.count))
+    .catch(handleAxiosError);
+
+    this.interval = setInterval(() => {
+      axios
+      .get(`${this.backendURL}/api/v1/notifications/unseen/count` , authHeader())
+      .then(response => (this.notificationCount = response.data.data.count))
+      .catch(handleAxiosError);
+    } , this.notificationInterval);
+  
   },
   methods: {
     toggleMenu() {
@@ -105,6 +126,22 @@ export default {
         });
       });
     },
+    fetchNotifications(){
+     axios
+    .get(`${this.backendURL}/api/v1/notifications?per_page=${this.notificationsPerPage}&page=${this.notificationsCurrentPage}` , authHeader())
+    .then(response => {
+      this.notifications = response.data.data;
+      var nc = 0;
+      for(var i = 0; i < this.notifications.length; i++){
+        var noti = this.notifications[i];
+        if (!noti.seen){
+          nc++;
+        }
+      }
+      this.notificationCount-= nc;
+     })
+    .catch(handleAxiosError);
+    }
   },
 };
 </script>
@@ -504,11 +541,12 @@ export default {
           menu-class="dropdown-menu-lg p-0"
           toggle-class="header-item noti-icon"
           variant="black"
+          v-on:shown="fetchNotifications()"
         >
           <template v-slot:button-content>
             <i class="bx bx-bell bx-tada"></i>
-            <span class="badge badge-danger badge-pill">{{
-              $t("navbar.dropdown.notification.badge")
+            <span v-if="notificationCount > 0" class="badge badge-danger badge-pill">{{
+              notificationCount
             }}</span>
           </template>
 
@@ -526,8 +564,8 @@ export default {
               </div>
             </div>
           </div>
-          <simplebar style="max-height: 230px">
-            <a href="javascript: void(0);" class="text-reset notification-item">
+          <simplebar style="max-height: 230px" >
+            <!-- <a href="javascript: void(0);" class="text-reset notification-item">
               <div class="media">
                 <div class="avatar-xs mr-3">
                   <span
@@ -551,8 +589,8 @@ export default {
                   </div>
                 </div>
               </div>
-            </a>
-            <a href="javascript: void(0);" class="text-reset notification-item">
+            </a> -->
+            <a href="javascript: void(0);" class="text-reset notification-item" v-for="notification in notifications" :key="notification.id">
               <div class="media">
                 <img
                   src="@/assets/images/users/avatar-3.jpg"
@@ -561,21 +599,21 @@ export default {
                 />
                 <div class="media-body">
                   <h6 class="mt-0 mb-1">
-                    {{ $t("navbar.dropdown.notification.james.title") }}
+                    {{ notification.title }}
                   </h6>
                   <div class="font-size-12 text-muted">
                     <p class="mb-1">
-                      {{ $t("navbar.dropdown.notification.james.text") }}
+                      {{ notification.body }}
                     </p>
                     <p class="mb-0">
                       <i class="mdi mdi-clock-outline"></i>
-                      {{ $t("navbar.dropdown.notification.james.time") }}
+                      {{ notification.created_at }}
                     </p>
                   </div>
                 </div>
               </div>
             </a>
-            <a href="javascript: void(0);" class="text-reset notification-item">
+            <!-- <a href="javascript: void(0);" class="text-reset notification-item">
               <div class="media">
                 <div class="avatar-xs mr-3">
                   <span
@@ -622,7 +660,7 @@ export default {
                   </div>
                 </div>
               </div>
-            </a>
+            </a> -->
           </simplebar>
           <div class="p-2 border-top">
             <a
