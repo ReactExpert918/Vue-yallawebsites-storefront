@@ -19,6 +19,8 @@ export default {
       backendURL: process.env.VUE_APP_BACKEND_URL,
       notifications: [],
       notificationCount: "",
+      notificationsPerPage: 5,
+      notificationsCurrentPage: 1,
       user: {},
       languages: [
         {
@@ -61,12 +63,12 @@ export default {
     this.user = getLoggedInUser();
 
     axios
-    .get(`${this.backendURL}/api/v1/notifications` , authHeader())
+    .get(`${this.backendURL}/api/v1/notifications?per_page=${this.notificationsPerPage}&page=${this.notificationsCurrentPage}` , authHeader())
     .then(response => {
        this.notifications  = response.data.data;
        var nc = 0;
        for(var i = 0; i < this.notifications.length; i++){
-         if (this.notifications[i].seen){
+         if (!this.notifications[i].seen){
            nc++;
          }
        }
