@@ -18,9 +18,11 @@ export default {
     return {
       backendURL: process.env.VUE_APP_BACKEND_URL,
       notifications: [],
-      notificationCount: "",
+      notificationCount: 0,
       notificationsPerPage: 5,
       notificationsCurrentPage: 1,
+      interval: undefined,
+      notificationInterval: 60000, //milliseconds
       user: {},
       languages: [
         {
@@ -62,21 +64,19 @@ export default {
     this.flag = this.value.flag;
     this.user = getLoggedInUser();
 
+    
     axios
-    .get(`${this.backendURL}/api/v1/notifications?per_page=${this.notificationsPerPage}&page=${this.notificationsCurrentPage}` , authHeader())
-    .then(response => {
-       this.notifications  = response.data.data;
-       var nc = 0;
-       for(var i = 0; i < this.notifications.length; i++){
-         if (!this.notifications[i].seen){
-           nc++;
-         }
-       }
-       if (nc > 0){
-         this.notificationCount = nc.toString();
-       }
-    })
+    .get(`${this.backendURL}/api/v1/notifications/unseen/count` , authHeader())
+    .then(response => (this.notificationCount = response.data.data.count))
     .catch(handleAxiosError);
+
+    this.interval = setInterval(() => {
+      axios
+      .get(`${this.backendURL}/api/v1/notifications/unseen/count` , authHeader())
+      .then(response => (this.notificationCount = response.data.data.count))
+      .catch(handleAxiosError);
+    } , this.notificationInterval);
+  
   },
   methods: {
     toggleMenu() {
@@ -126,6 +126,22 @@ export default {
         });
       });
     },
+    fetchNotifications(){
+     axios
+    .get(`${this.backendURL}/api/v1/notifications?per_page=${this.notificationsPerPage}&page=${this.notificationsCurrentPage}` , authHeader())
+    .then(response => {
+      this.notifications = response.data.data;
+      var nc = 0;
+      for(var i = 0; i < this.notifications.length; i++){
+        var noti = this.notifications[i];
+        if (!noti.seen){
+          nc++;
+        }
+      }
+      this.notificationCount-= nc;
+     })
+    .catch(handleAxiosError);
+    }
   },
 };
 </script>
@@ -525,10 +541,11 @@ export default {
           menu-class="dropdown-menu-lg p-0"
           toggle-class="header-item noti-icon"
           variant="black"
+          v-on:shown="fetchNotifications()"
         >
           <template v-slot:button-content>
             <i class="bx bx-bell bx-tada"></i>
-            <span class="badge badge-danger badge-pill">{{
+            <span v-if="notificationCount > 0" class="badge badge-danger badge-pill">{{
               notificationCount
             }}</span>
           </template>
