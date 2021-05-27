@@ -593,7 +593,7 @@ export default {
             <a href="javascript: void(0);" class="text-reset notification-item" v-for="notification in notifications" :key="notification.id">
               <div class="media">
                 <img
-                  src="@/assets/images/users/avatar-3.jpg"
+                  :src="notification.image"
                   class="mr-3 rounded-circle avatar-xs"
                   alt="user-pic"
                 />
