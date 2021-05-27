@@ -132,7 +132,7 @@ export default {
                 <div class="media">
                   <div class="mr-3">
                     <img
-                      src="@/assets/images/users/avatar-1.jpg"
+                      :src="user.profile_picture"
                       alt
                       class="avatar-md rounded-circle img-thumbnail"
                     />
