@@ -3,6 +3,7 @@ import Layout from "../../../layouts/main";
 import PageHeader from "@/components/page-header";
 import axios from "axios";
 import appConfig from "@/app.config";
+import vue2Dropzone from "vue2-dropzone";
 import {
   authHeader,
 } from "@/helpers/authservice/auth-header";
@@ -17,7 +18,7 @@ export default {
     title: "Users",
     meta: [{ name: "description", content: appConfig.description }]
   },
-  components: { Layout, PageHeader },
+  components: { Layout, PageHeader ,  vueDropzone: vue2Dropzone,},
   data() {
     return {
       pageIdentity: "user_management",
@@ -91,6 +92,14 @@ export default {
           },
       ],
       lgchecked: '',
+      dropzoneOptions: {
+        url: `${process.env.VUE_APP_BACKEND_URL}/api/v1/users/upload`,
+        // thumbnailWidth: 75,
+        paramName: "profile_picture_image",
+        maxFilesize: 200,
+        headers: authHeader().headers,
+        autoProcessQueue: false,
+      }
     };
   },
   computed: {
@@ -174,7 +183,11 @@ export default {
         this.createUserPayload.role_id = this.currentRoleID
         axios
         .post(`${this.backendURL}/api/v1/users` , this.createUserPayload , authHeader())
-        .then(response => (alert(`${response.data.data.id} Created!`)))
+        .then(response => {
+            alert(`${response.data.data.id} Created!`);
+            this.$refs.vueCreateDropzone.setOption("url" , `${this.backendURL}/api/v1/users/${response.data.data.id}/upload`);
+            this.$refs.vueCreateDropzone.processQueue();
+         })
         .catch(handleAxiosError);
       },
       updateUser(e){
@@ -186,7 +199,10 @@ export default {
         this.currentUser.role_id = this.currentUser.role.id;
         axios
         .put(`${this.backendURL}/api/v1/users/${this.currentUser.id}` , this.currentUser , authHeader())
-        .then(response => (alert(`${response.data.data.id} Updated!`)))
+        .then(response => {
+          alert(`${response.data.data.id} Updated!`);
+          this.$refs.myVueDropzone.processQueue();
+         })
         .catch(handleAxiosError);
       },
       isUserRole(role) {
@@ -210,7 +226,10 @@ export default {
         }else{
           contentArr.splice(contentArr.indexOf(contentID) , 1);
         }
-      }
+      },
+      handleImageUpload(){
+        this.$refs.myVueDropzone.setOption("url" , `${this.backendURL}/api/v1/users/${this.currentUser.id}/upload`);
+      },
   },
 };
 </script>
@@ -349,6 +368,20 @@ export default {
               <label class="mt-3">Password Confirmation</label>
               <b-form-input type="password" for="password" value="" v-model="createUserPayload.password_confirmation"></b-form-input>
             </div>
+            <div class="col-md-6">
+                  <label class="mt-3">Profile Picture</label>
+                  <vue-dropzone
+                    id="createDropzone"
+                    ref="vueCreateDropzone"
+                    :use-custom-slot="true"
+                    :options="dropzoneOptions"
+                  >
+                      <div class="dropzone-custom-content">
+                        <i class="display-4 text-muted bx bxs-cloud-upload"></i>
+                        <h4>Drop files here or click to upload.</h4>
+                      </div>
+                  </vue-dropzone>
+            </div>
           </div>
         </b-tab>
         <b-tab>
@@ -445,6 +478,19 @@ export default {
               <b-form-input for="text" v-model="currentUser.email"></b-form-input>
               <label class="mt-3">Password Confirmation</label>
               <b-form-input type="password" for="text" value="" v-model="currentUser.password_confirmation"></b-form-input>
+              <label class="mt-3">Profile Picture</label>
+              <vue-dropzone
+                id="dropzone"
+                ref="myVueDropzone"
+                :use-custom-slot="true"
+                :options="dropzoneOptions"
+                @vdropzone-file-added="handleImageUpload"
+              >
+                <div class="dropzone-custom-content">
+                  <i class="display-4 text-muted bx bxs-cloud-upload"></i>
+                  <h4>Drop files here or click to upload.</h4>
+                </div>
+              </vue-dropzone>
             </div>
           </div>
         </b-tab>
