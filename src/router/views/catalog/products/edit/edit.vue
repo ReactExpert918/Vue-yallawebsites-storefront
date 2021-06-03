@@ -525,8 +525,8 @@ export default {
       },
       isCustomSpecSelected(spec , varSpecs){
         for(var i = 0; i < varSpecs.length; i++){
-          spec.custom_value = varSpecs[i].custom_value;
           if (varSpecs[i].id == spec.id){
+            spec.custom_value = varSpecs[i].custom_value;
             return true;
           }
         }
