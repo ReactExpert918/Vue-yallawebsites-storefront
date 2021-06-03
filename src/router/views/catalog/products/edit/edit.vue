@@ -412,10 +412,16 @@ export default {
             varReq.image_content = v.image_content;
           }
           if (v.subitem.specs.length > 0) { 
-            var spec = v.subitem.specs[0];
-            varReq.custom_specs.push({
-              attribute_id: spec.id,
-              value: spec.custom_value,
+            var csValObj = {};
+            v.custom_specs.forEach((cs) => {
+              csValObj[cs.id] = cs.custom_value;
+            });
+            window.console.log(csValObj);
+            v.subitem.specs.forEach((s) => {
+              varReq.custom_specs.push({
+                attribute_id: s.id,
+                value: csValObj[s.id],
+              });
             });
           }
           productReq.variations.push(varReq);
@@ -514,12 +520,13 @@ export default {
         if (selected){
           variation.subitem.specs.push(spec);
         }else{
-          variation.subitem.specs = variation.subitem.specs.filter(item => item.id !== spec.id);
+          variation.subitem.specs = variation.subitem.specs.filter(item => item.id !== spec.id); // removing spec from variation if unchecked is toggled
         }
       },
-      isCustomSpecSelected(specID , varSpecs){
+      isCustomSpecSelected(spec , varSpecs){
         for(var i = 0; i < varSpecs.length; i++){
-          if (varSpecs[i].id == specID){
+          spec.custom_value = varSpecs[i].custom_value;
+          if (varSpecs[i].id == spec.id){
             return true;
           }
         }
@@ -854,7 +861,7 @@ export default {
                                       </thead>
                                       <tbody>
                                         <tr v-for="spec in variation.custom_specs" :key="spec.id">
-                                          <td><b-form-checkbox switch size="lg" :checked="isCustomSpecSelected(spec.id , variation.subitem.specs)" v-on:change="(selected) => addVariationSpec(variation , spec , selected)"></b-form-checkbox></td>
+                                          <td><b-form-checkbox switch size="lg" :checked="isCustomSpecSelected(spec , variation.subitem.specs)" v-on:change="(selected) => addVariationSpec(variation , spec , selected)"></b-form-checkbox></td>
                                           <td>{{spec.name}}</td>
                                           <td><b-form-input for="text" v-model="spec.custom_value"></b-form-input></td>
                                         </tr>
