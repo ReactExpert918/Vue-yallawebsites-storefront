@@ -70,12 +70,12 @@ export default {
     .then(response => (this.notificationCount = response.data.data.count))
     .catch(handleAxiosError);
 
-    this.interval = setInterval(() => {
-      axios
-      .get(`${this.backendURL}/api/v1/notifications/unseen/count` , authHeader())
-      .then(response => (this.notificationCount = response.data.data.count))
-      .catch(handleAxiosError);
-    } , this.notificationInterval);
+    // this.interval = setInterval(() => {
+    //   axios
+    //   .get(`${this.backendURL}/api/v1/notifications/unseen/count` , authHeader())
+    //   .then(response => (this.notificationCount = response.data.data.count))
+    //   .catch(handleAxiosError);
+    // } , this.notificationInterval);
   
   },
   methods: {
