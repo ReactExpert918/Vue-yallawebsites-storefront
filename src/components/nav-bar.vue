@@ -10,6 +10,28 @@ import {
   authHeader,
 } from "@/helpers/authservice/auth-header";
 
+// import VueSocketIO from 'vue-socket.io';
+// import Vue from 'vue';
+
+// var options =  { 
+//   autoConnect: false, 
+//   reconnection: true, 
+//   reconnectionDelay: 5000, 
+//   reconnectionDelayMax : 20000, 
+//   reconnectionAttempts: 100,
+//   transportOptions: {
+//     polling: {
+//       extraHeaders: authHeader(),
+//     }
+//   }
+// };
+
+// Vue.use(new VueSocketIO({
+//     debug: false,
+//     connection: 'ws://localhost:8000/api/v1/notifications/socket',
+//     options: options,
+// }))
+
 /**
  * Nav-bar Component
  */
@@ -69,6 +91,21 @@ export default {
     .get(`${this.backendURL}/api/v1/notifications/unseen/count` , authHeader())
     .then(response => (this.notificationCount = response.data.data.count))
     .catch(handleAxiosError);
+
+
+    //  this.$socket.extraHeaders = authHeader();
+    // this.$socket.open();
+    // this.$socket.emit("join");
+
+    var ws = new WebSocket('ws://localhost:8000/api/v1/notifications/socket');
+
+    ws.onopen = function() {
+      window.console.log('Connected')
+    }
+
+    ws.onmessage = function(evt) {
+      alert(evt.data);
+    }
 
     // this.interval = setInterval(() => {
     //   axios
