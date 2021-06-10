@@ -10,27 +10,6 @@ import {
   authHeader,
 } from "@/helpers/authservice/auth-header";
 
-// import VueSocketIO from 'vue-socket.io';
-// import Vue from 'vue';
-
-// var options =  { 
-//   autoConnect: false, 
-//   reconnection: true, 
-//   reconnectionDelay: 5000, 
-//   reconnectionDelayMax : 20000, 
-//   reconnectionAttempts: 100,
-//   transportOptions: {
-//     polling: {
-//       extraHeaders: authHeader(),
-//     }
-//   }
-// };
-
-// Vue.use(new VueSocketIO({
-//     debug: false,
-//     connection: 'ws://localhost:8000/api/v1/notifications/socket',
-//     options: options,
-// }))
 
 /**
  * Nav-bar Component
@@ -39,6 +18,7 @@ export default {
   data() {
     return {
       backendURL: process.env.VUE_APP_BACKEND_URL,
+      socketURL: process.env.VUE_APP_BACKEND_SOCKET_URL,
       notifications: [],
       notificationCount: 0,
       notificationsPerPage: 5,
@@ -86,6 +66,8 @@ export default {
     this.flag = this.value.flag;
     this.user = getLoggedInUser();
 
+
+
     
     axios
     .get(`${this.backendURL}/api/v1/notifications/unseen/count` , authHeader())
@@ -93,26 +75,14 @@ export default {
     .catch(handleAxiosError);
 
 
-    //  this.$socket.extraHeaders = authHeader();
-    // this.$socket.open();
-    // this.$socket.emit("join");
+    var ws = new WebSocket(`${this.socketURL}/api/v1/socket/notifications?token=${this.user.token}`);
 
-    var ws = new WebSocket('ws://localhost:8000/api/v1/notifications/socket');
+    // ws.onopen = function() {
+    //   window.console.log('Connected')
+    // }
 
-    ws.onopen = function() {
-      window.console.log('Connected')
-    }
+    ws.onmessage = (evt) => this.processNewNotification(evt);
 
-    ws.onmessage = function(evt) {
-      alert(evt.data);
-    }
-
-    // this.interval = setInterval(() => {
-    //   axios
-    //   .get(`${this.backendURL}/api/v1/notifications/unseen/count` , authHeader())
-    //   .then(response => (this.notificationCount = response.data.data.count))
-    //   .catch(handleAxiosError);
-    // } , this.notificationInterval);
   
   },
   methods: {
@@ -178,6 +148,13 @@ export default {
       this.notificationCount-= nc;
      })
     .catch(handleAxiosError);
+    },
+    processNewNotification(evt){
+      window.console.log(this.notificationCount);
+      var newNotification = evt.data;
+      if (newNotification.id != ""){
+        this.notificationCount++;
+      }
     }
   },
 };
