@@ -412,23 +412,23 @@ export default {
             varReq.image_content = v.image_content;
           }
           if (v.subitem.specs.length > 0) { 
-            var spec = v.subitem.specs[0];
-            varReq.custom_specs.push({
-              attribute_id: spec.id,
-              value: spec.custom_value,
+            v.subitem.specs.forEach((s) => {
+              varReq.custom_specs.push({
+                attribute_id: s.id,
+                value: s.custom_value,
+              });
             });
           }
           productReq.variations.push(varReq);
         })
 
-        window.console.log(productReq);
-        // axios
-        // .put(`${this.backendURL}/api/v1/products/${this.$route.params.id}` , productReq , authHeader())
-        // .then(response => {
-        //   alert(`${response.data.data.id} Product Updated!`);
-        //   this.$refs.myVueDropzone.processQueue();
-        // })
-        // .catch(handleAxiosError);
+        axios
+        .put(`${this.backendURL}/api/v1/products/${this.$route.params.id}` , productReq , authHeader())
+        .then(response => {
+          alert(`${response.data.data.id} Product Updated!`);
+          this.$refs.myVueDropzone.processQueue();
+        })
+        .catch(handleAxiosError);
       },
 
       deleteProduct(){
@@ -514,16 +514,25 @@ export default {
         if (selected){
           variation.subitem.specs.push(spec);
         }else{
-          variation.subitem.specs = variation.subitem.specs.filter(item => item.id !== spec.id);
+          variation.subitem.specs = variation.subitem.specs.filter(item => item.id !== spec.id); // removing spec from variation if unchecked is toggled
         }
       },
-      isCustomSpecSelected(specID , varSpecs){
+      isCustomSpecSelected(spec , varSpecs){
         for(var i = 0; i < varSpecs.length; i++){
-          if (varSpecs[i].id == specID){
+          if (varSpecs[i].id == spec.id){
+            spec.custom_value = varSpecs[i].custom_value;
             return true;
           }
         }
         return false;
+      },
+      updateSubSpecValue(val , specID , variation){
+        for(var i = 0; i < variation.subitem.specs.length; i++){
+          var cs = variation.subitem.specs[i];
+          if (cs.id == specID){
+            cs.custom_value = val;
+          }
+        }
       },
       handleVariationImageUpload(file , variation){
         this.getBase64(file).
@@ -854,9 +863,9 @@ export default {
                                       </thead>
                                       <tbody>
                                         <tr v-for="spec in variation.custom_specs" :key="spec.id">
-                                          <td><b-form-checkbox switch size="lg" :checked="isCustomSpecSelected(spec.id , variation.subitem.specs)" v-on:change="(selected) => addVariationSpec(variation , spec , selected)"></b-form-checkbox></td>
+                                          <td><b-form-checkbox switch size="lg" :checked="isCustomSpecSelected(spec , variation.subitem.specs)" v-on:change="(selected) => addVariationSpec(variation , spec , selected)"></b-form-checkbox></td>
                                           <td>{{spec.name}}</td>
-                                          <td><b-form-input for="text" v-model="spec.custom_value"></b-form-input></td>
+                                          <td><b-form-input for="text" v-on:change="(v)=>updateSubSpecValue(v , spec.id , variation)" v-model="spec.custom_value"></b-form-input></td>
                                         </tr>
                                       </tbody>
                                     </table>

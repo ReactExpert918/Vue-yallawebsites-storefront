@@ -10,6 +10,7 @@ import {
   authHeader,
 } from "@/helpers/authservice/auth-header";
 
+
 /**
  * Nav-bar Component
  */
@@ -17,6 +18,7 @@ export default {
   data() {
     return {
       backendURL: process.env.VUE_APP_BACKEND_URL,
+      socketURL: process.env.VUE_APP_BACKEND_SOCKET_URL,
       notifications: [],
       notificationCount: 0,
       notificationsPerPage: 5,
@@ -64,18 +66,23 @@ export default {
     this.flag = this.value.flag;
     this.user = getLoggedInUser();
 
+
+
     
     axios
     .get(`${this.backendURL}/api/v1/notifications/unseen/count` , authHeader())
     .then(response => (this.notificationCount = response.data.data.count))
     .catch(handleAxiosError);
 
-    this.interval = setInterval(() => {
-      axios
-      .get(`${this.backendURL}/api/v1/notifications/unseen/count` , authHeader())
-      .then(response => (this.notificationCount = response.data.data.count))
-      .catch(handleAxiosError);
-    } , this.notificationInterval);
+
+    var ws = new WebSocket(`${this.socketURL}/api/v1/socket/notifications?token=${this.user.token}`);
+
+    // ws.onopen = function() {
+    //   window.console.log('Connected')
+    // }
+
+    ws.onmessage = (evt) => this.processNewNotification(evt);
+
   
   },
   methods: {
@@ -141,6 +148,13 @@ export default {
       this.notificationCount-= nc;
      })
     .catch(handleAxiosError);
+    },
+    processNewNotification(evt){
+      window.console.log(this.notificationCount);
+      var newNotification = evt.data;
+      if (newNotification.id != ""){
+        this.notificationCount++;
+      }
     }
   },
 };
