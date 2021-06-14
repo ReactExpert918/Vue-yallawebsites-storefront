@@ -40,6 +40,7 @@ export default {
       ChatData: ChatData,
       analytics: {
         order: {},
+        finance:{},
       },
       user: {},
       title: "Dashboard",
@@ -241,7 +242,7 @@ export default {
                   </h4>
                   <div class="d-flex">
                     <span class="badge badge-soft-success font-size-12"
-                      >+ 0.2%</span
+                      >{{analytics.order.percentage_sign}} {{analytics.order.percentage}}</span
                     >
                     <span class="ml-2 text-truncate">From previous period</span>
                   </div>
@@ -265,12 +266,12 @@ export default {
                 </div>
                 <div class="text-muted mt-4">
                   <h4>
-                    $ 28,452
+                    $ {{analytics.finance.revenue}}
                     <i class="mdi mdi-chevron-up ml-1 text-success"></i>
-                  </h4>
+                  </h4> 
                   <div class="d-flex">
                     <span class="badge badge-soft-success font-size-12"
-                      >+ 0.2%</span
+                      >{{analytics.finance.revenue_percentage_sign}} {{analytics.finance.revenue_percentage}}</span
                     >
                     <span class="ml-2 text-truncate">From previous period</span>
                   </div>
