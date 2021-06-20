@@ -35,8 +35,6 @@ export function createJWTToken(data) {
 
     var secret = process.env.VUE_APP_JWT_SECRET;
 
-    window.console.log(secret);
-
     var signature = CryptoJS.HmacSHA256(token, secret);
     signature = base64url(signature);
 
