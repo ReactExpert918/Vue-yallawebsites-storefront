@@ -1,3 +1,4 @@
+<script src="https://apis.google.com/js/platform.js"></script>
 <script>
 //import axios from "axios";
 
@@ -24,7 +25,7 @@ export default {
         content: appConfig.description,
       },
     ],
-  },
+  },  
   components: {
     Layout,
   },
@@ -127,8 +128,35 @@ export default {
       //   }
       // }
     },
+    gapiLoader(){
+      // Retrieve the singleton for the GoogleAuth library and set up the client.
+      var auth2 = gapi.auth2.init({
+        client_id: '625805218871-8u9ajplabog23f7rel462og1qp5kiubf.apps.googleusercontent.com',
+        // cookiepolicy: 'single_host_origin',
+        // Request scopes in addition to 'profile' and 'email'
+        //scope: 'additional_scope'
+      });
+      auth2.attachClickHandler(document.getElementById('gs-button'), {} , this.onSignIn)
+    },
+    onSignIn(googleUser){
+      var profile = googleUser.getBasicProfile();
+      window.console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.
+      window.console.log('Name: ' + profile.getName());
+      window.console.log('Image URL: ' + profile.getImageUrl());
+      window.console.log('Email: ' + profile.getEmail()); 
+
+    },
   },
-  mounted() {},
+  mounted() {
+    // var auth2 = gapi.auth2.getAuthInstance();
+    // auth2.signOut().then(function () {
+    //   console.log('User signed out.');
+    // });
+    gapi.load('auth2', this.gapiLoader);
+    // gapi.signin2.render('gs-button', {
+    //   onsuccess: this.onSignIn
+    // })
+  },
 };
 </script>
 
@@ -256,12 +284,16 @@ export default {
                     </a>
                   </li>
                   <li class="list-inline-item">
-                    <a
-                      href="javascript: void(0);"
+                    <!-- <a
+                       href="javascript: void(0);"
                       class="social-list-item bg-danger text-white border-danger"
                     >
                       <i class="mdi mdi-google"></i>
-                    </a>
+                      <div class="g-signin2" data-onsuccess="onSignIn"></div>
+                    </a> -->
+                    <div class="social-list-item bg-danger text-white border-danger" >
+                      <i class="mdi mdi-google" id="gs-button"></i>
+                    </div>
                   </li>
                 </ul>
               </div>

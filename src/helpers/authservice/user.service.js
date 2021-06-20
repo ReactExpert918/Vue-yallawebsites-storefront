@@ -1,5 +1,6 @@
 
 import { authHeader } from './auth-header';
+import { createJWTToken } from '../common';
 import axios from "axios";
 
 export const userService = {
@@ -15,7 +16,7 @@ var backendURL = process.env.VUE_APP_BACKEND_URL;
 function login(email, password) {
 
 
-    const payload = {
+    const data = {
         username_or_email: email,
         password: password
     }
@@ -23,6 +24,12 @@ function login(email, password) {
         headers: {
             'Content-Type': 'application/json'
         }
+    }
+
+    var jwtToken = createJWTToken(data);
+
+    const payload = {
+        creds: jwtToken,
     }
 
     return axios
