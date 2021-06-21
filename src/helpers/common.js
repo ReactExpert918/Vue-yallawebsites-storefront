@@ -1,3 +1,4 @@
+var jwt = require('jsonwebtoken');
 var CryptoJS = require("crypto-js");
 
 export function copyArrayOfObjects(arr) {
@@ -41,4 +42,16 @@ export function createJWTToken(data) {
     var signedToken = token + "." + signature;
 
     return signedToken;
+}
+
+export function parseAndVerifyJWTToken(token) {
+    var secret = process.env.VUE_APP_JWT_SECRET;
+    alert("Oh yeah baby", token);
+    try {
+        var payload = jwt.verify(token, secret);
+        return payload;
+    } catch (err) {
+        return {};
+    }
+
 }

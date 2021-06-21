@@ -1,6 +1,7 @@
 
 import { authHeader } from './auth-header';
 import { createJWTToken } from '../common';
+import { parseAndVerifyJWTToken } from '../common';
 import axios from "axios";
 
 export const userService = {
@@ -35,7 +36,8 @@ function login(email, password) {
     return axios
         .post(`${backendURL}/api/auth/login`, payload, headers)
         .then(response => {
-            var user = response.data.data;
+            var dataToken = response.data.token;
+            var user = parseAndVerifyJWTToken(dataToken);
             if (user.token) {
                 localStorage.setItem('user', JSON.stringify(user));
             }
