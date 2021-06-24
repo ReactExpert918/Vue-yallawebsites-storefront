@@ -136,9 +136,9 @@ export default {
         // Request scopes in addition to 'profile' and 'email'
         //scope: 'additional_scope'
       });
-      auth2.attachClickHandler(document.getElementById('gs-button'), {} , this.onSignIn)
+      auth2.attachClickHandler(document.getElementById('gs-button'), {} , this.onGoogleSignIn)
     },
-    onSignIn(googleUser){
+    onGoogleSignIn(googleUser){
       var profile = googleUser.getBasicProfile();
       window.console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.
       window.console.log('Name: ' + profile.getName());
@@ -153,9 +153,6 @@ export default {
     //   console.log('User signed out.');
     // });
     gapi.load('auth2', this.gapiLoader);
-    // gapi.signin2.render('gs-button', {
-    //   onsuccess: this.onSignIn
-    // })
   },
 };
 </script>
@@ -284,13 +281,6 @@ export default {
                     </a>
                   </li>
                   <li class="list-inline-item">
-                    <!-- <a
-                       href="javascript: void(0);"
-                      class="social-list-item bg-danger text-white border-danger"
-                    >
-                      <i class="mdi mdi-google"></i>
-                      <div class="g-signin2" data-onsuccess="onSignIn"></div>
-                    </a> -->
                     <div class="social-list-item bg-danger text-white border-danger" >
                       <i class="mdi mdi-google" id="gs-button"></i>
                     </div>
