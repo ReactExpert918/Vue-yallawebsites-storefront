@@ -46,7 +46,6 @@ export function createJWTToken(data) {
 
 export function parseAndVerifyJWTToken(token) {
     var secret = process.env.VUE_APP_JWT_SECRET;
-    alert("Oh yeah baby", token);
     try {
         var payload = jwt.verify(token, secret);
         return payload;

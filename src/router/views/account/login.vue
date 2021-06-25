@@ -37,6 +37,7 @@ export default {
       authError: null,
       tryingToLogIn: false,
       isAuthError: false,
+      googleClientID: process.env.VUE_APP_GOOGLE_CLIENT_ID,
     };
   },
   validations: {
@@ -77,61 +78,11 @@ export default {
               password,
             });
           }
-
-      // if (this.$v.$invalid) {
-      //   return;
-      // } else {
-      //   if (process.env.VUE_APP_DEFAULT_AUTH === "firebase") {
-      //     this.tryingToLogIn = true;
-      //     // Reset the authError if it existed.
-      //     this.authError = null;
-      //     return (
-      //       this.logIn({
-      //         email: this.email,
-      //         password: this.password,
-      //       })
-      //         // eslint-disable-next-line no-unused-vars
-      //         .then((token) => {
-      //           this.tryingToLogIn = false;
-      //           this.isAuthError = false;
-      //           // Redirect to the originally requested page, or to the home page
-      //           this.$router.push(
-      //             this.$route.query.redirectFrom || {
-      //               name: "default",
-      //             }
-      //           );
-      //         })
-      //         .catch((error) => {
-      //           this.tryingToLogIn = false;
-      //           this.authError = error ? error : "";
-      //           this.isAuthError = true;
-      //         })
-      //     );
-      //   } else if (process.env.VUE_APP_DEFAULT_AUTH === "fakebackend") {
-      //     const { email, password } = this;
-      //     if (email && password) {
-      //       this.login({
-      //         email,
-      //         password,
-      //       });
-      //     }
-      //   } else if (process.env.VUE_APP_DEFAULT_AUTH === "authapi") {
-      //     axios
-      //       .post(`${this.backendURL}/api/auth/login`, {
-      //         username_or_email: this.email,
-      //         password: this.password,
-      //       })
-      //       .then((res) => {
-      //         this.console.log(res);
-      //         return res;
-      //       });
-      //   }
-      // }
     },
     gapiLoader(){
       // Retrieve the singleton for the GoogleAuth library and set up the client.
       var auth2 = gapi.auth2.init({
-        client_id: '625805218871-8u9ajplabog23f7rel462og1qp5kiubf.apps.googleusercontent.com',
+        client_id: this.googleClientID,
         // cookiepolicy: 'single_host_origin',
         // Request scopes in addition to 'profile' and 'email'
         //scope: 'additional_scope'
@@ -139,11 +90,14 @@ export default {
       auth2.attachClickHandler(document.getElementById('gs-button'), {} , this.onGoogleSignIn)
     },
     onGoogleSignIn(googleUser){
-      var profile = googleUser.getBasicProfile();
-      window.console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.
-      window.console.log('Name: ' + profile.getName());
-      window.console.log('Image URL: ' + profile.getImageUrl());
-      window.console.log('Email: ' + profile.getEmail()); 
+      
+      const payload = {
+        issuer: "google",
+        data: {
+          token:  googleUser.getAuthResponse().id_token,
+        },
+      }
+      this.loginWithThirdParty({payload});
 
     },
   },

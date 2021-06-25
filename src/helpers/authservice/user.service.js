@@ -6,6 +6,7 @@ import axios from "axios";
 
 export const userService = {
     login,
+    loginWithThirdParty,
     logout,
     register,
     getAll,
@@ -35,6 +36,26 @@ function login(email, password) {
 
     return axios
         .post(`${backendURL}/api/auth/login`, payload, headers)
+        .then(response => {
+            var dataToken = response.data.token;
+            var user = parseAndVerifyJWTToken(dataToken);
+            if (user.token) {
+                localStorage.setItem('user', JSON.stringify(user));
+            }
+        }).catch(handleAxiosError);
+}
+
+function loginWithThirdParty(payload) {
+
+
+    const headers = {
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    }
+
+    return axios
+        .post(`${backendURL}/api/auth/login/third-party`, payload, headers)
         .then(response => {
             var dataToken = response.data.token;
             var user = parseAndVerifyJWTToken(dataToken);
