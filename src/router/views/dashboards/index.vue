@@ -246,7 +246,7 @@ export default {
                       >{{analytics.order.sign}} {{analytics.order.percentage}}%</span
                     >
                     <span v-else class="badge badge-soft-warning font-size-12"
-                      >{{analytics.order.percentage}}%</span
+                      >{{analytics.order.sign}}{{analytics.order.percentage}}%</span
                     >
                     <span class="ml-2 text-truncate">From previous period</span>
                   </div>
@@ -278,7 +278,7 @@ export default {
                     <span v-if="analytics.finance.revenue_sign=='+'" class="badge badge-soft-success font-size-12"
                       >{{analytics.finance.revenue_sign}} {{analytics.finance.revenue_percentage}}%</span>
                     <span v-else class="badge badge-soft-warning font-size-12">
-                      {{analytics.finance.revenue_percentage}}%
+                      {{analytics.finance.revenue_sign}}{{analytics.finance.revenue_percentage}}%
                     </span>
                     <span class="ml-2 text-truncate">From previous period</span>
                   </div>
@@ -312,7 +312,7 @@ export default {
                       >{{analytics.finance.average_price_sign}} {{analytics.finance.average_price_percentage}}%</span
                     >
                     <span v-else class="badge badge-soft-warning font-size-12"
-                      >{{analytics.finance.average_price_percentage}}%</span
+                      >{{analytics.finance.average_price_sign}}{{analytics.finance.average_price_percentage}}%</span
                     >
                     <span class="ml-2 text-truncate">From previous period</span>
                   </div>
@@ -356,7 +356,7 @@ export default {
                       >{{analytics.finance.earning_sign}} {{analytics.finance.earning_percentage}}%</span
                     >
                     <span v-else class="badge badge-soft-warning font-size-12 mr-1"
-                      >{{analytics.finance.earning_percentage}}%</span
+                      >{{analytics.finance.earning_sign}}{{analytics.finance.earning_percentage}}%</span
                     >
                       From previous period
                     </div>
