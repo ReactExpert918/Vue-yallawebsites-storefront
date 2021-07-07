@@ -1,9 +1,12 @@
 
 import { authHeader } from './auth-header';
+import { createJWTToken } from '../common';
+import { parseAndVerifyJWTToken } from '../common';
 import axios from "axios";
 
 export const userService = {
     login,
+    loginWithThirdParty,
     logout,
     register,
     getAll,
@@ -15,7 +18,7 @@ var backendURL = process.env.VUE_APP_BACKEND_URL;
 function login(email, password) {
 
 
-    const payload = {
+    const data = {
         username_or_email: email,
         password: password
     }
@@ -25,10 +28,37 @@ function login(email, password) {
         }
     }
 
+    var jwtToken = createJWTToken(data);
+
+    const payload = {
+        creds: jwtToken,
+    }
+
     return axios
         .post(`${backendURL}/api/auth/login`, payload, headers)
         .then(response => {
-            var user = response.data.data;
+            var dataToken = response.data.token;
+            var user = parseAndVerifyJWTToken(dataToken);
+            if (user.token) {
+                localStorage.setItem('user', JSON.stringify(user));
+            }
+        }).catch(handleAxiosError);
+}
+
+function loginWithThirdParty(payload) {
+
+
+    const headers = {
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    }
+
+    return axios
+        .post(`${backendURL}/api/auth/login/third-party`, payload, headers)
+        .then(response => {
+            var dataToken = response.data.token;
+            var user = parseAndVerifyJWTToken(dataToken);
             if (user.token) {
                 localStorage.setItem('user', JSON.stringify(user));
             }

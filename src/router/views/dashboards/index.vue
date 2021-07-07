@@ -238,11 +238,15 @@ export default {
                 <div class="text-muted mt-4">
                   <h4>
                     {{analytics.order.order_amount}}
-                    <i class="mdi mdi-chevron-up ml-1 text-success"></i>
+                    <i v-if="analytics.order.sign=='+'" class="mdi mdi-chevron-up ml-1 text-success"></i>
+                    <i v-else class="mdi mdi-chevron-down ml-1 text-warning"></i>
                   </h4>
                   <div class="d-flex">
-                    <span class="badge badge-soft-success font-size-12"
-                      >{{analytics.order.percentage_sign}} {{analytics.order.percentage}}</span
+                    <span v-if="analytics.order.sign=='+'" class="badge badge-soft-success font-size-12"
+                      >{{analytics.order.sign}} {{analytics.order.percentage}}%</span
+                    >
+                    <span v-else class="badge badge-soft-warning font-size-12"
+                      >{{analytics.order.sign}}{{analytics.order.percentage}}%</span
                     >
                     <span class="ml-2 text-truncate">From previous period</span>
                   </div>
@@ -267,12 +271,15 @@ export default {
                 <div class="text-muted mt-4">
                   <h4>
                     $ {{analytics.finance.revenue}}
-                    <i class="mdi mdi-chevron-up ml-1 text-success"></i>
+                    <i v-if="analytics.finance.revenue_sign=='+'" class="mdi mdi-chevron-up ml-1 text-success"></i>
+                    <i v-else class="mdi mdi-chevron-down ml-1 text-warning"></i>
                   </h4> 
                   <div class="d-flex">
-                    <span class="badge badge-soft-success font-size-12"
-                      >{{analytics.finance.revenue_percentage_sign}} {{analytics.finance.revenue_percentage}}</span
-                    >
+                    <span v-if="analytics.finance.revenue_sign=='+'" class="badge badge-soft-success font-size-12"
+                      >{{analytics.finance.revenue_sign}} {{analytics.finance.revenue_percentage}}%</span>
+                    <span v-else class="badge badge-soft-warning font-size-12">
+                      {{analytics.finance.revenue_sign}}{{analytics.finance.revenue_percentage}}%
+                    </span>
                     <span class="ml-2 text-truncate">From previous period</span>
                   </div>
                 </div>
@@ -295,13 +302,17 @@ export default {
                 </div>
                 <div class="text-muted mt-4">
                   <h4>
-                    $ 16.2
-                    <i class="mdi mdi-chevron-up ml-1 text-success"></i>
+                    $ {{analytics.finance.average_price}}
+                    <i v-if="analytics.finance.average_price_sign=='+'" class="mdi mdi-chevron-up ml-1 text-success"></i>
+                    <i v-else class="mdi mdi-chevron-down ml-1 text-warning"></i>
                   </h4>
 
                   <div class="d-flex">
-                    <span class="badge badge-soft-warning font-size-12"
-                      >0%</span
+                    <span v-if="analytics.finance.average_price_sign=='+'" class="badge badge-soft-success font-size-12"
+                      >{{analytics.finance.average_price_sign}} {{analytics.finance.average_price_percentage}}%</span
+                    >
+                    <span v-else class="badge badge-soft-warning font-size-12"
+                      >{{analytics.finance.average_price_sign}}{{analytics.finance.average_price_percentage}}%</span
                     >
                     <span class="ml-2 text-truncate">From previous period</span>
                   </div>
@@ -339,11 +350,14 @@ export default {
                 <div class="text-muted">
                   <div class="mb-4">
                     <p>This month</p>
-                    <h4>$2453.35</h4>
+                    <h4>${{analytics.finance.earning}}</h4>
                     <div>
-                      <span class="badge badge-soft-success font-size-12 mr-1"
-                        >+ 0.2%</span
-                      >
+                      <span v-if="analytics.finance.earning_sign=='+'" class="badge badge-soft-success font-size-12 mr-1"
+                      >{{analytics.finance.earning_sign}} {{analytics.finance.earning_percentage}}%</span
+                    >
+                    <span v-else class="badge badge-soft-warning font-size-12 mr-1"
+                      >{{analytics.finance.earning_sign}}{{analytics.finance.earning_percentage}}%</span
+                    >
                       From previous period
                     </div>
                   </div>
@@ -360,7 +374,7 @@ export default {
 
                   <div class="mt-4">
                     <p class="mb-2">Last month</p>
-                    <h5>$2281.04</h5>
+                    <h5>${{analytics.finance.previous_earning}}</h5>
                   </div>
                 </div>
               </div>

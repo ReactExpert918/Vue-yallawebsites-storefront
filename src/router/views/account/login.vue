@@ -1,3 +1,4 @@
+<script src="https://apis.google.com/js/platform.js"></script>
 <script>
 //import axios from "axios";
 
@@ -24,7 +25,7 @@ export default {
         content: appConfig.description,
       },
     ],
-  },
+  },  
   components: {
     Layout,
   },
@@ -36,6 +37,7 @@ export default {
       authError: null,
       tryingToLogIn: false,
       isAuthError: false,
+      googleClientID: process.env.VUE_APP_GOOGLE_CLIENT_ID,
     };
   },
   validations: {
@@ -76,59 +78,36 @@ export default {
               password,
             });
           }
+    },
+    gapiLoader(){
+      // Retrieve the singleton for the GoogleAuth library and set up the client.
+      var auth2 = gapi.auth2.init({
+        client_id: this.googleClientID,
+        // cookiepolicy: 'single_host_origin',
+        // Request scopes in addition to 'profile' and 'email'
+        //scope: 'additional_scope'
+      });
+      auth2.attachClickHandler(document.getElementById('gs-button'), {} , this.onGoogleSignIn)
+    },
+    onGoogleSignIn(googleUser){
+      
+      const payload = {
+        issuer: "google",
+        data: {
+          token:  googleUser.getAuthResponse().id_token,
+        },
+      }
+      this.loginWithThirdParty({payload});
 
-      // if (this.$v.$invalid) {
-      //   return;
-      // } else {
-      //   if (process.env.VUE_APP_DEFAULT_AUTH === "firebase") {
-      //     this.tryingToLogIn = true;
-      //     // Reset the authError if it existed.
-      //     this.authError = null;
-      //     return (
-      //       this.logIn({
-      //         email: this.email,
-      //         password: this.password,
-      //       })
-      //         // eslint-disable-next-line no-unused-vars
-      //         .then((token) => {
-      //           this.tryingToLogIn = false;
-      //           this.isAuthError = false;
-      //           // Redirect to the originally requested page, or to the home page
-      //           this.$router.push(
-      //             this.$route.query.redirectFrom || {
-      //               name: "default",
-      //             }
-      //           );
-      //         })
-      //         .catch((error) => {
-      //           this.tryingToLogIn = false;
-      //           this.authError = error ? error : "";
-      //           this.isAuthError = true;
-      //         })
-      //     );
-      //   } else if (process.env.VUE_APP_DEFAULT_AUTH === "fakebackend") {
-      //     const { email, password } = this;
-      //     if (email && password) {
-      //       this.login({
-      //         email,
-      //         password,
-      //       });
-      //     }
-      //   } else if (process.env.VUE_APP_DEFAULT_AUTH === "authapi") {
-      //     axios
-      //       .post(`${this.backendURL}/api/auth/login`, {
-      //         username_or_email: this.email,
-      //         password: this.password,
-      //       })
-      //       .then((res) => {
-      //         this.console.log(res);
-      //         return res;
-      //       });
-      //   }
-      // }
     },
   },
-  mounted() {},
+  mounted() {
+    // var auth2 = gapi.auth2.getAuthInstance();
+    // auth2.signOut().then(function () {
+    //   console.log('User signed out.');
+    // });
+    gapi.load('auth2', this.gapiLoader);
+  },
 };
 </script>
 
@@ -256,12 +235,9 @@ export default {
                     </a>
                   </li>
                   <li class="list-inline-item">
-                    <a
-                      href="javascript: void(0);"
-                      class="social-list-item bg-danger text-white border-danger"
-                    >
-                      <i class="mdi mdi-google"></i>
-                    </a>
+                    <div class="social-list-item bg-danger text-white border-danger" >
+                      <i class="mdi mdi-google" id="gs-button"></i>
+                    </div>
                   </li>
                 </ul>
               </div>
