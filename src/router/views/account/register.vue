@@ -1,3 +1,4 @@
+<script src="https://apis.google.com/js/platform.js"></script>
 <script>
 // import axios from "axios";
 
@@ -43,6 +44,7 @@ export default {
       tryingToRegister: false,
       isRegisterError: false,
       registerSuccess: false,
+      googleClientID: process.env.VUE_APP_GOOGLE_CLIENT_ID,
     };
   },
   validations: {
@@ -85,55 +87,35 @@ export default {
         this.registeruser(user);
       }
 
-      // if (this.$v.$invalid) {
-      //   return;
-      // } else {
-      //   if (process.env.VUE_APP_DEFAULT_AUTH === "firebase") {
-      //     this.tryingToRegister = true;
-      //     // Reset the regError if it existed.
-      //     this.regError = null;
-      //     return (
-      //       this.register({
-      //         email: this.user.email,
-      //         password: this.user.password,
-      //       })
-      //         // eslint-disable-next-line no-unused-vars
-      //         .then((token) => {
-      //           this.tryingToRegister = false;
-      //           this.isRegisterError = false;
-      //           this.registerSuccess = true;
-      //           if (this.registerSuccess) {
-      //             this.$router.push(
-      //               this.$route.query.redirectFrom || {
-      //                 name: "default",
-      //               }
-      //             );
-      //           }
-      //         })
-      //         .catch((error) => {
-      //           this.tryingToRegister = false;
-      //           this.regError = error ? error : "";
-      //           this.isRegisterError = true;
-      //         })
-      //     );
-      //   } else if (process.env.VUE_APP_DEFAULT_AUTH === "fakebackend") {
-      //     const { email, username, password } = this.user;
-      //     if (email && username && password) {
-      //       this.registeruser(this.user);
-      //     }
-      //   } else if (process.env.VUE_APP_DEFAULT_AUTH === "authapi") {
-      //     axios
-      //       .post("http://127.0.0.1:8000/api/register", {
-      //         username: this.user.username,
-      //         email: this.user.email,
-      //         password: this.user.password,
-      //       })
-      //       .then((res) => {
-      //         return res;
-      //       });
-      //   }
-      // }
     },
+    gapiLoader(){
+      // Retrieve the singleton for the GoogleAuth library and set up the client.
+      var auth2 = gapi.auth2.init({
+        client_id: this.googleClientID,
+        // cookiepolicy: 'single_host_origin',
+        // Request scopes in addition to 'profile' and 'email'
+        //scope: 'additional_scope'
+      });
+      auth2.attachClickHandler(document.getElementById('gs-button'), {} , this.onGoogleSignIn)
+    },
+    onGoogleSignIn(googleUser){
+      
+      const payload = {
+        issuer: "google",
+        data: {
+          token:  googleUser.getAuthResponse().id_token,
+        },
+      }
+      this.loginWithThirdParty({payload});
+
+    },
+  },
+  mounted() {
+    // var auth2 = gapi.auth2.getAuthInstance();
+    // auth2.signOut().then(function () {
+    //   console.log('User signed out.');
+    // });
+    gapi.load('auth2', this.gapiLoader);
   },
 };
 </script>
@@ -357,7 +339,7 @@ export default {
                       href="javascript: void(0);"
                       class="social-list-item bg-danger text-white border-danger"
                     >
-                      <i class="mdi mdi-google"></i>
+                      <i class="mdi mdi-google" id="gs-button"></i>
                     </a>
                   </li>
                 </ul>
