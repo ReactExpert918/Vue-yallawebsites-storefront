@@ -2,12 +2,8 @@
 import Layout from "../../../layouts/main";
 import PageHeader from "@/components/page-header";
 import axios from "axios";
+import { productsData } from "./products-data";
 import appConfig from "@/app.config";
-import {
-  authHeader,
-} from "@/helpers/authservice/auth-header";
-import {handleAxiosError} from "@/helpers/authservice/user.service";
-import {roleService} from "@/helpers/authservice/roles";
 
 /**
  * Pages component
@@ -20,11 +16,8 @@ export default {
   components: { Layout, PageHeader },
   data() {
     return {
-      pageIdentity: "products",
-      backendURL: process.env.VUE_APP_BACKEND_URL,
       selectedAll: false,
-      productsData: [],
-      currentProduct: {},
+      productsData: productsData,
       title: "Products",
       items: [
         {
@@ -34,8 +27,8 @@ export default {
       ],
       totalRows: 1,
       currentPage: 1,
-      perPage: 10,
-      pageOptions: [10, 25, 50, 100],
+      perPage: 3,
+      pageOptions: [3, 5, 50, 100],
       filter: null,
       filterOn: [],
       selected: [],
@@ -59,9 +52,8 @@ export default {
               key: "price",
               sortable: true,
           },
-          { 
-              label: "qty",
-              key: "quantity",
+          {
+              key: "qty",
               sortable: true,
           },
           {
@@ -94,33 +86,42 @@ export default {
     }
   },
   mounted() {
+      // Set the initial number of items
+      this.totalRows = this.items.length;
       axios
-      .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
-      .then(response => (this.productsData = response.data.data))
-      .catch(handleAxiosError);
+      .get('https://api.coindesk.com/v1/bpi/currentprice.json')
+      .then(response => (this.info = response))
   },
   methods: {
       /**
         * Search the table data with search input
         */
-       uncheckSelectAll(){
+        uncheckSelectAll(){
          this.selectedAll = false
-       },
-      onFiltered(filteredItems) {
+        },
+        onFiltered(filteredItems) {
           // Trigger pagination to update the number of buttons/pages due to filtering
           this.totalRows = filteredItems.length;
           this.currentPage = 1;
-      },
-      deleteProduct(){
-        if (!roleService.hasDeletePermission(this.pageIdentity)){
-          alert("You do no have the permission to perform this action!")
-          return;
+        },
+        handlePageChange(value) {
+          this.currentPage = value;
+          let apiUrl = 
+                        'https://api.coindesk.com/v1/bpi/catalog/project/per_page=this.perPage&page=this.currentPage';
+
+          axios
+          .get(apiUrl)
+          .then(response => (this.info = response))
+        },
+        handlePerPageChange(value) {
+          this.perPage = value;
+          this.currentPage = 1;
+          let apiUrl = 
+                        'https://api.coindesk.com/v1/bpi/catalog/project/per_page=this.perPage&page=this.currentPage';
+          axios
+          .get(apiUrl)
+          .then(response => (this.info = response))
         }
-        axios
-        .delete(`${this.backendURL}/api/v1/products/${this.currentProduct.id}` , authHeader())
-        .then(response => (alert(`${response.data.data.id} Product deleted!`)))
-        .catch(handleAxiosError);
-      }
   },
 };
 </script>
@@ -151,7 +152,13 @@ export default {
                 <div id="tickets-table_length" class="dataTables_length">
                     <label class="d-inline-flex align-items-center">
                         Show&nbsp;
-                        <b-form-select v-model="perPage" size="sm" :options="pageOptions"></b-form-select>&nbsp;entries
+                        <b-form-select 
+                          v-model="perPage" 
+                          size="sm" 
+                          :options="pageOptions"
+                          @change = "handlePerPageChange"
+                        >
+                        </b-form-select>&nbsp;entries
                     </label>
                 </div>
               </div>
@@ -196,8 +203,7 @@ export default {
                       </template>
                       <template #cell(status)="data">
                         <span class="badge badge-success font-size-12">
-                          <span v-if="data.item.enabled">Enabled</span>
-                          <span v-else>Disabled</span>
+                          {{data.item.status}}
                         </span>
                       </template>
                       <template #cell(actions)="data">
@@ -206,11 +212,11 @@ export default {
                             <i class="mdi mdi-dots-horizontal font-size-18"></i>
                           </template>
 
-                          <b-dropdown-item :href="'/catalog/products/edit/' + data.item.id">
+                          <b-dropdown-item :href="'/catalog/products/edit/' + data.item.productId">
                             <i class="fas fa-pencil-alt text-success mr-1"></i> Edit
                           </b-dropdown-item>
 
-                          <b-dropdown-item v-b-modal.modal-delete-page @click="currentProduct = data.item">
+                          <b-dropdown-item v-b-modal.modal-delete-page>
                             <i class="fas fa-trash-alt text-danger mr-1"></i> Delete
                           </b-dropdown-item>
                         </b-dropdown>
@@ -222,7 +228,13 @@ export default {
                         <div class="dataTables_paginate paging_simple_numbers float-right">
                             <ul class="pagination pagination-rounded mb-0">
                                 <!-- pagination -->
-                                <b-pagination v-model="currentPage" :total-rows="rows" :per-page="perPage"></b-pagination>
+                                <b-pagination 
+                                  v-model="currentPage" 
+                                  :total-rows="rows" 
+                                  :per-page="perPage"
+                                  @change = "handlePageChange"
+                                >
+                                </b-pagination>
                             </ul>
                         </div>
                     </div>
@@ -237,7 +249,7 @@ export default {
     <b-modal id="modal-delete-page" centered title="Delete Product" title-class="font-18" hide-footer>
       <p>Are you sure? Pressing Delete will remove this product permenantly.</p>
       <div class="text-right">
-        <b-button variant="danger" @click="deleteProduct()">Delete</b-button>
+        <b-button variant="danger">Delete</b-button>
       </div>
     </b-modal>
   </Layout>
