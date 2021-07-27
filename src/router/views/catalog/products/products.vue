@@ -122,7 +122,8 @@ export default {
           .get(apiUrl)
           .then(response => (this.info = response))
         }
-  },
+  }
+
 };
 </script>
 
