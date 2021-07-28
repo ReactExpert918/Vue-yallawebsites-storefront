@@ -175,6 +175,24 @@ export default {
           }
           return false;
       },
+      handlePageChange(value) {
+        this.currentPage = value;
+        let apiUrl = 
+                      'https://api.coindesk.com/v1/bpi/catalog/project/per_page=this.perPage&page=this.currentPage';
+
+        axios
+        .get(apiUrl)
+        .then(response => (this.info = response))
+      },
+      handlePerPageChange(value) {
+        this.perPage = value;
+        this.currentPage = 1;
+        let apiUrl = 
+                      'https://api.coindesk.com/v1/bpi/catalog/project/per_page=this.perPage&page=this.currentPage';
+        axios
+        .get(apiUrl)
+        .then(response => (this.info = response))
+      },
       handleDefaultOptionChange(id){
         this.currentAttribute.default_option.id = id;
       },
@@ -362,7 +380,13 @@ export default {
                 <div id="tickets-table_length" class="dataTables_length">
                     <label class="d-inline-flex align-items-center">
                         Show&nbsp;
-                        <b-form-select v-model="perPage" size="sm" :options="pageOptions"></b-form-select>&nbsp;entries
+                        <b-form-select 
+                          v-model="perPage" 
+                          size="sm" 
+                          :options="pageOptions"
+                          @change = "handlePerPageChange"
+                        >
+                        </b-form-select>&nbsp;entries
                     </label>
                 </div>
               </div>
@@ -436,7 +460,13 @@ export default {
                         <div class="dataTables_paginate paging_simple_numbers float-right">
                             <ul class="pagination pagination-rounded mb-0">
                                 <!-- pagination -->
-                                <b-pagination v-model="currentPage" :total-rows="rows" :per-page="perPage"></b-pagination>
+                                <b-pagination 
+                                  v-model="currentPage" 
+                                  :total-rows="rows" 
+                                  :per-page="perPage"
+                                  @change = "handlePageChange"
+                                >
+                                </b-pagination>
                             </ul>
                         </div>
                     </div>

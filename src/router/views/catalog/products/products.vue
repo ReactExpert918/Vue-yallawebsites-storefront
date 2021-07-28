@@ -2,8 +2,10 @@
 import Layout from "../../../layouts/main";
 import PageHeader from "@/components/page-header";
 import axios from "axios";
-import { productsData } from "./products-data";
 import appConfig from "@/app.config";
+import {
+  authHeader,
+} from "@/helpers/authservice/auth-header";
 
 /**
  * Pages component
@@ -16,19 +18,15 @@ export default {
   components: { Layout, PageHeader },
   data() {
     return {
+      backendURL: process.env.VUE_APP_BACKEND_URL,
       selectedAll: false,
-      productsData: productsData,
-      title: "Products",
-      items: [
-        {
-          text: "Products",
-          active: true
-        }
-      ],
+      productsData: [],
+      productsDataLength: 1,
       totalRows: 1,
+      title: "Products",
       currentPage: 1,
-      perPage: 3,
-      pageOptions: [3, 5, 50, 100],
+      perPage: 10,
+      pageOptions: [10, 20, 50, 100],
       filter: null,
       filterOn: [],
       selected: [],
@@ -71,7 +69,7 @@ export default {
         * Total no. of records
         */
       rows() {
-          return this.productsData.length;
+          return this.productsDataLength;
       },
   },
   watch: {
@@ -87,10 +85,10 @@ export default {
   },
   mounted() {
       // Set the initial number of items
-      this.totalRows = this.items.length;
       axios
-      .get('https://api.coindesk.com/v1/bpi/currentprice.json')
-      .then(response => (this.info = response))
+      .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
+      .then(response => (this.productsData = response.data.data,
+                         this.productsDataLength = response.data.pagination.total));
   },
   methods: {
       /**
@@ -102,25 +100,22 @@ export default {
         onFiltered(filteredItems) {
           // Trigger pagination to update the number of buttons/pages due to filtering
           this.totalRows = filteredItems.length;
-          this.currentPage = 1;
+          this.currentPage = this.currentPage;
         },
         handlePageChange(value) {
           this.currentPage = value;
-          let apiUrl = 
-                        'https://api.coindesk.com/v1/bpi/catalog/project/per_page=this.perPage&page=this.currentPage';
-
           axios
-          .get(apiUrl)
-          .then(response => (this.info = response))
+          .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
+          .then(response => (this.productsData = response.data.data,
+                             this.productsDataLength = response.data.pagination.total));
         },
         handlePerPageChange(value) {
           this.perPage = value;
           this.currentPage = 1;
-          let apiUrl = 
-                        'https://api.coindesk.com/v1/bpi/catalog/project/per_page=this.perPage&page=this.currentPage';
           axios
-          .get(apiUrl)
-          .then(response => (this.info = response))
+          .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
+          .then(response => (this.productsData = response.data.data,
+                             this.productsDataLength = response.data.pagination.total));
         }
   }
 
@@ -129,7 +124,7 @@ export default {
 
 <template>
   <Layout>
-    <PageHeader :title="title" :items="items" />
+    <PageHeader :title="title" />
 
     <div class="row">
       <div class="col-12">
@@ -178,7 +173,7 @@ export default {
                       :fields="fields" 
                       responsive="sm" 
                       :per-page="perPage" 
-                      :current-page="currentPage" 
+                      :current-page="1" 
                       :sort-by.sync="sortBy" 
                       :sort-desc.sync="sortDesc" 
                       :filter="filter" 
@@ -188,7 +183,7 @@ export default {
                       <template #head(selected)="data">
                         <b-form-checkbox
                         v-model="selectedAll"
-                        v-bind:value='data.id'                                                 
+                        v-bind:value='data.id'                                             
                         class="custom-checkbox custom-checkbox-primary "
                       ></b-form-checkbox>
                       </template>
