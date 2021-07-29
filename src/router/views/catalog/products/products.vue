@@ -26,7 +26,7 @@ export default {
       title: "Products",
       currentPage: 1,
       perPage: 10,
-      pageOptions: [10, 20, 50, 100],
+      pageOptions: [10, 25, 50, 100],
       filter: null,
       filterOn: [],
       selected: [],

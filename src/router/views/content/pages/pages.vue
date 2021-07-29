@@ -24,6 +24,7 @@ export default {
       selectedAll: false,
       backendURL: process.env.VUE_APP_BACKEND_URL,
       pagesData: [],
+      pagesDataLength: 1,
       page: {},
       title: "Pages",
       items: [
@@ -86,7 +87,7 @@ export default {
         * Total no. of records
         */
       rows() {
-          return this.pagesData.length;
+          return this.pagesDataLength;
       },
   },
   watch: {
@@ -103,7 +104,8 @@ export default {
   mounted() {
       axios
       .get(`${this.backendURL}/api/v1/pages?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
-      .then(response => (this.pagesData = response.data.data))
+      .then(response => (this.pagesData = response.data.data,
+                         this.pagesDataLength = response.data.pagination.total))
       .catch(handleAxiosError);
   },
   methods: {
@@ -117,6 +119,21 @@ export default {
           // Trigger pagination to update the number of buttons/pages due to filtering
           this.totalRows = filteredItems.length;
           this.currentPage = 1;
+      },
+      handlePageChange(value) {
+          this.currentPage = value;
+          axios
+          .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
+          .then(response => (this.pagesData = response.data.data,
+                             this.pagesDataLength = response.data.pagination.total));
+        },
+      handlePerPageChange(value) {
+        this.perPage = value;
+        this.currentPage = 1;
+        axios
+        .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
+        .then(response => (this.pagesData = response.data.data,
+                           this.pagesDataLength = response.data.pagination.total));
       },
       deletePage(){
         if (!roleService.hasDeletePermission(this.pageIdentity)){
@@ -160,7 +177,13 @@ export default {
                   <div id="tickets-table_length" class="dataTables_length">
                       <label class="d-inline-flex align-items-center">
                           Show&nbsp;
-                          <b-form-select v-model="perPage" size="sm" :options="pageOptions"></b-form-select>&nbsp;entries
+                        <b-form-select 
+                          v-model="perPage" 
+                          size="sm" 
+                          :options="pageOptions"
+                          @change = "handlePerPageChange"
+                        >
+                        </b-form-select>&nbsp;entries
                       </label>
                   </div>
                 </div>
@@ -179,7 +202,7 @@ export default {
                     :fields="fields" 
                     responsive="sm" 
                     :per-page="perPage" 
-                    :current-page="currentPage" 
+                    :current-page="1" 
                     :sort-by.sync="sortBy" 
                     :sort-desc.sync="sortDesc" 
                     :filter="filter" 
@@ -189,8 +212,8 @@ export default {
                     <template #head(selected)="data">
                       <b-form-checkbox
                       v-model="selectedAll"
-                      v-bind:value='data.id'                                                 
-                      class="custom-checkbox custom-checkbox-primary "
+                      v-bind:value='data.id'                                                
+                      class="custom-checkbox custom-checkbox-primary"
                     ></b-form-checkbox>
                     </template>
                     <template #cell(selected)="data">
@@ -230,7 +253,13 @@ export default {
                       <div class="dataTables_paginate paging_simple_numbers float-right">
                           <ul class="pagination pagination-rounded mb-0">
                               <!-- pagination -->
-                              <b-pagination v-model="currentPage" :total-rows="rows" :per-page="perPage"></b-pagination>
+                              <b-pagination 
+                                v-model="currentPage" 
+                                :total-rows="rows" 
+                                :per-page="perPage"
+                                @change = "handlePageChange"
+                              >
+                              </b-pagination>
                           </ul>
                       </div>
                   </div>
