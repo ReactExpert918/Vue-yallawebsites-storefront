@@ -71,13 +71,14 @@ function logout() {
     if (user) {
         const headers = {
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + user.token,
             }
         }
         localStorage.removeItem('user');
 
         axios
-            .post(`${backendURL}/api/auth/logout/${user.id}`, headers)
+            .post(`${backendURL}/api/auth/logout`, {}, headers)
             .catch(error => {
                 if (error.response) {
                     window.console.log(error.response.data);
