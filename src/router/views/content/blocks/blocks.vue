@@ -130,7 +130,7 @@ export default {
       handlePageChange(value) {
         this.currentPage = value;
         axios
-        .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
+        .get(`${this.backendURL}/api/v1/blocks?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
         .then(response => (this.blockData = response.data.data,
                            this.blockDataLength = response.data.pagination.total));
       },
@@ -138,7 +138,7 @@ export default {
         this.perPage = value;
         this.currentPage = 1;
         axios
-        .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
+        .get(`${this.backendURL}/api/v1/blocks?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
         .then(response => (this.blockData = response.data.data,
                            this.blockDataLength = response.data.pagination.total));
       }

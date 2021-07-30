@@ -24,8 +24,7 @@ export default {
       pageIdentity: "customers",
       backendURL: process.env.VUE_APP_BACKEND_URL,
       customersData: [],
-      productsData: [],
-      productsDataLength: 1,
+      customersDataLength: 1,
       authConfig: {
         headers:{
           authorization: ""
@@ -110,8 +109,8 @@ export default {
       this.totalRows = this.items.length;
       axios
       .get(`${this.backendURL}/api/v1/customers?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
-      .then(response => (this.productsData = response.data.data,
-                         this.productsDataLength = response.data.pagination.total))
+      .then(response => (this.customersData = response.data.data,
+                         this.customersDataLength = response.data.pagination.total))
       .catch(handleAxiosError);
   },
   methods: {
@@ -143,16 +142,16 @@ export default {
           this.currentPage = value;
           axios
           .get(`${this.backendURL}/api/v1/customers?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
-          .then(response => (this.productsData = response.data.data,
-                             this.productsDataLength = response.data.pagination.total));
+          .then(response => (this.customersData = response.data.data,
+                             this.customersDataLength = response.data.pagination.total));
         },
       handlePerPageChange(value) {
         this.perPage = value;
         this.currentPage = 1;
         axios
         .get(`${this.backendURL}/api/v1/customers?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
-        .then(response => (this.productsData = response.data.data,
-                           this.productsDataLength = response.data.pagination.total));
+        .then(response => (this.customersData = response.data.data,
+                           this.customersDataLength = response.data.pagination.total));
       }
   },
 };
