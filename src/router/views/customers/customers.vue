@@ -24,6 +24,8 @@ export default {
       pageIdentity: "customers",
       backendURL: process.env.VUE_APP_BACKEND_URL,
       customersData: [],
+      productsData: [],
+      productsDataLength: 1,
       authConfig: {
         headers:{
           authorization: ""
@@ -88,7 +90,7 @@ export default {
         * Total no. of records
         */
       rows() {
-          return this.customersData.length;
+          return this.customersDataLength;
       },
       console: () => console
   },
@@ -108,7 +110,8 @@ export default {
       this.totalRows = this.items.length;
       axios
       .get(`${this.backendURL}/api/v1/customers?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
-      .then(response => (this.customersData = response.data.data))
+      .then(response => (this.productsData = response.data.data,
+                         this.productsDataLength = response.data.pagination.total))
       .catch(handleAxiosError);
   },
   methods: {
@@ -135,6 +138,21 @@ export default {
         .delete(`${this.backendURL}/api/v1/customers/${id}` , authHeader())
         .then(alert("Deleted!"))
         .catch(handleAxiosError);
+      },
+      handlePageChange(value) {
+          this.currentPage = value;
+          axios
+          .get(`${this.backendURL}/api/v1/customers?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
+          .then(response => (this.productsData = response.data.data,
+                             this.productsDataLength = response.data.pagination.total));
+        },
+      handlePerPageChange(value) {
+        this.perPage = value;
+        this.currentPage = 1;
+        axios
+        .get(`${this.backendURL}/api/v1/customers?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
+        .then(response => (this.productsData = response.data.data,
+                           this.productsDataLength = response.data.pagination.total));
       }
   },
 };
@@ -163,7 +181,13 @@ export default {
                 <div id="tickets-table_length" class="dataTables_length">
                     <label class="d-inline-flex align-items-center">
                         Show&nbsp;
-                        <b-form-select v-model="perPage" size="sm" :options="pageOptions"></b-form-select>&nbsp;entries
+                      <b-form-select 
+                        v-model="perPage" 
+                        size="sm" 
+                        :options="pageOptions"
+                        @change = "handlePerPageChange"
+                      >
+                      </b-form-select>&nbsp;entries
                     </label>
                 </div>
               </div>
@@ -182,7 +206,7 @@ export default {
                       :fields="fields" 
                       responsive="sm" 
                       :per-page="perPage" 
-                      :current-page="currentPage" 
+                      :current-page="1" 
                       :sort-by.sync="sortBy" 
                       :sort-desc.sync="sortDesc" 
                       :filter="filter" 
@@ -233,7 +257,13 @@ export default {
                         <div class="dataTables_paginate paging_simple_numbers float-right">
                             <ul class="pagination pagination-rounded mb-0">
                                 <!-- pagination -->
-                                <b-pagination v-model="currentPage" :total-rows="rows" :per-page="perPage"></b-pagination>
+                              <b-pagination 
+                                v-model="currentPage"
+                                :total-rows="rows" 
+                                :per-page="perPage"
+                                @change = "handlePageChange"
+                              >
+                              </b-pagination>
                             </ul>
                         </div>
                     </div>
