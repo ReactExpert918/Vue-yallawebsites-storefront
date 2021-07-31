@@ -24,6 +24,7 @@ export default {
       selectedAll: false,
       backendURL: process.env.VUE_APP_BACKEND_URL,
       domainsData: [],
+      domainsDataLength: 1,
       currentDomain: {},
       newDomainData: {}, 
       title: "Domains",
@@ -69,7 +70,7 @@ export default {
         * Total no. of records
         */
       rows() {
-          return this.domainsData.length;
+          return this.domainsDataLength;
       }
   },
   watch: {
@@ -139,6 +140,21 @@ export default {
         .delete(`${this.backendURL}/api/v1/domains/${this.currentDomain.id}` , authHeader())
         .then(response => (alert(`${response.data.data.id} Domain deleted!`)))
         .catch(handleAxiosError);
+      },
+      handlePageChange(value) {
+        this.currentPage = value;
+        axios
+        .get(`${this.backendURL}/api/v1/domains?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
+        .then(response => (this.domainsData = response.data.data,
+                           this.domainsDataLength = response.data.pagination.total));
+      },
+      handlePerPageChange(value) {
+        this.perPage = value;
+        this.currentPage = 1;
+        axios
+        .get(`${this.backendURL}/api/v1/domains?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
+        .then(response => (this.domainsData = response.data.data,
+                           this.domainsDataLength = response.data.pagination.total));
       }
   },
 };
@@ -168,7 +184,13 @@ export default {
                 <div id="tickets-table_length" class="dataTables_length">
                     <label class="d-inline-flex align-items-center">
                         Show&nbsp;
-                        <b-form-select v-model="perPage" size="sm" :options="pageOptions"></b-form-select>&nbsp;entries
+                        <b-form-select 
+                          v-model="perPage" 
+                          size="sm" 
+                          :options="pageOptions"
+                          @change = "handlePerPageChange"
+                        >
+                        </b-form-select>&nbsp;entries
                     </label>
                 </div>
               </div>
@@ -187,7 +209,7 @@ export default {
                       :fields="fields" 
                       responsive="sm" 
                       :per-page="perPage" 
-                      :current-page="currentPage" 
+                      :current-page="1" 
                       :sort-by.sync="sortBy" 
                       :sort-desc.sync="sortDesc" 
                       :filter="filter" 
@@ -237,7 +259,13 @@ export default {
                         <div class="dataTables_paginate paging_simple_numbers float-right">
                             <ul class="pagination pagination-rounded mb-0">
                                 <!-- pagination -->
-                                <b-pagination v-model="currentPage" :total-rows="rows" :per-page="perPage"></b-pagination>
+                                <b-pagination 
+                                  v-model="currentPage" 
+                                  :total-rows="rows" 
+                                  :per-page="perPage"
+                                  @change = "handlePageChange"
+                                >
+                                </b-pagination>
                             </ul>
                         </div>
                     </div>
