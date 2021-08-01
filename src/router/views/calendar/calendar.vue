@@ -283,10 +283,19 @@ export default {
         </div>
 
         <div class="text-right pt-5 mt-3">
-          <b-button variant="light" @click="hideModal">Close</b-button>
-          <b-button type="submit" variant="success" class="ml-1"
-            >Create event</b-button
+          <b-button 
+            variant="light" 
+            @click="hideModal"
           >
+            Close
+          </b-button>
+          <b-button 
+            type="submit" 
+            variant="success" 
+            class="ml-1"
+          >
+            Create event
+          </b-button>
         </div>
       </form>
     </b-modal>
@@ -333,13 +342,26 @@ export default {
           </div>
         </div>
         <div class="text-right p-3">
-          <b-button variant="light" @click="closeModal">Close</b-button>
-          <b-button class="ml-1" variant="danger" @click="confirm"
-            >Delete</b-button
+          <b-button 
+            variant="light" 
+            @click="closeModal"
           >
-          <b-button class="ml-1" variant="success" @click="editSubmit"
-            >Save</b-button
+            Close
+          </b-button>
+          <b-button 
+            class="ml-1" 
+            variant="danger" 
+            @click="confirm"
           >
+            Delete
+          </b-button>
+          <b-button 
+            class="ml-1" 
+            variant="success" 
+            @click="editSubmit"
+          >
+            Save
+          </b-button>
         </div>
       </form>
     </b-modal>
