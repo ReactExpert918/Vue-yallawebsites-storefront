@@ -26,7 +26,8 @@ export default {
     },
     data() {
         return {
-            tableData: tableData,
+            tableData: [],
+            tableDataLength: 1,
             title: "Advanced Table",
             items: [{
                     text: "Tables",
@@ -77,7 +78,7 @@ export default {
          * Total no. of records
          */
         rows() {
-            return this.tableData.length;
+            return this.tableDataLength;
         },
     },
     mounted() {

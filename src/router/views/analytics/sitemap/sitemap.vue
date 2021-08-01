@@ -42,8 +42,10 @@ export default {
             <div class="row mb-2">
               <div class="col-sm-12">
                 <div class="text-sm-right">
-                  <b-button v-b-modal.modal-scrollable variant="primary">
-                  Generate
+                  <b-button 
+                    v-b-modal.modal-scrollable variant="primary"
+                  >
+                    Generate
                   </b-button>
                 </div>
               </div>
@@ -51,7 +53,14 @@ export default {
             </div>
             <div class="form-group">
               <label for="sitetitle">Sitemap</label>
-              <input id="sitetitle" name="site title" type="text" class="form-control" value="https://mydomain.com/sitemap.xml" disabled>
+              <input 
+                id="sitetitle" 
+                name="site title" 
+                type="text" 
+                class="form-control" 
+                value="https://mydomain.com/sitemap.xml" 
+                disabled
+              />
             </div>
             <div class="row">
               <div class="col-lg-4">

@@ -45,7 +45,7 @@ export default {
               <div class="col-sm-12">
                 <div class="text-sm-right">
                   <b-button v-b-modal variant="primary">
-                  Save
+                    Save
                   </b-button>
                 </div>
               </div>
@@ -57,23 +57,43 @@ export default {
                 <b-form>
                   <div class="row">
                     <div class="col-md-3">
-                      <b-form-group label="Enabled" label-for="formrow-enabled-input">
-                        <b-form-checkbox switch size="lg"></b-form-checkbox>
+                      <b-form-group 
+                        label="Enabled" 
+                        label-for="formrow-enabled-input"
+                      >
+                        <b-form-checkbox 
+                          switch size="lg"
+                        ></b-form-checkbox>
                       </b-form-group>
                     </div>
                     <div class="col-md-3">
-                      <b-form-group label="Account Number" label-for="formrow-accountnumber-input">
-                        <b-form-input id="formrow-accountnumber-input" type="text"></b-form-input>
+                      <b-form-group 
+                        label="Account Number" 
+                        label-for="formrow-accountnumber-input"
+                      >
+                        <b-form-input 
+                          id="formrow-accountnumber-input" 
+                          type="text"
+                        ></b-form-input>
                       </b-form-group>
                     </div>
                     <div class="col-md-3">
-                      <b-form-group label="Annonymise IP" label-for="formrow-annonymiseip-input">
-                        <b-form-checkbox switch size="lg"></b-form-checkbox>
+                      <b-form-group 
+                        label="Annonymise IP" 
+                        label-for="formrow-annonymiseip-input"
+                      >
+                        <b-form-checkbox 
+                          switch size="lg"
+                        ></b-form-checkbox>
                       </b-form-group>
                     </div>
                     <div class="col-md-3">
-                      <b-form-group label="Enhanced eCommerce Tracking" label-for="formrow-enablernhancedecommercetracking-input">
-                        <b-form-checkbox switch size="lg"></b-form-checkbox>
+                      <b-form-group 
+                        label="Enhanced eCommerce Tracking" label-for="formrow-enablernhancedecommercetracking-input"
+                      >
+                        <b-form-checkbox 
+                          switch size="lg"
+                        ></b-form-checkbox>
                       </b-form-group>
                     </div>
                   </div>
@@ -85,20 +105,33 @@ export default {
                 <b-form>
                   <div class="row">
                     <div class="col-md-3">
-                      <b-form-group label="Enabled" label-for="formrow-adwordsenabled-input">
-                        <b-form-checkbox switch size="lg"></b-form-checkbox>
+                      <b-form-group 
+                        label="Enabled" 
+                        label-for="formrow-adwordsenabled-input"
+                      >
+                        <b-form-checkbox 
+                          switch size="lg"
+                        ></b-form-checkbox>
                       </b-form-group>
                     </div>
                     <div class="col-md-3">
                       <div class="form-group">
-                        <b-form-group label="Conversion ID" label-for="formrow-conversionid-input">
-                          <b-form-input id="formrow-conversionid-input" type="text"></b-form-input>
+                        <b-form-group 
+                          label="Conversion ID" 
+                          label-for="formrow-conversionid-input"
+                        >
+                          <b-form-input 
+                            id="formrow-conversionid-input" 
+                            type="text"
+                          ></b-form-input>
                         </b-form-group>
                       </div>
                     </div>
                     <div class="col-md-3">
                       <div class="form-group">
-                        <b-form-group label="Conversion Language" label-for="formrow-coonversionlanguage-input">
+                        <b-form-group 
+                          label="Conversion Language" label-for="formrow-coonversionlanguage-input"
+                        >
                           <select class="form-control">
                             <option value="ar">العربية / Arabic (ar)</option>
                             <option value="bg">Български / Bulgarian (bg)</option>
@@ -147,28 +180,48 @@ export default {
                     </div>
                     <div class="col-md-3">
                       <div class="form-group">
-                        <b-form-group label="Conversion Format" label-for="formrow-conversionformat-input">
-                          <b-form-input id="formrow-conversionformat-input" type="text"></b-form-input>
+                        <b-form-group 
+                          label="Conversion Format" label-for="formrow-conversionformat-input"
+                        >
+                          <b-form-input 
+                            id="formrow-conversionformat-input" 
+                            type="text"
+                          ></b-form-input>
                         </b-form-group>
                       </div>
                     </div>
                     <div class="col-md-3">
                       <div class="form-group">
-                        <b-form-group label="Conversion Color" label-for="formrow-conversioncolor-input">
-                          <b-form-input id="formrow-conversioncolor-input" type="text"></b-form-input>
+                        <b-form-group 
+                          label="Conversion Color" 
+                          label-for="formrow-conversioncolor-input"
+                        >
+                          <b-form-input 
+                            id="formrow-conversioncolor-input" 
+                            type="text"
+                          ></b-form-input>
                         </b-form-group>
                       </div>
                     </div>
                     <div class="col-md-3">
                       <div class="form-group">
-                        <b-form-group label="Conversion Label" label-for="formrow-conversionlabel-input">
-                          <b-form-input id="formrow-conversionlabel-input" type="text"></b-form-input>
+                        <b-form-group 
+                          label="Conversion Label"
+                          label-for="formrow-conversionlabel-input"
+                        >
+                          <b-form-input 
+                            id="formrow-conversionlabel-input" 
+                            type="text"
+                          ></b-form-input>
                         </b-form-group>
                       </div>
                     </div>
                     <div class="col-md-3">
                       <div class="form-group">
-                        <b-form-group label="Conversion Value Type" label-for="formrow-conversionvaluetype-input">
+                        <b-form-group 
+                          label="Conversion Value Type"
+                          label-for="formrow-conversionvaluetype-input"
+                        >
                           <select class="form-control">
                             <option value="1" selected="selected">Dynamic</option>
                             <option value="0">Constant</option>
@@ -185,8 +238,13 @@ export default {
                 <b-form>
                   <div class="row">
                     <div class="col-md-3">
-                      <b-form-group label="Enabled" label-for="formrow-remarketingenabled-input">
-                        <b-form-checkbox switch size="lg"></b-form-checkbox>
+                      <b-form-group 
+                        label="Enabled" 
+                        label-for="formrow-remarketingenabled-input"
+                      >
+                        <b-form-checkbox 
+                          switch size="lg"
+                        ></b-form-checkbox>
                       </b-form-group>
                     </div>
                     <div class="col-md-3">
@@ -197,13 +255,22 @@ export default {
                       </div>
                     </div>
                     <div class="col-md-3">
-                      <b-form-group label="Enable Tracking For Other Sites" label-for="formrow-enabletracking-input">
-                        <b-form-checkbox switch size="lg"></b-form-checkbox>
+                      <b-form-group 
+                        label="Enable Tracking For Other Sites" label-for="formrow-enabletracking-input"
+                      >
+                        <b-form-checkbox 
+                          switch size="lg"
+                        ></b-form-checkbox>
                       </b-form-group>
                     </div>
                     <div class="col-md-3">
-                      <b-form-group label="Dynamic Remarking tags" label-for="formrow-dynamicremarkingtags-input">
-                        <b-form-checkbox switch size="lg"></b-form-checkbox>
+                      <b-form-group 
+                        label="Dynamic Remarking tags" label-for="formrow-dynamicremarkingtags-input"
+                      >
+                        <b-form-checkbox 
+                          switch size="lg"
+                        >
+                        </b-form-checkbox>
                       </b-form-group>
                     </div>
                   </div>

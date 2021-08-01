@@ -170,7 +170,8 @@ export default {
                   type="text"
                   placeholder="Enter email"
                   :class="{ 'is-invalid': submitted && $v.email.$error }"
-                ></b-form-input>
+                >
+                </b-form-input>
                 <div
                   v-if="submitted && $v.email.$error"
                   class="invalid-feedback"
@@ -210,9 +211,12 @@ export default {
                 >
               </div>
               <div class="mt-3">
-                <b-button type="submit" variant="primary" class="btn-block"
-                  >Log In</b-button
-                >
+                <b-button 
+                  type="submit" 
+                  variant="primary" 
+                  class="btn-block"
+                >Log In
+                </b-button>
               </div>
               <div class="mt-4 text-center">
                 <h5 class="font-size-14 mb-3">Sign in with</h5>
@@ -242,8 +246,16 @@ export default {
                 </ul>
               </div>
               <div class="mt-4 text-center">
-                <router-link tag="a" to="/forgot-password" class="text-muted">
-                  <i class="mdi mdi-lock mr-1"></i> Forgot your password?
+                <router-link 
+                  tag="a" 
+                  to="/forgot-password" 
+                  class="text-muted"
+                >
+                  <i 
+                    class="mdi mdi-lock mr-1"
+                  >
+                  </i> 
+                    Forgot your password?
                 </router-link>
               </div>
             </b-form>
@@ -259,8 +271,9 @@ export default {
               tag="a"
               to="/register"
               class="font-weight-medium text-primary"
-              >Signup now</router-link
             >
+              Signup now
+            </router-link>
           </p>
           <p>
             © {{ new Date().getFullYear() }} Skote. Crafted with

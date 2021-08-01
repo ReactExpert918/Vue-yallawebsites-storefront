@@ -75,8 +75,12 @@ export default {
         <div class="card">
           <div class="card-body">
                 <h4 class="card-title mb-4">Most Added To Cart</h4>
-                <div class="mostAdded" v-for="mostAdded in mostAdded" :key="mostAdded.id">
-                      <div class="productAdded">{{mostAdded.productName}}</div>
+                <div 
+                  class="mostAdded" 
+                  v-for="mostAdded in mostAdded" 
+                  :key="mostAdded.id"
+                >
+                  <div class="productAdded">{{mostAdded.productName}}</div>
                 </div>
             </div>
         </div>
@@ -86,8 +90,17 @@ export default {
         <div class="card">
           <div class="card-body">
                 <h4 class="card-title mb-4">Most Viewed Pages</h4>
-                <div class="mostViewedPages" v-for="mostViewedPage in mostViewedPages" :key="mostViewedPage.id">
-                      <div class="productAdded">{{mostViewedPage.link}} <span class="count">{{mostViewedPage.views}}</span></div>
+                <div 
+                  class="mostViewedPages" 
+                  v-for="mostViewedPage in mostViewedPages" 
+                  :key="mostViewedPage.id"
+                >
+                  <div class="productAdded">
+                    {{mostViewedPage.link}} 
+                    <span class="count">
+                      {{mostViewedPage.views}}
+                    </span>
+                  </div>
                 </div>
             </div>
         </div>
@@ -97,8 +110,17 @@ export default {
         <div class="card">
           <div class="card-body">
                 <h4 class="card-title mb-4">Most Bought</h4>
-                <div class="mostBought" v-for="mostBought in mostBought" :key="mostBought.id">
-                      <div class="productAdded">{{mostBought.productName}} <span class="count">{{mostBought.boughtCount}}</span></div>
+                <div 
+                  class="mostBought" 
+                  v-for="mostBought in mostBought" 
+                  :key="mostBought.id"
+                >
+                  <div class="productAdded">
+                    {{mostBought.productName}} 
+                    <span class="count">
+                      {{mostBought.boughtCount}}
+                    </span>
+                  </div>
                 </div>
             </div>
         </div>
