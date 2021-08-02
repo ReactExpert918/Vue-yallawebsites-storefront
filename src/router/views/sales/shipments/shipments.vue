@@ -102,7 +102,6 @@ export default {
   },
   mounted() {
       // Set the initial number of items
-      this.totalRows = this.items.length;
       axios
       .get(`${this.backendURL}/api/v1/orders/shipments?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
       .then(response => {
@@ -127,12 +126,12 @@ export default {
       onFiltered(filteredItems) {
           // Trigger pagination to update the number of buttons/pages due to filtering
           this.totalRows = filteredItems.length;
-          this.currentPage = 1;
+          this.currentPage = this.currentPage;
       },
       handlePageChange(value) {
         this.currentPage = value;
         axios
-        .get(`${this.backendURL}/api/v1/shipments?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
+        .get(`${this.backendURL}/api/v1/orders/shipments?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
         .then(response => (this.shipmentsData = response.data.data,
                            this.shipmentsDataLength = response.data.pagination.total));
       },
@@ -140,7 +139,7 @@ export default {
         this.perPage = value;
         this.currentPage = 1;
         axios
-        .get(`${this.backendURL}/api/v1/shipments?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
+        .get(`${this.backendURL}/api/v1/orders/shipments?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
         .then(response => (this.shipmentsData = response.data.data,
                            this.shipmentsDataLength = response.data.pagination.total));
       }

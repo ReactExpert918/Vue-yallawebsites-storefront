@@ -5,10 +5,6 @@ import Layout from "../../layouts/main";
 import PageHeader from "@/components/page-header";
 import appConfig from "@/app.config";
 
-import {
-    tableData
-} from "./dataAdvancedtable";
-
 /**
  * Advanced table component
  */

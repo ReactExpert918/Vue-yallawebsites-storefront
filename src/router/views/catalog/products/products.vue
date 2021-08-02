@@ -183,7 +183,6 @@ export default {
                       <template #head(selected)="data">
                         <b-form-checkbox
                         v-model="selectedAll"
-                        v-bind:value='data.id'                                             
                         class="custom-checkbox custom-checkbox-primary "
                       ></b-form-checkbox>
                       </template>
@@ -192,7 +191,6 @@ export default {
                         @change="uncheckSelectAll"
                         v-model="data.item.selected"
                         :value="data.id"
-                        
                         class="custom-checkbox custom-checkbox-primary"
                         
                       ></b-form-checkbox>
@@ -208,7 +206,7 @@ export default {
                             <i class="mdi mdi-dots-horizontal font-size-18"></i>
                           </template>
 
-                          <b-dropdown-item :href="'/catalog/products/edit/' + data.item.productId">
+                          <b-dropdown-item :href="'/catalog/products/edit/' + data.item.id">
                             <i class="fas fa-pencil-alt text-success mr-1"></i> Edit
                           </b-dropdown-item>
 
