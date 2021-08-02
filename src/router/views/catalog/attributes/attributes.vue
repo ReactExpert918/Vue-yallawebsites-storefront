@@ -49,6 +49,7 @@ export default {
       selectedAll: false,
 
       attributesData: [],
+      attributesDataLength: 1,
       attributeGroups: [],
       attrTypes: [],
       newOption: {},
@@ -115,7 +116,7 @@ export default {
         * Total no. of records
         */
       rows() {
-          return this.attributesData.length;
+          return this.attributesDataLength;
       },
       console: () => console
   },
@@ -134,7 +135,8 @@ export default {
       axios
       .get(`${this.backendURL}/api/v1/products/attributes?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
       .then(response => {
-          this.attributesData = response.data.data;
+          this.attributesData = response.data.data,
+          this.attributesDataLength = response.data.pagination.total;
           if (this.attributesData.group == null){
             this.attributesData.group = {};
           }
@@ -177,21 +179,22 @@ export default {
       },
       handlePageChange(value) {
         this.currentPage = value;
-        let apiUrl = 
-                      'https://api.coindesk.com/v1/bpi/catalog/project/per_page=this.perPage&page=this.currentPage';
-
         axios
-        .get(apiUrl)
-        .then(response => (this.info = response))
+        .get(`${this.backendURL}/api/v1/products/attributes?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
+        .then(response => {
+            this.attributesData = response.data.data,
+            this.attributesDataLength = response.data.pagination.total;
+        })
       },
       handlePerPageChange(value) {
         this.perPage = value;
         this.currentPage = 1;
-        let apiUrl = 
-                      'https://api.coindesk.com/v1/bpi/catalog/project/per_page=this.perPage&page=this.currentPage';
         axios
-        .get(apiUrl)
-        .then(response => (this.info = response))
+        .get(`${this.backendURL}/api/v1/products/attributes?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
+        .then(response => {
+            this.attributesData = response.data.data,
+            this.attributesDataLength = response.data.pagination.total;
+        })
       },
       handleDefaultOptionChange(id){
         this.currentAttribute.default_option.id = id;

@@ -42,6 +42,7 @@ export default {
         specifications: [],
         variations: [],
       },
+      allProductsDataLength: 1,
       variationsData: [],
       allProductsData: [],
       attrs: [],
@@ -157,7 +158,9 @@ export default {
     };
   },
   computed: {
-      
+      rows() {
+          return this.allProductsDataLength;
+      },
   },
   mounted() {
       axios
@@ -172,6 +175,7 @@ export default {
       .get(`${this.backendURL}/api/v1/products/${this.$route.params.id}` , authHeader())
       .then(response => {
           this.productData = response.data.data;
+          this.productDataLength = response.data.pagination.total;
           this.productData.meta_keywords_str = "";
           if (this.productData.layout == null){
             this.productData.layout = {};
@@ -263,7 +267,8 @@ export default {
       .catch(handleAxiosError);
       axios
       .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}&without=${this.$route.params.id}&with_disabled=false` , authHeader())
-      .then(response => (this.allProductsData = response.data.data))
+      .then(response => (this.allProductsData = response.data.data,
+                         this.allProductsDataLength = response.data.pagination.total))
       .catch(handleAxiosError);
 
      
@@ -330,21 +335,20 @@ export default {
   methods: {
       handlePageChange(value) {
         this.currentPage = value;
-        let apiUrl = 
-                      'https://api.coindesk.com/v1/bpi/catalog/project/per_page=this.perPage&page=this.currentPage';
-
         axios
-        .get(apiUrl)
-        .then(response => (this.info = response))
+      .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}&without=${this.$route.params.id}&with_disabled=false` , authHeader())
+      .then(response => (this.allProductsData = response.data.data,
+                         this.allProductsDataLength = response.data.pagination.total))
+      .catch(handleAxiosError);
       },
       handlePerPageChange(value) {
         this.perPage = value;
         this.currentPage = 1;
-        let apiUrl = 
-                      'https://api.coindesk.com/v1/bpi/catalog/project/per_page=this.perPage&page=this.currentPage';
-        axios
-        .get(apiUrl)
-        .then(response => (this.info = response))
+       axios
+      .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}&without=${this.$route.params.id}&with_disabled=false` , authHeader())
+      .then(response => (this.allProductsData = response.data.data,
+                         this.allProductsDataLength = response.data.pagination.total))
+      .catch(handleAxiosError);
       },
       updateProduct(){
         if (!roleService.hasEditPermission(this.pageIdentity)){
@@ -930,7 +934,7 @@ export default {
                     </div>
                     <!-- Table -->
                     <div class="table-responsive mb-0">
-                        <b-table :items="allProductsData" selectable :fields="fields" responsive="sm" :per-page="perPage" :current-page="currentPage" :sort-by.sync="sortBy" :sort-desc.sync="sortDesc" :filter="filter" :filter-included-fields="filterOn" @filtered="onFiltered">
+                        <b-table :items="allProductsData" selectable :fields="fields" responsive="sm" :per-page="perPage" :current-page="1" :sort-by.sync="sortBy" :sort-desc.sync="sortDesc" :filter="filter" :filter-included-fields="filterOn" @filtered="onFiltered">
                       <template #cell(selected)="data">
                         <b-form-checkbox switch size="lg"   v-on:change="addBundle(data.item.id)" :checked="isBundleID(data.item.id)"></b-form-checkbox>
                       </template>
@@ -950,6 +954,7 @@ export default {
                                     <b-pagination 
                                       v-model="currentPage" 
                                       :per-page="perPage"
+                                      :total-rows="rows" 
                                       @change = "handlePageChange"
                                     >
                                     </b-pagination>

@@ -128,7 +128,8 @@ export default {
        axios
       .get(`${this.backendURL}/api/v1/users?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
       .then(response => {
-         this.usersData = response.data.data;
+         this.usersData = response.data.data,
+         this.usersDataLength = response.data.pagination.total;
          for(var i = 0; i < this.usersData.length; i++){
            var user = this.usersData[i];
            user.role_content_ids = [];
