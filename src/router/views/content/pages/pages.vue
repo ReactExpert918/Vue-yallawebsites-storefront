@@ -8,6 +8,7 @@ import {
 } from "@/helpers/authservice/auth-header";
 import {handleAxiosError} from "@/helpers/authservice/user.service";
 import {roleService} from "@/helpers/authservice/roles";
+import convert from "@/helpers/convertObject";
 
 /**
  * Pages component
@@ -24,6 +25,7 @@ export default {
       selectedAll: false,
       backendURL: process.env.VUE_APP_BACKEND_URL,
       pagesData: [],
+      date: "",
       pagesDataLength: 1,
       page: {},
       title: "Pages",
@@ -104,8 +106,8 @@ export default {
   mounted() {
       axios
       .get(`${this.backendURL}/api/v1/pages?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
-      .then(response => (this.pagesData = response.data.data,
-                         this.pagesDataLength = response.data.pagination.total))
+      .then(response => (this.pagesData = convert(response.data.data),
+                        this.pagesDataLength = response.data.pagination.total))
       .catch(handleAxiosError);
   },
   methods: {
@@ -124,7 +126,7 @@ export default {
           this.currentPage = value;
           axios
           .get(`${this.backendURL}/api/v1/pages?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
-          .then(response => (this.pagesData = response.data.data,
+          .then(response => (this.pagesData = convert(response.data.data),
                              this.pagesDataLength = response.data.pagination.total));
         },
       handlePerPageChange(value) {
@@ -132,7 +134,7 @@ export default {
         this.currentPage = 1;
         axios
         .get(`${this.backendURL}/api/v1/pages?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
-        .then(response => (this.pagesData = response.data.data,
+        .then(response => (this.pagesData = convert(response.data.data),
                            this.pagesDataLength = response.data.pagination.total));
       },
       deletePage(){
