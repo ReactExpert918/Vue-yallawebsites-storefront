@@ -42,6 +42,7 @@ export default {
         specifications: [],
         variations: [],
       },
+      allProductsDataLength: 1,
       variationsData: [],
       allProductsData: [],
       attrs: [],
@@ -157,7 +158,9 @@ export default {
     };
   },
   computed: {
-      
+      rows() {
+          return this.allProductsDataLength;
+      },
   },
   mounted() {
       axios
@@ -172,6 +175,7 @@ export default {
       .get(`${this.backendURL}/api/v1/products/${this.$route.params.id}` , authHeader())
       .then(response => {
           this.productData = response.data.data;
+          this.productDataLength = response.data.pagination.total;
           this.productData.meta_keywords_str = "";
           if (this.productData.layout == null){
             this.productData.layout = {};
@@ -263,7 +267,8 @@ export default {
       .catch(handleAxiosError);
       axios
       .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}&without=${this.$route.params.id}&with_disabled=false` , authHeader())
-      .then(response => (this.allProductsData = response.data.data))
+      .then(response => (this.allProductsData = response.data.data,
+                         this.allProductsDataLength = response.data.pagination.total))
       .catch(handleAxiosError);
 
      
@@ -328,7 +333,23 @@ export default {
       .catch(handleAxiosError);
   },
   methods: {
-
+      handlePageChange(value) {
+        this.currentPage = value;
+        axios
+      .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}&without=${this.$route.params.id}&with_disabled=false` , authHeader())
+      .then(response => (this.allProductsData = response.data.data,
+                         this.allProductsDataLength = response.data.pagination.total))
+      .catch(handleAxiosError);
+      },
+      handlePerPageChange(value) {
+        this.perPage = value;
+        this.currentPage = 1;
+       axios
+      .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}&without=${this.$route.params.id}&with_disabled=false` , authHeader())
+      .then(response => (this.allProductsData = response.data.data,
+                         this.allProductsDataLength = response.data.pagination.total))
+      .catch(handleAxiosError);
+      },
       updateProduct(){
         if (!roleService.hasEditPermission(this.pageIdentity)){
           alert("You do no have the permission to perform this action!")
@@ -890,7 +911,13 @@ export default {
                             <div id="tickets-table_length" class="dataTables_length">
                                 <label class="d-inline-flex align-items-center">
                                     Show&nbsp;
-                                    <b-form-select v-model="perPage" size="sm" :options="pageOptions"></b-form-select>&nbsp;entries
+                                    <b-form-select 
+                                      v-model="perPage" 
+                                      size="sm" 
+                                      :options="pageOptions"
+                                      @change = "handlePerPageChange"
+                                    >
+                                    </b-form-select>&nbsp;entries
                                 </label>
                             </div>
                         </div>
@@ -907,7 +934,7 @@ export default {
                     </div>
                     <!-- Table -->
                     <div class="table-responsive mb-0">
-                        <b-table :items="allProductsData" selectable :fields="fields" responsive="sm" :per-page="perPage" :current-page="currentPage" :sort-by.sync="sortBy" :sort-desc.sync="sortDesc" :filter="filter" :filter-included-fields="filterOn" @filtered="onFiltered">
+                        <b-table :items="allProductsData" selectable :fields="fields" responsive="sm" :per-page="perPage" :current-page="1" :sort-by.sync="sortBy" :sort-desc.sync="sortDesc" :filter="filter" :filter-included-fields="filterOn" @filtered="onFiltered">
                       <template #cell(selected)="data">
                         <b-form-checkbox switch size="lg"   v-on:change="addBundle(data.item.id)" :checked="isBundleID(data.item.id)"></b-form-checkbox>
                       </template>
@@ -924,7 +951,13 @@ export default {
                             <div class="dataTables_paginate paging_simple_numbers float-right">
                                 <ul class="pagination pagination-rounded mb-0">
                                     <!-- pagination -->
-                                    <b-pagination v-model="currentPage" :per-page="perPage"></b-pagination>
+                                    <b-pagination 
+                                      v-model="currentPage" 
+                                      :per-page="perPage"
+                                      :total-rows="rows" 
+                                      @change = "handlePageChange"
+                                    >
+                                    </b-pagination>
                                 </ul>
                             </div>
                         </div>

@@ -171,8 +171,9 @@ export default {
               class="mt-3"
               variant="danger"
               dismissible
-              >{{ regError }}</b-alert
             >
+              {{ regError }}
+            </b-alert>
 
             <div
               v-if="notification.message"
@@ -181,11 +182,14 @@ export default {
               {{ notification.message }}
             </div>
 
-            <b-form class="p-2" @submit.prevent="tryToRegisterIn">
-               <b-form-group
-                id="firstname-group"
-                label="First Name"
-                label-for="firstname"
+            <b-form 
+              class="p-2" 
+              @submit.prevent="tryToRegisterIn"
+            >
+             <b-form-group
+              id="firstname-group"
+              label="First Name"
+              label-for="firstname"
               >
                 <b-form-input
                   id="firstname"
@@ -260,8 +264,9 @@ export default {
                 >
                   <span v-if="!$v.user.email.required">Email is required.</span>
                   <span v-if="!$v.user.email.email"
-                    >Please enter valid email.</span
                   >
+                    Please enter valid email.
+                  </span>
                 </div>
               </b-form-group>
 

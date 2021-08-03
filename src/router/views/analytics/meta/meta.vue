@@ -51,15 +51,25 @@ export default {
             </div>
             <div class="form-group">
               <label for="sitetitle">Site Title</label>
-              <input id="sitetitle" name="site title" type="text" class="form-control">
+              <input id="sitetitle" name="site title" type="text" class="form-control" />
             </div>
             <div class="form-group">
               <label for="sitekeywords">Site Keywords</label>
-              <input id="sitekeywords" name="site keywords" type="text" class="form-control">
+              <input 
+                id="sitekeywords" 
+                name="site keywords" 
+                type="text" 
+                class="form-control" 
+              />
             </div>
             <div class="form-group">
               <label for="sitedescriiption">Site Description</label>
-              <textarea id="sitedescriiption" name="site description" type="text" class="form-control"></textarea>
+              <textarea 
+                id="sitedescriiption" 
+                name="site description" 
+                type="text" 
+                class="form-control"
+              ></textarea>
             </div>
           </div>
         </div>

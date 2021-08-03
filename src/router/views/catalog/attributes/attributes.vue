@@ -49,6 +49,7 @@ export default {
       selectedAll: false,
 
       attributesData: [],
+      attributesDataLength: 1,
       attributeGroups: [],
       attrTypes: [],
       newOption: {},
@@ -115,7 +116,7 @@ export default {
         * Total no. of records
         */
       rows() {
-          return this.attributesData.length;
+          return this.attributesDataLength;
       },
       console: () => console
   },
@@ -134,7 +135,8 @@ export default {
       axios
       .get(`${this.backendURL}/api/v1/products/attributes?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
       .then(response => {
-          this.attributesData = response.data.data;
+          this.attributesData = response.data.data,
+          this.attributesDataLength = response.data.pagination.total;
           if (this.attributesData.group == null){
             this.attributesData.group = {};
           }
@@ -174,6 +176,25 @@ export default {
             }
           }
           return false;
+      },
+      handlePageChange(value) {
+        this.currentPage = value;
+        axios
+        .get(`${this.backendURL}/api/v1/products/attributes?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
+        .then(response => {
+            this.attributesData = response.data.data,
+            this.attributesDataLength = response.data.pagination.total;
+        })
+      },
+      handlePerPageChange(value) {
+        this.perPage = value;
+        this.currentPage = 1;
+        axios
+        .get(`${this.backendURL}/api/v1/products/attributes?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
+        .then(response => {
+            this.attributesData = response.data.data,
+            this.attributesDataLength = response.data.pagination.total;
+        })
       },
       handleDefaultOptionChange(id){
         this.currentAttribute.default_option.id = id;
@@ -362,7 +383,13 @@ export default {
                 <div id="tickets-table_length" class="dataTables_length">
                     <label class="d-inline-flex align-items-center">
                         Show&nbsp;
-                        <b-form-select v-model="perPage" size="sm" :options="pageOptions"></b-form-select>&nbsp;entries
+                        <b-form-select 
+                          v-model="perPage" 
+                          size="sm" 
+                          :options="pageOptions"
+                          @change = "handlePerPageChange"
+                        >
+                        </b-form-select>&nbsp;entries
                     </label>
                 </div>
               </div>
@@ -370,7 +397,12 @@ export default {
               <div class="col-sm-12 col-md-6">
                   <div id="tickets-table_filter" class="dataTables_filter text-md-right">
                       <label class="d-inline-flex align-items-center">Search:
-                          <b-form-input v-model="filter" type="search" placeholder="Search..." class="form-control form-control-sm ml-2"></b-form-input>
+                        <b-form-input 
+                          v-model="filter" 
+                          type="search" 
+                          placeholder="Search..." 
+                          class="form-control form-control-sm ml-2"
+                        ></b-form-input>
                       </label>
                   </div>
               </div>
@@ -391,19 +423,16 @@ export default {
                       <template #head(selected)="data">
                         <b-form-checkbox
                         v-model="selectedAll"
-                        v-bind:value='data.id'                                                 
                         class="custom-checkbox custom-checkbox-primary "
                       ></b-form-checkbox>
                       </template>
                       <template #cell(selected)="data">
                         <b-form-checkbox
-                        @change="uncheckSelectAll"
-                        v-model="data.item.selected"
-                        :value="data.id"
-                        
-                        class="custom-checkbox custom-checkbox-primary"
-                        
-                      ></b-form-checkbox>
+                          @change="uncheckSelectAll"
+                          v-model="data.item.selected"
+                          :value="data.id"
+                          class="custom-checkbox custom-checkbox-primary"
+                        ></b-form-checkbox>
                       </template>
                       <template #cell(status)="data">
                         <span class="badge badge-success font-size-12">
@@ -418,13 +447,16 @@ export default {
                           </template>
 
                           <b-dropdown-item 
-                          v-b-modal.modal-scrollable-edit variant="primary"
-                          @click="currentAttribute = data.item"
+                            v-b-modal.modal-scrollable-edit variant="primary"
+                            @click="currentAttribute = data.item"
                           >
                             <i class="fas fa-pencil-alt text-success mr-1" ></i> Edit
                           </b-dropdown-item>
 
-                          <b-dropdown-item v-b-modal.modal-delete-page @click="currentAttribute = data.item">
+                          <b-dropdown-item 
+                            v-b-modal.modal-delete-page 
+                            @click="currentAttribute = data.item"
+                          >
                             <i class="fas fa-trash-alt text-danger mr-1"></i> Delete
                           </b-dropdown-item>
                         </b-dropdown>
@@ -433,10 +465,18 @@ export default {
                 </div>
                 <div class="row">
                     <div class="col">
-                        <div class="dataTables_paginate paging_simple_numbers float-right">
+                        <div 
+                          class="dataTables_paginate paging_simple_numbers float-right"
+                        >
                             <ul class="pagination pagination-rounded mb-0">
                                 <!-- pagination -->
-                                <b-pagination v-model="currentPage" :total-rows="rows" :per-page="perPage"></b-pagination>
+                                <b-pagination 
+                                  v-model="currentPage" 
+                                  :total-rows="rows" 
+                                  :per-page="perPage"
+                                  @change = "handlePageChange"
+                                >
+                                </b-pagination>
                             </ul>
                         </div>
                     </div>
@@ -445,8 +485,15 @@ export default {
 
             <!-- <b-button v-b-modal.modal-scrollable variant="primary">Edit Popup</b-button> -->
 
-            <b-modal id="modal-scrollable-edit" scrollable title="Edit Attribute" title-class="font-18" hide-footer>
-              <b-tabs justified nav-class="nav-tabs-custom" content-class="p-3 text-muted">
+            <b-modal 
+              id="modal-scrollable-edit" 
+              scrollable title="Edit Attribute" 
+              title-class="font-18" hide-footer
+            >
+              <b-tabs justified 
+                nav-class="nav-tabs-custom" 
+                content-class="p-3 text-muted"
+              >
                 <b-tab active>
                   <template v-slot:title>
                     <span class="d-inline-block d-sm-none">
@@ -457,25 +504,44 @@ export default {
                   <div class="row">
                     <div class="col-sm-6">
                       <label class="mt-3">Attribute Name</label>
-                      <b-form-input for="text" v-model="currentAttribute.name"></b-form-input>
+                      <b-form-input 
+                        for="text"  
+                        v-model="currentAttribute.name"
+                      ></b-form-input>
                       <label class="mt-3">Is Required</label>
-                       <b-form-checkbox 
-                        switch size="lg"       
-                        v-model="currentAttribute.required"
-                      ></b-form-checkbox>
+                        <b-form-checkbox 
+                          switch size="lg"       
+                          v-model="currentAttribute.required"
+                        ></b-form-checkbox>
                       <label class="mt-3">Option Type</label>
-                      <select class="custom-select" v-model="currentAttribute.type.id">
-                         <option v-for="attrType in attrTypes" v-bind:value="attrType.id" :key="attrType.id">{{attrType.name}}</option>
+                      <select 
+                        class="custom-select" 
+                        v-model="currentAttribute.type.id"
+                      >
+                        <option 
+                          v-for="attrType in attrTypes" 
+                          v-bind:value="attrType.id" 
+                          :key="attrType.id"
+                        >
+                          {{attrType.name}}
+                        </option>
                       </select>
                       <label class="mt-3">Attribute Code</label>
-                      <b-form-input for="text" v-model="currentAttribute.code"></b-form-input>
-
-
+                      <b-form-input 
+                        for="text" 
+                        v-model="currentAttribute.code"
+                      ></b-form-input>
                     </div>
                     <div class="col-sm-6">
                       <label class="mt-3">Attribute Group</label>
                       <select class="custom-select" v-model="currentAttribute.group.id">
-                        <option v-for="group in attributeGroups" :key="group.id" :value="group.id">{{group.name}}</option>
+                        <option 
+                          v-for="group in attributeGroups" 
+                          :key="group.id" 
+                          :value="group.id"
+                        >
+                          {{group.name}}
+                        </option>
                       </select>
                       <label class="mt-3">Enabled</label>
                       <b-form-checkbox 
@@ -495,15 +561,27 @@ export default {
                   <div class="dropdownOptions">
                     <div class="row mb-3">
                       <div class="col-sm-12 mb-3">
-                        <b-form-input for="text" placeholder="Option Label" v-model="newOption.label"></b-form-input>
+                        <b-form-input 
+                          for="text" 
+                          placeholder="Option Label" 
+                          v-model="newOption.label"
+                        ></b-form-input>
                       </div>
                       <div class="col-sm-9">
-                        <b-form-input for="text" placeholder="Option Name" v-model="newOption.name"></b-form-input>
+                        <b-form-input 
+                          for="text" 
+                          placeholder="Option Name" 
+                          v-model="newOption.name"
+                        ></b-form-input>
                       </div>
                       <div class="col-sm-3">
-                        <b-button variant="primary" class="btn-block" @click="addOption()">
-                        <i class="bx bx-check-double font-size-16 align-middle mr-2"></i>
-                        Add
+                        <b-button 
+                          variant="primary" 
+                          class="btn-block" 
+                          @click="addOption()"
+                        >
+                          <i class="bx bx-check-double font-size-16 align-middle mr-2"></i>
+                          Add
                         </b-button>
                       </div>
                     </div>
@@ -533,17 +611,21 @@ export default {
                                         :checked="currentAttribute.default_option.id == attributeoption.id"
                                         :disabled="currentAttribute.default_option.id == attributeoption.id"
                                         @change="handleDefaultOptionChange(attributeoption.id)"
-                                      >Default</b-form-checkbox>
+                                      >
+                                        Default
+                                      </b-form-checkbox>
                                     </div>
                                     <div class="col-sm-4">
-                                      <button variant="primary" @click="deleteProductOption(attributeoption)">
+                                      <button 
+                                        variant="primary" 
+                                        @click="deleteProductOption(attributeoption)"
+                                      >
                                         <i class="bx bx-trash-alt"></i>
                                       </button>
                                     </div>
                                   </div>
-                                  
-                                  </span>
-                                </div>
+                                </span>
+                              </div>
                             </h6>
                           </b-card-header>
                         </b-card>
@@ -553,7 +635,11 @@ export default {
                   <div class="text-options">
                     <div class="row mb-3">
                       <div class="col-sm-12">
-                        <b-form-input for="text" placeholder="Text Label" v-model="newOption.text_label"></b-form-input>
+                        <b-form-input 
+                          for="text" 
+                          placeholder="Text Label" 
+                          v-model="newOption.text_label"
+                        ></b-form-input>
                       </div>
                     </div>
                   </div>
@@ -568,30 +654,53 @@ export default {
                   <div class="row">
                     <div class="col-sm-6">
                       <label class="mt-3">Use in Category Filters</label>
-                      <b-form-checkbox switch size="lg" v-model="currentAttribute.use_category_filters"></b-form-checkbox>
+                      <b-form-checkbox 
+                        switch size="lg" 
+                        v-model="currentAttribute.use_category_filters"
+                      ></b-form-checkbox>
                       <label class="mt-3">Show On Product Page</label>
-                      <b-form-checkbox switch size="lg" v-model="currentAttribute.show_product_page"></b-form-checkbox>
+                      <b-form-checkbox 
+                        switch size="lg"
+                        v-model="currentAttribute.show_product_page"
+                      ></b-form-checkbox>
                       <label class="mt-3">Show On Category Page</label>
-                      <b-form-checkbox switch size="lg" v-model="currentAttribute.show_category_page"></b-form-checkbox>
+                      <b-form-checkbox 
+                        switch size="lg" 
+                        v-model="currentAttribute.show_category_page"
+                      ></b-form-checkbox>
                       <label class="mt-3">Sort Order</label>
-                      <b-form-input for="text" v-model="currentAttribute.sort_order"></b-form-input>
+                      <b-form-input 
+                        for="text" 
+                        v-model="currentAttribute.sort_order"
+                      ></b-form-input>
                     </div>
                     <div class="col-sm-6">
                       <label class="mt-3">Show In Product Specifications</label>
-                      <b-form-checkbox switch size="lg" v-model="currentAttribute.show_product_specifications"></b-form-checkbox>
+                      <b-form-checkbox 
+                        switch size="lg" 
+                        v-model="currentAttribute.show_product_specifications"
+                      ></b-form-checkbox>
                     </div>
                   </div>
                 </b-tab>
               </b-tabs>
               <div class="text-sm-right">
                 <b-button variant="primary" @click="updateAttribute()">
-                      <i class="bx bx-check-double font-size-16 align-middle mr-2"></i>
-                      Publish
-                  </b-button>
+                  <i class="bx bx-check-double font-size-16 align-middle mr-2"></i>
+                  Publish
+                </b-button>
               </div>
             </b-modal>
-            <b-modal id="modal-scrollable-add" scrollable title="Add Attribute" title-class="font-18" hide-footer>
-              <b-tabs justified nav-class="nav-tabs-custom" content-class="p-3 text-muted">
+            <b-modal 
+              id="modal-scrollable-add" 
+              scrollable title="Add Attribute" 
+              title-class="font-18" 
+              hide-footer
+            >
+              <b-tabs justified 
+                nav-class="nav-tabs-custom" 
+                content-class="p-3 text-muted"
+              >
                 <b-tab active>
                   <template v-slot:title>
                     <span class="d-inline-block d-sm-none">
@@ -602,7 +711,10 @@ export default {
                   <div class="row">
                     <div class="col-sm-6">
                       <label class="mt-3">Attribute Name</label>
-                      <b-form-input for="text" v-model="newAttr.name"></b-form-input>
+                      <b-form-input 
+                        for="text" 
+                        v-model="newAttr.name"
+                      ></b-form-input>
                       <label class="mt-3">Is Required</label>
                       <b-form-checkbox 
                         switch size="lg"
@@ -610,15 +722,30 @@ export default {
                       ></b-form-checkbox>
                       <label class="mt-3">Option Type</label>
                       <select class="custom-select" v-model="newAttr.type_id">
-                         <option v-for="attrType in attrTypes" v-bind:value="attrType.id" :key="attrType.id">{{attrType.name}}</option>
+                         <option 
+                          v-for="attrType in attrTypes" 
+                          v-bind:value="attrType.id" 
+                          :key="attrType.id"
+                        >
+                          {{attrType.name}}
+                        </option>
                       </select>
                       <label class="mt-3">Attribute Code</label>
-                      <b-form-input for="text" v-model="newAttr.code"></b-form-input>
+                      <b-form-input 
+                        for="text" 
+                        v-model="newAttr.code"
+                      ></b-form-input>
                     </div>
                     <div class="col-sm-6">
                       <label class="mt-3">Attribute Group</label>
                       <select class="custom-select" v-model="newAttr.group_id">
-                        <option v-for="group in attributeGroups" :key="group.id" :value="group.id">{{group.name}}</option>
+                        <option 
+                          v-for="group in attributeGroups" 
+                          :key="group.id" 
+                          :value="group.id"
+                        >
+                          {{group.name}}
+                        </option>
                       </select>
                       <label class="mt-3">Enabled</label>
                       <b-form-checkbox 
@@ -638,15 +765,27 @@ export default {
                   <div class="dropdown-options">
                     <div class="row mb-3">
                       <div class="col-sm-12 mb-3">
-                        <b-form-input for="text" placeholder="Option Label" v-model="newAttr.option_label"></b-form-input>
+                        <b-form-input 
+                          for="text" 
+                          placeholder="Option Label" 
+                          v-model="newAttr.option_label"
+                        ></b-form-input>
                       </div>
                       <div class="col-sm-9">
-                        <b-form-input for="text" placeholder="Option Name" v-model="newAttr.option_name"></b-form-input>
+                        <b-form-input 
+                          for="text" 
+                          placeholder="Option Name" 
+                          v-model="newAttr.option_name"
+                        ></b-form-input>
                       </div>
                       <div class="col-sm-3">
-                        <b-button variant="primary" class="btn-block" @click="handleOptionAdd()">
+                        <b-button 
+                          variant="primary" 
+                          class="btn-block" 
+                          @click="handleOptionAdd()"
+                        >
                         <i class="bx bx-check-double font-size-16 align-middle mr-2"></i>
-                        Add
+                          Add
                         </b-button>
                       </div>
                     </div>
@@ -664,7 +803,9 @@ export default {
                           <b-card-header header-tag="header" >
                             <h6 class="row">
                               <div class="col-sm-8">
-                                <span class="move"><i class="bx bx-move-vertical"></i></span>
+                                <span class="move">
+                                  <i class="bx bx-move-vertical"></i>
+                                </span>
                                 {{attributeoption.name}}
                               </div>
                               <div class="col-sm-4">
@@ -676,10 +817,14 @@ export default {
                                         :checked="isOptionDefault(attributeoption.name)"
                                         :disabled="isOptionDefault(attributeoption.name)"
                                         @change="handleDefaultOptionCreateChange(attributeoption.name)"
-                                      >Default</b-form-checkbox>
+                                      >
+                                        Default
+                                      </b-form-checkbox>
                                     </div>
                                     <div class="col-sm-4">
-                                      <button variant="primary" @click="handleProductOptionDelete(attributeoption.name , newAttr.options)">
+                                      <button 
+                                        variant="primary"   @click="handleProductOptionDelete(attributeoption.name , newAttr.options)"
+                                      >
                                         <i class="bx bx-trash-alt"></i>
                                       </button>
                                     </div>
@@ -695,7 +840,11 @@ export default {
                   <div class="text-options">
                     <div class="row mb-3">
                       <div class="col-sm-12">
-                        <b-form-input for="text" placeholder="Text Label" v-model="newAttr.option_text_label"></b-form-input>
+                        <b-form-input 
+                          for="text" 
+                          placeholder="Text Label" 
+                          v-model="newAttr.option_text_label"
+                        ></b-form-input>
                       </div>
                     </div>
                   </div>
@@ -710,52 +859,108 @@ export default {
                   <div class="row">
                     <div class="col-sm-6">
                       <label class="mt-3">Use in Category Filters</label>
-                      <b-form-checkbox switch size="lg" v-model="newAttr.use_category_filters"></b-form-checkbox>
+                      <b-form-checkbox 
+                        switch size="lg" 
+                        v-model="newAttr.use_category_filters"
+                      ></b-form-checkbox>
                       <label class="mt-3">Show On Product Page</label>
-                      <b-form-checkbox switch size="lg" v-model="newAttr.show_product_page"></b-form-checkbox>
+                      <b-form-checkbox 
+                        switch size="lg" 
+                        v-model="newAttr.show_product_page"
+                      ></b-form-checkbox>
                       <label class="mt-3">Show On Category Page</label>
-                      <b-form-checkbox switch size="lg" v-model="newAttr.show_category_page"></b-form-checkbox>
+                      <b-form-checkbox 
+                        switch size="lg" 
+                        v-model="newAttr.show_category_page"
+                      ></b-form-checkbox>
                       <label class="mt-3">Sort Order</label>
-                      <b-form-input for="text" v-model="newAttr.sort_order"></b-form-input>
+                      <b-form-input 
+                        for="text" 
+                        v-model="newAttr.sort_order"
+                      ></b-form-input>
                     </div>
                     <div class="col-sm-6">
                       <label class="mt-3">Show In Product Specifications</label>
-                      <b-form-checkbox switch size="lg" v-model="newAttr.show_product_specifications"></b-form-checkbox>
+                      <b-form-checkbox 
+                        switch size="lg"
+                        v-model="newAttr.show_product_specifications"
+                      ></b-form-checkbox>
                     </div>
                   </div>
                 </b-tab>
               </b-tabs>
               <div class="text-sm-right">
                 <b-button variant="primary" @click="addAttribute()">
-                      <i class="bx bx-check-double font-size-16 align-middle mr-2"></i>
-                      Publish
-                  </b-button>
+                  <i class="bx bx-check-double font-size-16 align-middle mr-2"></i>
+                  Publish
+                </b-button>
               </div>
             </b-modal>
-            <b-modal id="modal-delete-page" centered title="Delete Attribute" title-class="font-18" hide-footer>
+            <b-modal 
+              id="modal-delete-page" 
+              centered title="Delete Attribute" 
+              title-class="font-18" hide-footer
+            >
               <p>Are you sure? Pressing Delete will remove this attribute permenantly.</p>
               <div class="text-right">
-                <b-button variant="danger" @click="deleteAttribute()">Delete</b-button>
+                <b-button 
+                  variant="danger" 
+                  @click="deleteAttribute()"
+                >
+                  Delete
+                </b-button>
               </div>
             </b-modal>
-            <b-modal id="modal-attribute-groups" centered title="Manage Attribute Groups" title-class="font-18" hide-footer>
+            <b-modal 
+              id="modal-attribute-groups" 
+              centered title="Manage Attribute Groups" 
+              title-class="font-18" hide-footer
+            >
               <div class="row mb-3">
                 <div class="col-sm-12 mb-3">
                   <div class="slim-tab mb-2" v-for="group in attributeGroups" :key="group.id">
                     <span class="p-3">{{group.name}}</span>
                     <span class="actions-right cursor-ponter">
-                      <b-button class="mr-1 w-s m-2" variant="danger"><i class="mdi mdi-trash-can d-block"></i></b-button>
-                      <span class="delete-confirmation">Are you sure? <b-button class="mr-1 w-s m-2" variant="danger" @click="deleteAttributeGroup(group)"><i class="bx bx-check d-block"></i></b-button><b-button class="mr-1 w-s m-2" variant="secondary"><i class="bx bx-x d-block"></i></b-button></span>
+                      <b-button 
+                        class="mr-1 w-s m-2" 
+                        variant="danger"
+                      >
+                        <i class="mdi mdi-trash-can d-block"></i>
+                      </b-button>
+                      <span class="delete-confirmation">
+                        Are you sure? 
+                        <b-button 
+                          class="mr-1 w-s m-2" 
+                          variant="danger" 
+                          @click="deleteAttributeGroup(group)"
+                        >
+                          <i class="bx bx-check d-block"></i>
+                        </b-button>
+                        <b-button 
+                          class="mr-1 w-s m-2" 
+                          variant="secondary"
+                        >
+                          <i class="bx bx-x d-block"></i>
+                        </b-button>
+                      </span>
                     </span>
                   </div>
                 </div>
                 <div class="col-sm-9">
-                  <b-form-input for="text" placeholder="Attribute Group Name" v-model="newGroup.name"></b-form-input>
+                  <b-form-input 
+                    for="text" 
+                    placeholder="Attribute Group Name" 
+                    v-model="newGroup.name"
+                  ></b-form-input>
                 </div>
                 <div class="col-sm-3">
-                  <b-button variant="primary" class="btn-block" @click="addAttributeGroup()">
-                  <i class="bx bx-check-double font-size-16 align-middle mr-2"></i>
-                  Add
+                  <b-button 
+                    variant="primary" 
+                    class="btn-block" 
+                    @click="addAttributeGroup()"
+                  >
+                    <i class="bx bx-check-double font-size-16 align-middle mr-2"></i>
+                    Add
                   </b-button>
                 </div>
               </div>

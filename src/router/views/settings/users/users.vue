@@ -25,6 +25,7 @@ export default {
       selectedAll: false,
       backendURL: process.env.VUE_APP_BACKEND_URL,
       usersData: [],
+      usersDataLength: 1,
       rolesData: [],
       currentUser: {
         role:{
@@ -107,7 +108,7 @@ export default {
         * Total no. of records
         */
       rows() {
-          return this.usersData.length;
+          return this.usersDataLength;
       },
   },
   watch: {
@@ -127,7 +128,8 @@ export default {
        axios
       .get(`${this.backendURL}/api/v1/users?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
       .then(response => {
-         this.usersData = response.data.data;
+         this.usersData = response.data.data,
+         this.usersDataLength = response.data.pagination.total;
          for(var i = 0; i < this.usersData.length; i++){
            var user = this.usersData[i];
            user.role_content_ids = [];
@@ -230,6 +232,21 @@ export default {
       handleImageUpload(){
         this.$refs.myVueDropzone.setOption("url" , `${this.backendURL}/api/v1/users/${this.currentUser.id}/upload`);
       },
+      handlePageChange(value) {
+        this.currentPage = value;
+        axios
+        .get(`${this.backendURL}/api/v1/users?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
+        .then(response => (this.usersData = response.data.data,
+                           this.usersDataLength = response.data.pagination.total));
+      },
+      handlePerPageChange(value) {
+        this.perPage = value;
+        this.currentPage = 1;
+        axios
+        .get(`${this.backendURL}/api/v1/users?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
+        .then(response => (this.usersData = response.data.data,
+                           this.usersDataLength = response.data.pagination.total));
+      }
   },
 };
 </script>
@@ -258,7 +275,13 @@ export default {
                 <div id="tickets-table_length" class="dataTables_length">
                     <label class="d-inline-flex align-items-center">
                         Show&nbsp;
-                        <b-form-select v-model="perPage" size="sm" :options="pageOptions"></b-form-select>&nbsp;entries
+                        <b-form-select 
+                          v-model="perPage" 
+                          size="sm" 
+                          :options="pageOptions"
+                          @change = "handlePerPageChange"
+                        >
+                        </b-form-select>&nbsp;entries
                     </label>
                 </div>
               </div>
@@ -277,7 +300,7 @@ export default {
                       :fields="fields" 
                       responsive="sm" 
                       :per-page="perPage" 
-                      :current-page="currentPage" 
+                      :current-page="1" 
                       :sort-by.sync="sortBy" 
                       :sort-desc.sync="sortDesc" 
                       :filter="filter" 
@@ -329,7 +352,13 @@ export default {
                         <div class="dataTables_paginate paging_simple_numbers float-right">
                             <ul class="pagination pagination-rounded mb-0">
                                 <!-- pagination -->
-                                <b-pagination v-model="currentPage" :total-rows="rows" :per-page="perPage"></b-pagination>
+                                <b-pagination 
+                                  v-model="currentPage"
+                                  :total-rows="rows"
+                                  :per-page="perPage"
+                                  @change = "handlePageChange"
+                                >
+                                </b-pagination>
                             </ul>
                         </div>
                     </div>
