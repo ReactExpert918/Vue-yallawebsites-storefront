@@ -4,6 +4,7 @@ import PageHeader from "@/components/page-header";
 import axios from "axios";
 import appConfig from "@/app.config";
 import {authHeader} from "@/helpers/authservice/auth-header";
+import convert from "@/helpers/convertObject";
 import {handleAxiosError} from "@/helpers/authservice/user.service"
 
 /**
@@ -105,7 +106,7 @@ export default {
       axios
       .get(`${this.backendURL}/api/v1/orders/shipments?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
       .then(response => {
-         this.shipmentsData = response.data.data,
+         this.shipmentsData = convert(response.data.data),
          this.shipmentsDataLength = response.data.pagination.total;
          for (var i = 0; i < this.shipmentsData.length; i++){
             var smnt = this.shipmentsData[i];
@@ -132,7 +133,7 @@ export default {
         this.currentPage = value;
         axios
         .get(`${this.backendURL}/api/v1/orders/shipments?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
-        .then(response => (this.shipmentsData = response.data.data,
+        .then(response => (this.shipmentsData = convert(response.data.data),
                            this.shipmentsDataLength = response.data.pagination.total));
       },
       handlePerPageChange(value) {
@@ -140,7 +141,7 @@ export default {
         this.currentPage = 1;
         axios
         .get(`${this.backendURL}/api/v1/orders/shipments?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
-        .then(response => (this.shipmentsData = response.data.data,
+        .then(response => (this.shipmentsData = convert(response.data.data),
                            this.shipmentsDataLength = response.data.pagination.total));
       }
   },

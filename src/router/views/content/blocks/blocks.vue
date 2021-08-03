@@ -8,6 +8,7 @@ import {
 } from "@/helpers/authservice/auth-header";
 import {handleAxiosError} from "@/helpers/authservice/user.service";
 import {roleService} from "@/helpers/authservice/roles";
+import convert from "@/helpers/convertObject";
 
 /**
  * Block component
@@ -101,7 +102,7 @@ export default {
   mounted() {
       axios
       .get(`${this.backendURL}/api/v1/blocks?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
-      .then(response => (this.blockData = response.data.data,
+      .then(response => (this.blockData = convert(response.data.data),
                          this.blockDataLength = response.data.pagination.total))
       .catch(handleAxiosError);
   },
@@ -124,14 +125,14 @@ export default {
         }
         axios
         .delete(`${this.backendURL}/api/v1/blocks/${this.block.id}` , authHeader())
-        .then(response => (alert(`${response.data.data.id} Block deleted!`)))
+        .then(response => (alert(`${convert(response.data.data).id} Block deleted!`)))
         .catch(handleAxiosError);
       },
       handlePageChange(value) {
         this.currentPage = value;
         axios
         .get(`${this.backendURL}/api/v1/blocks?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
-        .then(response => (this.blockData = response.data.data,
+        .then(response => (this.blockData = convert(response.data.data),
                            this.blockDataLength = response.data.pagination.total));
       },
       handlePerPageChange(value) {
@@ -139,7 +140,7 @@ export default {
         this.currentPage = 1;
         axios
         .get(`${this.backendURL}/api/v1/blocks?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
-        .then(response => (this.blockData = response.data.data,
+        .then(response => (this.blockData = convert(response.data.data),
                            this.blockDataLength = response.data.pagination.total));
       }
   },
@@ -222,9 +223,11 @@ export default {
                     ></b-form-checkbox>
                     </template>
                     <template #cell(status)="data">
-                      <span class="badge badge-success font-size-12">
-                        <span v-if="data.item.enabled">Enabled</span>
-                          <span v-else>Disabled</span>
+                      <span v-if="data.item.enabled" class="badge badge-success font-size-12">
+                        <span>Enabled</span>
+                      </span>
+                      <span v-else class="badge badge-danger font-size-12">
+                        <span>Disabled</span>
                       </span>
                     </template>
                     <template #cell(actions)="data">

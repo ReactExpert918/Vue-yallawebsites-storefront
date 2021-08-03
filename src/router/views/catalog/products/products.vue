@@ -51,7 +51,8 @@ export default {
               sortable: true,
           },
           {
-              key: "qty",
+              label: "QTY",
+              key: "quantity",
               sortable: true,
           },
           {
@@ -175,11 +176,10 @@ export default {
               <!-- End search -->
               <!-- Table -->
                 <div class="table-responsive mb-0">
-                    <b-table :items="productsData" 
-                      :fields="fields" 
-                      responsive="sm" 
-                      :per-page="perPage" 
-                      :current-page="1" 
+                    <b-table 
+                      :items="productsData" selectable 
+                      :fields="fields" responsive="sm" 
+                      :per-page="perPage" :current-page="1" 
                       :sort-by.sync="sortBy" 
                       :sort-desc.sync="sortDesc" 
                       :filter="filter" 
@@ -201,8 +201,11 @@ export default {
                       ></b-form-checkbox>
                       </template>
                       <template #cell(status)="data">
-                        <span class="badge badge-success font-size-12">
-                          {{data.item.status}}
+                        <span v-if="data.item.enabled" class="badge badge-success font-size-12">
+                          <span>Enabled</span>
+                        </span>
+                        <span v-else class="badge badge-danger font-size-12">
+                          <span>Disabled</span>
                         </span>
                       </template>
                       <template #cell(actions)="data">

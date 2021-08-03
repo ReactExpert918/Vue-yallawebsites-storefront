@@ -7,6 +7,7 @@ import {
   authHeader,
 } from "@/helpers/authservice/auth-header";
 import {handleAxiosError} from "@/helpers/authservice/user.service"
+import convert from "@/helpers/convertObject";
 
 /**
  * Pages component
@@ -100,7 +101,7 @@ export default {
   mounted() {
       axios
       .get(`${this.backendURL}/api/v1/orders?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
-      .then(response => (this.ordersData = response.data.data,
+      .then(response => (this.ordersData = convert(response.data.data),
                         this.ordersDataLength = response.data.pagination.total))
       .catch(handleAxiosError);
   },
@@ -120,7 +121,7 @@ export default {
         this.currentPage = value;
         axios
         .get(`${this.backendURL}/api/v1/orders?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
-        .then(response => (this.ordersData = response.data.data,
+        .then(response => (this.ordersData = convert(response.data.data),
                            this.ordersDataLength = response.data.pagination.total));
       },
       handlePerPageChange(value) {
@@ -128,7 +129,7 @@ export default {
         this.currentPage = 1;
         axios
         .get(`${this.backendURL}/api/v1/orders?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
-        .then(response => (this.ordersData = response.data.data,
+        .then(response => (this.ordersData = convert(response.data.data),
                            this.ordersDataLength = response.data.pagination.total));
       }
   },

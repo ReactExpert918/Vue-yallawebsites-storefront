@@ -826,9 +826,11 @@ export default {
                         <b-form-checkbox switch size="lg"  v-on:change="addBundle(data.item.id)"></b-form-checkbox>
                       </template>
                        <template #cell(status)="data">
-                        <span class="badge badge-success font-size-12">
-                          <span v-if="data.item.enabled">Enabled</span>
-                          <span v-else>Disabled</span>
+                        <span v-if="data.item.enabled" class="badge badge-success font-size-12">
+                          <span>Enabled</span>
+                        </span>
+                        <span v-else class="badge badge-danger font-size-12">
+                          <span>Disabled</span>
                         </span>
                       </template>
                         </b-table>
