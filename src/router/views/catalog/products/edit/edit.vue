@@ -175,7 +175,6 @@ export default {
       .get(`${this.backendURL}/api/v1/products/${this.$route.params.id}` , authHeader())
       .then(response => {
           this.productData = response.data.data;
-          this.productDataLength = response.data.pagination.total;
           this.productData.meta_keywords_str = "";
           if (this.productData.layout == null){
             this.productData.layout = {};
@@ -262,7 +261,7 @@ export default {
 
               this.variations.push(varData);
           })
-
+          
       })
       .catch(handleAxiosError);
       axios
