@@ -213,8 +213,20 @@ export default {
                       ></b-form-checkbox>
                       </template>
                       <template #cell(status)="data">
-                        <span class="badge badge-success font-size-12">
-                          {{data.item.status.status}}
+                        <span v-if="data.item.status.status == 'Placed'" class="badge badge-warning font-size-12">
+                          <span>Placed</span>
+                        </span>
+                        <span v-else-if="data.item.status.status == 'Shipped'" class="badge badge-ship font-size-12">
+                          <span>Shipped</span>
+                        </span>
+                        <span v-else-if="data.item.status.status == 'Completed'" class="badge badge-success font-size-12">
+                          <span>Completed</span>
+                        </span>
+                        <span v-else-if="data.item.status.status == 'Refunded'" class="badge badge-danger font-size-12">
+                          <span>Refunded</span>
+                        </span>
+                        <span v-else class="badge badge-danger font-size-12">
+                          <span>Cancelled</span>
                         </span>
                       </template>
                       <template #cell(actions)="data">

@@ -704,7 +704,8 @@ export default {
                   ref="myVueDropzone"
                   :use-custom-slot="true"
                   :options="dropzoneOptions"
-                  @vdropzone-file-added="handleImageUpload">
+                  @vdropzone-file-added="handleImageUpload"
+                >
                   <div class="dropzone-custom-content">
                     <i class="display-4 text-muted bx bxs-cloud-upload"></i>
                     <h4>Drop files here or click to upload.</h4>
