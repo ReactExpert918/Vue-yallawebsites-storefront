@@ -46,6 +46,7 @@ export default {
       currentPaymentType: {},
       shippingData: [],
       products: [],
+      productsLength: 1,
       selectedProducts: [],
       credit_memo: "",
       selectedToogle: "A",
@@ -110,7 +111,7 @@ export default {
         * Total no. of records
         */
       rows() {
-          return this.products.length;
+          return this.productsLength;
       },
       console: () => console,
   },
@@ -129,7 +130,8 @@ export default {
       axios
       .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}&quantity_greater_than=${this.productQuantityGreaterThan}&with_disabled=false` , authHeader())
       .then(response => {
-         this.products = response.data.data;
+         this.products = response.data.data,
+         this.productsLength = response.data.pagination.total;
          for(var i = 0; i < this.products.length; i++){
            this.products[i].order_quantity = 1;
          }

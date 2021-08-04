@@ -33,6 +33,7 @@ export default {
       shippingData: [],
       products: [],
       customers: [],
+      customersLength: 0,
       selectedCustomer: {
         billing_addresses: [],
         shipping_addresses: [],
@@ -128,35 +129,26 @@ export default {
           return this.products.length;
       },
       customerrows() {
-          return this.customers.length;
-      },
-      console: () => console,
+          return this.customersLength;
+      }
   },
   watch: {
-    // selectedAll: function() {
-    //   const selectedLength = this.products.filter(data => data.selected);
-    //   return this.products.forEach( e => {
-    //     if(this.selectedAll === true) { e.selected = true; }
-    //     else if (selectedLength.length === this.products.length) {
-    //       e.selected = false;
-    //     }
-    //   })
-    // },
+     selectedAll: function() {
+       const selectedLength = this.products.filter(data => data.selected);
+       return this.products.forEach( e => {
+         if(this.selectedAll === true) { e.selected = true; }
+         else if (selectedLength.length === this.products.length) {
+           e.selected = false;
+         }
+       })
+     },
   },
   mounted() {
       axios
       .get(`${this.backendURL}/api/v1/customers?per_page=${this.perPage}&page=${this.currentPage}&address=true` , authHeader())
-      .then(response => (this.customers = response.data.data))
+      .then(response => (this.customers = response.data.data,
+      this.customersLength = response.data.pagination.total))
       .catch(handleAxiosError);
-      axios
-      .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}&quantity_greater_than=${this.productQuantityGreaterThan}&with_disabled=false` , authHeader())
-      .then(response => {
-         this.products = response.data.data;
-         for(var i = 0; i < this.products.length; i++){
-           this.products[i].order_quantity = 1;
-         }
-       })
-       .catch(handleAxiosError);
 
        axios
       .get(`${this.backendURL}/api/v1/payments/methods` , authHeader())
@@ -186,9 +178,26 @@ export default {
   },
   methods: {
       /**
-        * Search the table data with search input
+        * Search the table data with search input 
         */
-       uncheckSelectAll(){
+      handlePageChange(value) {
+        this.currentPage = value;
+        axios
+        .get(`${this.backendURL}/api/v1/customers?per_page=${this.perPage}&page=${this.currentPage}&address=true` , authHeader())
+        .then(response => (this.customers = response.data.data,
+        this.customersLength = response.data.pagination.total))
+        .catch(handleAxiosError);
+      },
+      handlePerPageChange(value) {
+        this.currentPage = 1;
+        this.perPage = value;
+        axios
+        .get(`${this.backendURL}/api/v1/customers?per_page=${this.perPage}&page=${this.currentPage}&address=true` , authHeader())
+        .then(response => (this.customers = response.data.data,
+        this.customersLength = response.data.pagination.total))
+        .catch(handleAxiosError);
+      },
+      uncheckSelectAll(){
          this.selectedAll = false
        },
       onFiltered(filteredItems) {
@@ -401,7 +410,12 @@ export default {
                               <div id="tickets-table_length" class="dataTables_length">
                                   <label class="d-inline-flex align-items-center">
                                       Show&nbsp;
-                                      <b-form-select v-model="perPage" size="sm" :options="pageOptions"></b-form-select>&nbsp;entries
+                                      <b-form-select 
+                                        v-model="perPage" 
+                                        size="sm" 
+                                        :options="pageOptions"
+                                        @change = "handlePerPageChange"
+                                      ></b-form-select>&nbsp;entries
                                   </label>
                               </div>
                             </div>
@@ -420,7 +434,7 @@ export default {
                                   :fields="customerfields" 
                                   responsive="sm" 
                                   :per-page="perPage" 
-                                  :current-page="currentPage" 
+                                  :current-page="1" 
                                   :sort-by.sync="sortBy" 
                                   :sort-desc.sync="sortDesc" 
                                   :filter="filter" 
@@ -450,7 +464,11 @@ export default {
                                     <div class="dataTables_paginate paging_simple_numbers float-right">
                                         <ul class="pagination pagination-rounded mb-0">
                                             <!-- pagination -->
-                                            <b-pagination v-model="currentPage" :total-rows="customerrows" :per-page="perPage"></b-pagination>
+                                          <b-pagination 
+                                            v-model="currentPage" :total-rows="customerrows"
+                                            :per-page="perPage"
+                                            @change = "handlePageChange"
+                                          ></b-pagination>
                                         </ul>
                                     </div>
                                 </div>
