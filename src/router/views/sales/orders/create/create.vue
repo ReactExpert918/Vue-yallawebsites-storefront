@@ -482,21 +482,19 @@ export default {
               <div class="col-sm-3">
                 <h5>Billing Address</h5>
                 <p>
-                  {{order.billingAddressCustomerName}}<br>
-                  {{order.billingAddressStreetAddress}}<br>
-                  {{order.billingAddressCity}}<br>
-                  {{order.billingAddressPostCodeZip}}<br>
-                  {{order.billingAddressCountry}}
-                  {{order.billingAddressTelephoneNumber}}
+                  <br />
+                  <br />
+                  <br />
+                  <br />
+                  <br />
                 </p>
                 <h5>Shipping Address</h5>
                 <p>
-                  {{order.shippingAddressCustomerName}}<br>
-                  {{order.shippingAddressStreetAddress}}<br>
-                  {{order.shippingAddressCity}}<br>
-                  {{order.shippingAddressPostCodeZip}}<br>
-                  {{order.shippingAddressCountry}}
-                  {{order.shippingAddressTelephoneNumber}}
+                  <br />
+                  <br />
+                  <br />
+                  <br />
+                  <br />
                 </p>
               </div>
             </div>
