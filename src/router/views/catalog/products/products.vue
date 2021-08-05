@@ -51,7 +51,8 @@ export default {
               sortable: true,
           },
           {
-              key: "qty",
+              label: "QTY",
+              key: "quantity",
               sortable: true,
           },
           {
@@ -161,19 +162,24 @@ export default {
               <!-- Search -->
               <div class="col-sm-12 col-md-6">
                   <div id="tickets-table_filter" class="dataTables_filter text-md-right">
-                      <label class="d-inline-flex align-items-center">Search:
-                          <b-form-input v-model="filter" type="search" placeholder="Search..." class="form-control form-control-sm ml-2"></b-form-input>
+                      <label class="d-inline-flex align-items-center">
+                        Search:
+                        <b-form-input 
+                          v-model="filter" 
+                          type="search" 
+                          placeholder="Search..." 
+                          class="form-control form-control-sm ml-2"
+                        ></b-form-input>
                       </label>
                   </div>
               </div>
               <!-- End search -->
               <!-- Table -->
                 <div class="table-responsive mb-0">
-                    <b-table :items="productsData" 
-                      :fields="fields" 
-                      responsive="sm" 
-                      :per-page="perPage" 
-                      :current-page="1" 
+                    <b-table 
+                      :items="productsData" selectable 
+                      :fields="fields" responsive="sm" 
+                      :per-page="perPage" :current-page="1" 
                       :sort-by.sync="sortBy" 
                       :sort-desc.sync="sortDesc" 
                       :filter="filter" 
@@ -192,12 +198,14 @@ export default {
                         v-model="data.item.selected"
                         :value="data.id"
                         class="custom-checkbox custom-checkbox-primary"
-                        
                       ></b-form-checkbox>
                       </template>
                       <template #cell(status)="data">
-                        <span class="badge badge-success font-size-12">
-                          {{data.item.status}}
+                        <span v-if="data.item.enabled" class="badge badge-success font-size-12">
+                          <span>Enabled</span>
+                        </span>
+                        <span v-else class="badge badge-danger font-size-12">
+                          <span>Disabled</span>
                         </span>
                       </template>
                       <template #cell(actions)="data">
@@ -205,13 +213,17 @@ export default {
                           <template v-slot:button-content>
                             <i class="mdi mdi-dots-horizontal font-size-18"></i>
                           </template>
-
-                          <b-dropdown-item :href="'/catalog/products/edit/' + data.item.id">
-                            <i class="fas fa-pencil-alt text-success mr-1"></i> Edit
+                          <b-dropdown-item 
+                            :href="'/catalog/products/edit/' + data.item.id"
+                          >
+                            <i class="fas fa-pencil-alt text-success mr-1"></i> 
+                            Edit
                           </b-dropdown-item>
-
-                          <b-dropdown-item v-b-modal.modal-delete-page>
-                            <i class="fas fa-trash-alt text-danger mr-1"></i> Delete
+                          <b-dropdown-item 
+                            v-b-modal.modal-delete-page
+                          >
+                            <i class="fas fa-trash-alt text-danger mr-1"></i> 
+                            Delete
                           </b-dropdown-item>
                         </b-dropdown>
                       </template>

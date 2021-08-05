@@ -29,6 +29,7 @@ export default {
       pageIdentity: "products",
       backendURL: process.env.VUE_APP_BACKEND_URL,
       allProductsData: [],
+      allProductsDataLength: 1,
       attrs: [],
       attrGroups: [],
       preVariation: [],
@@ -174,7 +175,7 @@ export default {
         * Total no. of records
         */
       rows() {
-          return this.allProductsData.length;
+          return this.allProductsDataLength;
       },
 
       currentAttributeGroupHandler:{
@@ -202,7 +203,8 @@ export default {
       .catch(handleAxiosError);
       axios
       .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}&with_disabled=false` , authHeader())
-      .then(response => (this.allProductsData = response.data.data))
+      .then(response => (this.allProductsData = response.data.data,
+      this.allProductsDataLength = response.data.pagination.total))
       .catch(handleAxiosError);
       
       axios
@@ -255,21 +257,20 @@ export default {
   methods: {
       handlePageChange(value) {
         this.currentPage = value;
-        let apiUrl = 
-                      'https://api.coindesk.com/v1/bpi/catalog/project/per_page=this.perPage&page=this.currentPage';
-
         axios
-        .get(apiUrl)
-        .then(response => (this.info = response))
+        .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}&with_disabled=false` , authHeader())
+        .then(response => (this.allProductsData = response.data.data,
+        this.allProductsDataLength = response.data.pagination.total))
+        .catch(handleAxiosError);
       },
       handlePerPageChange(value) {
         this.perPage = value;
         this.currentPage = 1;
-        let apiUrl = 
-                      'https://api.coindesk.com/v1/bpi/catalog/project/per_page=this.perPage&page=this.currentPage';
         axios
-        .get(apiUrl)
-        .then(response => (this.info = response))
+        .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}&with_disabled=false` , authHeader())
+        .then(response => (this.allProductsData = response.data.data,
+        this.allProductsDataLength = response.data.pagination.total))
+        .catch(handleAxiosError);
       },
       createProduct(){
         if (!roleService.hasCreatePermission(this.pageIdentity)){
@@ -821,14 +822,16 @@ export default {
                     </div>
                     <!-- Table -->
                     <div class="table-responsive mb-0">
-                        <b-table :items="allProductsData" selectable :fields="fields" responsive="sm" :per-page="perPage" :current-page="currentPage" :sort-by.sync="sortBy" :sort-desc.sync="sortDesc" :filter="filter" :filter-included-fields="filterOn" @filtered="onFiltered">
+                        <b-table :items="allProductsData" selectable :fields="fields" responsive="sm" :per-page="perPage" :current-page="1" :sort-by.sync="sortBy" :sort-desc.sync="sortDesc" :filter="filter" :filter-included-fields="filterOn" @filtered="onFiltered">
                       <template #cell(selected)="data">
                         <b-form-checkbox switch size="lg"  v-on:change="addBundle(data.item.id)"></b-form-checkbox>
                       </template>
                        <template #cell(status)="data">
-                        <span class="badge badge-success font-size-12">
-                          <span v-if="data.item.enabled">Enabled</span>
-                          <span v-else>Disabled</span>
+                        <span v-if="data.item.enabled" class="badge badge-success font-size-12">
+                          <span>Enabled</span>
+                        </span>
+                        <span v-else class="badge badge-danger font-size-12">
+                          <span>Disabled</span>
                         </span>
                       </template>
                         </b-table>

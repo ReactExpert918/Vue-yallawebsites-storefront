@@ -133,6 +133,7 @@ $warning: $yellow;
 $danger: $red;
 $light: $gray-200;
 $dark: $gray-800;
+$ship: $orange;
 
 $theme-colors: ();
 // stylelint-disable-next-line scss/dollar-variable-default
@@ -144,7 +145,8 @@ $theme-colors: map-merge(("primary": $primary,
         "danger": $danger,
         "pink": $pink,
         "light": $light,
-        "dark": $dark),
+        "dark": $dark,
+        "ship": $ship),
     $theme-colors);
 
 // Set a specific jump point for requesting color jumps

@@ -7,6 +7,7 @@ import {
   authHeader,
 } from "@/helpers/authservice/auth-header";
 import {handleAxiosError} from "@/helpers/authservice/user.service"
+import convert from "@/helpers/convertObject";
 
 /**
  * Pages component
@@ -100,7 +101,7 @@ export default {
   mounted() {
       axios
       .get(`${this.backendURL}/api/v1/orders?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
-      .then(response => (this.ordersData = response.data.data,
+      .then(response => (this.ordersData = convert(response.data.data),
                         this.ordersDataLength = response.data.pagination.total))
       .catch(handleAxiosError);
   },
@@ -120,7 +121,7 @@ export default {
         this.currentPage = value;
         axios
         .get(`${this.backendURL}/api/v1/orders?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
-        .then(response => (this.ordersData = response.data.data,
+        .then(response => (this.ordersData = convert(response.data.data),
                            this.ordersDataLength = response.data.pagination.total));
       },
       handlePerPageChange(value) {
@@ -128,7 +129,7 @@ export default {
         this.currentPage = 1;
         axios
         .get(`${this.backendURL}/api/v1/orders?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
-        .then(response => (this.ordersData = response.data.data,
+        .then(response => (this.ordersData = convert(response.data.data),
                            this.ordersDataLength = response.data.pagination.total));
       }
   },
@@ -212,8 +213,20 @@ export default {
                       ></b-form-checkbox>
                       </template>
                       <template #cell(status)="data">
-                        <span class="badge badge-success font-size-12">
-                          {{data.item.status.status}}
+                        <span v-if="data.item.status.status == 'Placed'" class="badge badge-warning font-size-12">
+                          <span>Placed</span>
+                        </span>
+                        <span v-else-if="data.item.status.status == 'Shipped'" class="badge badge-ship font-size-12">
+                          <span>Shipped</span>
+                        </span>
+                        <span v-else-if="data.item.status.status == 'Completed'" class="badge badge-success font-size-12">
+                          <span>Completed</span>
+                        </span>
+                        <span v-else-if="data.item.status.status == 'Refunded'" class="badge badge-danger font-size-12">
+                          <span>Refunded</span>
+                        </span>
+                        <span v-else class="badge badge-danger font-size-12">
+                          <span>Cancelled</span>
                         </span>
                       </template>
                       <template #cell(actions)="data">

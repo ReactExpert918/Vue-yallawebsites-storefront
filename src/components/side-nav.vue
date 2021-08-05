@@ -28,13 +28,16 @@ export default {
         }
         var itemIndex = paths.indexOf(window.location.pathname);
         if (itemIndex === -1) {
-            const strIndex = window.location.pathname.lastIndexOf("/");
+            let strIndex = window.location.pathname.lastIndexOf("/");
+            let count = window.location.pathname.substr(0, strIndex).match(/\//g).length;
+            if(count == 3) {
+                strIndex = window.location.pathname.substr(0, strIndex).lastIndexOf("/");
+            }
             const item = window.location.pathname.substr(0, strIndex).toString();
             matchingMenuItem = links[paths.indexOf(item)];
         } else {
             matchingMenuItem = links[itemIndex];
         }
-
         if (matchingMenuItem) {
             matchingMenuItem.classList.add("active");
             var parent = matchingMenuItem.parentElement;
