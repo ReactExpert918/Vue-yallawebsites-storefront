@@ -15,7 +15,3 @@ export default function formatDate(val) {
 function convertDigit(val) {
 	return val > 9 ? val : "0" + val; 
 }
-
-// function convert24to12(d) {
-// 	return (d.getHours() - 12);
-// }

@@ -150,6 +150,16 @@ export default {
       this.customersLength = response.data.pagination.total))
       .catch(handleAxiosError);
 
+      axios
+      .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}&quantity_greater_than=${this.productQuantityGreaterThan}&with_disabled=false` , authHeader())
+      .then(response => {
+         this.products = response.data.data;
+         for(var i = 0; i < this.products.length; i++){
+           this.products[i].order_quantity = 1;
+         }
+       })
+       .catch(handleAxiosError);
+
        axios
       .get(`${this.backendURL}/api/v1/payments/methods` , authHeader())
       .then(response => {
@@ -481,23 +491,21 @@ export default {
               </div>
               <div class="col-sm-3">
                 <h5>Billing Address</h5>
-                <p>
-                  {{order.billingAddressCustomerName}}<br>
-                  {{order.billingAddressStreetAddress}}<br>
-                  {{order.billingAddressCity}}<br>
-                  {{order.billingAddressPostCodeZip}}<br>
-                  {{order.billingAddressCountry}}
-                  {{order.billingAddressTelephoneNumber}}
-                </p>
+                <div>
+                  <p class="billing-fullname"> </p>
+                  <p class="billing-street_address"> </p>
+                  <p class="billing-city"> </p>
+                  <p class="billing-postzip"> </p>
+                  <p class="billing-phonenumber"> </p>
+                </div>
                 <h5>Shipping Address</h5>
-                <p>
-                  {{order.shippingAddressCustomerName}}<br>
-                  {{order.shippingAddressStreetAddress}}<br>
-                  {{order.shippingAddressCity}}<br>
-                  {{order.shippingAddressPostCodeZip}}<br>
-                  {{order.shippingAddressCountry}}
-                  {{order.shippingAddressTelephoneNumber}}
-                </p>
+                <div>
+                  <p class="shipping-fullname"> </p>
+                  <p class="shipping-street_address"> </p>
+                  <p class="shipping-city"> </p>
+                  <p class="shipping-postzip"> </p>
+                  <p class="shipping-phonenumber"> </p>
+                </div>
               </div>
             </div>
             <div class="row card-body">

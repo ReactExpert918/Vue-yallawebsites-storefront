@@ -168,7 +168,7 @@ export default {
                   <span class="d-none d-sm-inline-block">Configuration</span>
                 </template>
 
-                <b-button v-b-modal.modal-scrollable variant="primary" @click="saveDesignConfiguration()">
+                <b-button v-b-modal.modal-scrollable variant="primary saveButton" class="saveButton" @click="saveDesignConfiguration()">
                     <i class="mdi mdi-plus mr-1"></i> Save
                 </b-button>
                 
