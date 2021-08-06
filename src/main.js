@@ -9,6 +9,7 @@ import vco from "v-click-outside"
 import router from './router/index'
 import Scrollspy from 'vue2-scrollspy';
 import VueSweetalert2 from 'vue-sweetalert2';
+import Notifications from 'vue-notification';
 
 import "@/design/index.scss";
 
@@ -46,6 +47,7 @@ Vue.use(vco)
 Vue.use(Scrollspy);
 const VueScrollTo = require('vue-scrollto')
 Vue.use(VueScrollTo)
+Vue.use(Notifications)
 Vue.config.productionTip = false
 
 Vue.use(BootstrapVue)

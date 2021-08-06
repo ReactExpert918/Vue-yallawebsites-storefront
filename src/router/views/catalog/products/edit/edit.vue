@@ -351,7 +351,13 @@ export default {
       },
       updateProduct(){
         if (!roleService.hasEditPermission(this.pageIdentity)){
-          alert("You do no have the permission to perform this action!")
+          this.$notify({
+            group: 'foo',
+            type: 'warn',
+            text: "You do no have the permission to perform this action!",
+            duration: 5000,
+            speed: 1000
+          })
           return;
         }
         this.productData.meta_keywords = this.productData.meta_keywords_str.split(" ");
@@ -445,7 +451,12 @@ export default {
         axios
         .put(`${this.backendURL}/api/v1/products/${this.$route.params.id}` , productReq , authHeader())
         .then(response => {
-          alert(`${response.data.data.id} Product Updated!`);
+          this.$notify({
+            group: 'foo',
+            text: `${response.data.data.id} Product Updated!`,
+            duration: 5000,
+            speed: 1000
+          })
           this.$refs.myVueDropzone.processQueue();
         })
         .catch(handleAxiosError);
@@ -453,12 +464,25 @@ export default {
 
       deleteProduct(){
         if (!roleService.hasDeletePermission(this.pageIdentity)){
-          alert("You do no have the permission to perform this action!")
+          this.$notify({
+            group: 'foo',
+            type: 'warn',
+            text: "You do no have the permission to perform this action!",
+            duration: 5000,
+            speed: 1000
+          })
           return;
         }
         axios
         .delete(`${this.backendURL}/api/v1/products/${this.productData.id}` , authHeader())
-        .then(response => (alert(`${response.data.data.id} Product deleted!`)))
+        .then(
+          response => (
+            this.$notify({
+              group: 'foo',
+              text: `${response.data.data.id} Product deleted!`,
+              duration: 5000,
+              speed: 1000
+            })))
         .catch(handleAxiosError);
       },
 

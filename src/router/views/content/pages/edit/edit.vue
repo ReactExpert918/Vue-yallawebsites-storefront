@@ -91,7 +91,13 @@ export default {
   methods:{
     editPage(){
       if (!roleService.hasEditPermission(this.pageIdentity)){
-          alert("You do no have the permission to perform this action!")
+          this.$notify({
+            group: 'foo',
+            type: 'warn',
+            text: "You do no have the permission to perform this action!",
+            duration: 5000,
+            speed: 1000
+          })
           return;
       }
       this.pageData.meta_keywords = this.pageData.meta_keywords_str.split(" ");
@@ -101,7 +107,13 @@ export default {
       } 
       axios
       .put(`${this.backendURL}/api/v1/pages/${this.$route.params.id}` , this.pageData , authHeader())
-      .then(response => (alert(`${response.data.data.id} Updated!`)))
+      .then(response => (
+        this.$notify({
+          group: 'foo',
+          text: `${response.data.data.id} Updated!`,
+          duration: 5000,
+          speed: 1000
+        })))
       .catch(handleAxiosError);
     }
   }

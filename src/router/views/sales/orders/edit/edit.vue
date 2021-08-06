@@ -228,11 +228,23 @@ export default {
       },
       updateOrder(){
         if (!roleService.hasEditPermission(this.pageIdentity)){
-          alert("You do no have the permission to perform this action!")
+          this.$notify({
+            group: 'foo',
+            type: 'warn',
+            text: "You do no have the permission to perform this action!",
+            duration: 5000,
+            speed: 1000
+          })
           return;
         }
         if (!this.order.is_editable){
-          alert("Order cannot be edited");
+          this.$notify({
+            group: 'foo',
+            type: 'warn',
+            text: "Order cannot be edited",
+            duration: 5000,
+            speed: 1000
+          });
           return;
         }
         var payload = {
@@ -252,61 +264,136 @@ export default {
         }
         axios
         .put(`${this.backendURL}/api/v1/orders/${this.$route.params.id}` , payload , authHeader())
-        .then(response => (alert(`${response.data.data.id} Order Updated!`)))
+        .then(response => (
+          this.$notify({
+            group: 'foo',
+            text: `${response.data.data.id} Order Updated!`,
+            duration: 5000,
+            speed: 1000
+          })
+        ))
         .catch(handleAxiosError);
       },
       cancelOrder(){
         if (!roleService.hasEditPermission(this.pageIdentity)){
-          alert("You do no have the permission to perform this action!")
+          this.$notify({
+            group: 'foo',
+            type: 'warn',
+            text: "You do no have the permission to perform this action!",
+            duration: 5000,
+            speed: 1000
+          })
           return;
         }
         if (!this.order.is_cancelable){
-          alert("Order cannot be cancelled");
+          this.$notify({
+            group: 'foo',
+            type: 'warn',
+            text: "Order cannot be cancelled",
+            duration: 5000,
+            speed: 1000
+          })
           return;
         }
         
         axios
         .delete(`${this.backendURL}/api/v1/orders/${this.$route.params.id}/cancel` , authHeader())
-        .then(response => (alert(`${response.data.data.id} Order Cancelled!`)))
+        .then(response => (
+          this.$notify({
+            group: 'foo',
+            text: `${response.data.data.id} Order Cancelled!`,
+            duration: 5000,
+            speed: 1000
+          })))
         .catch(handleAxiosError);
       },
       shipOrder(){
         if (!roleService.hasEditPermission(this.pageIdentity)){
-          alert("You do no have the permission to perform this action!")
+          this.$notify({
+            group: 'foo',
+            type: "warn",
+            text: "You do no have the permission to perform this action!",
+            duration: 5000,
+            speed: 1000
+          })
           return;
         }
         if (!this.order.is_shippable){
-          alert("Order cannot be marked as shipped");
+          this.$notify({
+            group: 'foo',
+            type: "warn",
+            text: "Order cannot be marked as shipped",
+            duration: 5000,
+            speed: 1000
+          });
           return;
         }
         
         axios
         .put(`${this.backendURL}/api/v1/orders/${this.$route.params.id}/ship`  ,{}, authHeader())
-        .then(response => (alert(`${response.data.data.id} Order Marked As Shipped!`)))
+        .then(response => (
+          this.$notify({
+            group: 'foo',
+            text: `${response.data.data.id} Order Marked As Shipped!`,
+            duration: 5000,
+            speed: 1000
+          })
+        ))
         .catch(handleAxiosError);
       },
       deliverOrder(){
         if (!roleService.hasEditPermission(this.pageIdentity)){
-          alert("You do no have the permission to perform this action!")
+          this.$notify({
+            group: 'foo',
+            type: "warn",
+            text: "You do no have the permission to perform this action!",
+            duration: 5000,
+            speed: 1000
+          })
           return;
         }
         if (!this.order.is_deliverable){
-          alert("Order cannot be marked as delivered");
+          this.$notify({
+            group: 'foo',
+            type: "warn",
+            text: "Order cannot be marked as delivered",
+            duration: 5000,
+            speed: 1000
+          })
           return;
         }
         
         axios
         .put(`${this.backendURL}/api/v1/orders/${this.$route.params.id}/deliver` ,{}, authHeader())
-        .then(response => (alert(`${response.data.data.id} Order Marked As Delivered!`)))
+        .then(response => (
+          this.$notify({
+            group: 'foo',
+            text: `${response.data.data.id} Order Marked As Delivered!`,
+            duration: 5000,
+            speed: 1000
+          })
+        ))
         .catch(handleAxiosError);
       },
       refundOrder(){
         if (!roleService.hasEditPermission(this.pageIdentity)){
-          alert("You do no have the permission to perform this action!")
+          this.$notify({
+            group: 'foo',
+            type: "warn",
+            text: "You do no have the permission to perform this action!",
+            duration: 5000,
+            speed: 1000
+          })
           return;
         }
         if (!this.order.is_refundable){
-          alert("Order cannot be marked as refunded");
+          this.$notify({
+            group: 'foo',
+            type: "warn",
+            text: "Order cannot be marked as refunded",
+            duration: 5000,
+            speed: 1000
+          })
           return;
         }
 
@@ -316,12 +403,25 @@ export default {
         
         axios
         .put(`${this.backendURL}/api/v1/orders/${this.$route.params.id}/refund` ,payload, authHeader())
-        .then(response => (alert(`${response.data.data.id} Order Refunded!`)))
+        .then(response => (
+          this.$notify({
+            group: 'foo',
+            text: `${response.data.data.id} Order Refunded!`,
+            duration: 5000,
+            speed: 1000
+          })
+        ))
         .catch(handleAxiosError);
       },
       reOrder(){
         if (!roleService.hasCreatePermission(this.pageIdentity)){
-          alert("You do no have the permission to perform this action!")
+          this.$notify({
+            group: 'foo',
+            type: "warn",
+            text: "You do no have the permission to perform this action!",
+            duration: 5000,
+            speed: 1000
+          })
           return;
         }
         var payload = {
@@ -342,7 +442,14 @@ export default {
         }
         axios
         .post(`${this.backendURL}/api/v1/orders` , payload , authHeader())
-        .then(response => (alert(`${response.data.data.id} Order Re-Created!`)))
+        .then(response => (
+          this.$notify({
+            group: 'foo',
+            text: `${response.data.data.id} Order Re-Created!`,
+            duration: 5000,
+            speed: 1000
+          })
+        ))
         .catch(handleAxiosError);
       },
       // Invluce stripe dynamically
@@ -382,14 +489,27 @@ export default {
             }
         axios
             .post(`${this.backendURL}/api/v1/payments/${this.currentPayment.id}/pay` , payload , authHeader())
-            .then(response => (alert(`${response.data.data.id} Got Paid!`)))
+            .then(response => (
+              this.$notify({
+                group: 'foo',
+                text: `${response.data.data.id} Got Paid!`,
+                duration: 5000,
+                speed: 1000
+              })
+            ))
             .catch(handleAxiosError);
       },
       purchaseWithStripeCard(orderID){
           this.stripe.createToken(this.card)
           .then(result => {
             if(result.error){
-              alert("Failed to create stripe card token because: " + result.error.message);
+              this.$notify({
+                group: 'foo',
+                type: "warn",
+                text: "Failed to create stripe card token because: " + result.error.message,
+                duration: 5000,
+                speed: 1000
+              })
               return;
             }
 
@@ -403,7 +523,14 @@ export default {
             }
             axios
             .post(`${this.backendURL}/api/v1/payments/${this.currentPayment.id}/pay` , payload , authHeader())
-            .then(response => (alert(`${response.data.data.id} Got Paid!`)))
+            .then(response => (
+              this.$notify({
+                group: 'foo',
+                text: `${response.data.data.id} Got Paid!`,
+                duration: 5000,
+                speed: 1000
+              })
+            ))
             .catch(handleAxiosError);
           })
       },

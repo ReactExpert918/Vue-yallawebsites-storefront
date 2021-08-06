@@ -93,7 +93,13 @@ export default {
     },
     createCategory(){
       if (!roleService.hasCreatePermission(this.pageIdentity)){
-          alert("You do no have the permission to perform this action!")
+          this.$notify({
+            group: 'foo',
+            type: 'warn',
+            text: "You do no have the permission to perform this action!",
+            duration: 5000,
+            speed: 1000
+          })
           return;
       }
       this.catPayload.meta_keywords = this.catPayload.meta_keywords_str.split(" ");
@@ -103,7 +109,12 @@ export default {
       axios
       .post(`${this.backendURL}/api/v1/categories` , this.catPayload , authHeader())
       .then(response => {
-          alert(`${response.data.data.id} Category Created!`);
+          this.$notify({
+            group: 'foo',
+            text: `${response.data.data.id} Category Created!`,
+            duration: 5000,
+            speed: 1000
+          })
           this.$refs.vueCreateDropzone.setOption("url" , `${this.backendURL}/api/v1/categories/${response.data.data.id}/upload`);
           this.$refs.vueCreateDropzone.processQueue();
        })
@@ -111,7 +122,13 @@ export default {
     },
     updateCategory(){
       if (!roleService.hasEditPermission(this.pageIdentity)){
-          alert("You do no have the permission to perform this action!")
+          this.$notify({
+            group: 'foo',
+            type: 'warn',
+            text: "You do no have the permission to perform this action!",
+            duration: 5000,
+            speed: 1000
+          })
           return;
       }
       this.currentCategory.meta_keywords = this.currentCategory.meta_keywords_str.split(" ");
@@ -129,7 +146,12 @@ export default {
       axios
       .put(`${this.backendURL}/api/v1/categories/${this.currentCategory.id}` , this.currentCategory , authHeader())
       .then(response => {
-          alert(`${response.data.data.id} Category Updated!`);
+          this.$notify({
+            group: 'foo',
+            text: `${response.data.data.id} Category Updated!`,
+            duration: 5000,
+            speed: 1000
+          })
           this.$refs.myVueDropzone.processQueue();
        })
       .catch(handleAxiosError);
@@ -139,12 +161,26 @@ export default {
     },
     deleteCategory(){
       if (!roleService.hasDeletePermission(this.pageIdentity)){
-          alert("You do no have the permission to perform this action!")
+          this.$notify({
+            group: 'foo',
+            type: 'warn',
+            text: "You do no have the permission to perform this action!",
+            duration: 5000,
+            speed: 1000
+          })
           return;
       }
       axios
       .delete(`${this.backendURL}/api/v1/categories/${this.currentCategory.id}` , authHeader())
-      .then(response => (alert(`${response.data.data.id} Category deleted!`)))
+      .then(response => (
+        this.$notify({
+          group: 'foo',
+          type: 'warn',
+          text: `${response.data.data.id} Category deleted!`,
+          duration: 5000,
+          speed: 1000
+        })
+      ))
       .catch(handleAxiosError);
     },
     productSortChange(product){

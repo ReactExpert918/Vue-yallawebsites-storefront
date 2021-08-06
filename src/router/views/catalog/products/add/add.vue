@@ -274,7 +274,13 @@ export default {
       },
       createProduct(){
         if (!roleService.hasCreatePermission(this.pageIdentity)){
-          alert("You do no have the permission to perform this action!")
+          this.$notify({
+            group: 'foo',
+            type: 'warn',
+            text: "You do no have the permission to perform this action!",
+            duration: 5000,
+            speed: 1000
+          })
           return;
         }
         this.newProduct.meta_keywords = this.newProduct.meta_keywords_str.split(" ");

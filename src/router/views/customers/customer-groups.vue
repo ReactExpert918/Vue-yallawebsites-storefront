@@ -130,36 +130,71 @@ export default {
       },
       deleteCustomerGroup(id){
         if(!roleService.hasDeletePermission(this.pageIdentity)){
-          alert("You do no have the permission to perform this action!")
+          this.$notify({
+            group: 'foo',
+            type: 'warn',
+            text: "You do no have the permission to perform this action!",
+            duration: 5000,
+            speed: 1000
+          })
           return;
        }
         axios
         .delete(`${this.backendURL}/api/v1/customers/groups/${id}` , authHeader())
-        .then(alert("Deleted!"))
+        .then(this.$notify({
+            group: 'foo',
+            text: "Deleted!",
+            duration: 5000,
+            speed: 1000
+          }))
         .catch(handleAxiosError);
       },
       createCustomerGroup(e){
         if(!roleService.hasCreatePermission(this.pageIdentity)){
-          alert("You do no have the permission to perform this action!")
+          this.$notify({
+            group: 'foo',
+            type: 'warn',
+            text: "You do no have the permission to perform this action!",
+            duration: 5000,
+            speed: 1000
+          })
           return;
        }
         e.preventDefault();
         this.createGroupPayload.rule.value = parseFloat(this.createGroupPayload.rule.value);
         axios
         .post(`${this.backendURL}/api/v1/customers/groups` , this.createGroupPayload , authHeader())
-        .then(response => (alert(`${response.data.data.id} Created!`)))
+        .then(response => (
+          this.$notify({
+            group: 'foo',
+            text: `${response.data.data.id} Created!`,
+            duration: 5000,
+            speed: 1000
+          })))
         .catch(handleAxiosError);
       },
       updateCustomerGroup(e){
         if(!roleService.hasEditPermission(this.pageIdentity)){
-          alert("You do no have the permission to perform this action!")
+          this.$notify({
+            group: 'foo',
+            type: 'warn',
+            text: "You do no have the permission to perform this action!",
+            duration: 5000,
+            speed: 1000
+          })
           return;
        }
         e.preventDefault();
         this.currentGroup.rule.value = parseFloat(this.currentGroup.rule.value);
         axios
         .put(`${this.backendURL}/api/v1/customers/groups/${this.currentGroup.id}` , this.currentGroup , authHeader())
-        .then(response => (alert(`${response.data.data.id} Updated!`)))
+        .then(response => (
+          this.$notify({
+            group: 'foo',
+            text: `${response.data.data.id} Updated!`,
+            duration: 5000,
+            speed: 1000
+          })))
         .catch(handleAxiosError);
       },
       handlePageChange(value) {

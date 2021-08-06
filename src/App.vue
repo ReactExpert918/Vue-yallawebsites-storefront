@@ -31,6 +31,7 @@ export default {
 
 <template>
   <div id="app">
+    <notifications group="foo" />
     <RouterView />
   </div>
 </template>

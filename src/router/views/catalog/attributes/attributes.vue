@@ -236,21 +236,38 @@ export default {
       },
       addAttribute(){
         if (!roleService.hasCreatePermission(this.pageIdentity)){
-          alert("You do no have the permission to perform this action!")
+          this.$notify({
+            group: 'foo',
+            type: 'warn',
+            text: "You do no have the permission to perform this action!",
+            duration: 5000,
+            speed: 1000
+          })
           return;
         }
           this.newAttr.sort_order = parseInt(this.newAttr.sort_order);
           axios
          .post(`${this.backendURL}/api/v1/products/attributes` , this.newAttr , authHeader())
          .then(response => {
-             alert(`${response.data.data.id} attribute Created!`);
-             this.newAttr = {options: []};
+            this.$notify({
+              group: 'foo',
+              text: `${response.data.data.id} attribute Created!`,
+              duration: 5000,
+              speed: 1000
+            })
+          this.newAttr = {options: []};
          })
          .catch(handleAxiosError);
       },
       updateAttribute(){
         if (!roleService.hasEditPermission(this.pageIdentity)){
-          alert("You do no have the permission to perform this action!")
+          this.$notify({
+            group: 'foo',
+            type: 'warn',
+            text: "You do no have the permission to perform this action!",
+            duration: 5000,
+            speed: 1000
+          })
           return;
         }
         this.newAttr = {
@@ -270,24 +287,48 @@ export default {
         axios
          .put(`${this.backendURL}/api/v1/products/attributes/${this.currentAttribute.id}` , this.newAttr , authHeader())
          .then(response => {
-             alert(`${response.data.data.id} attribute Updated!`);
-             this.newAttr = {options: []};
+            this.$notify({
+              group: 'foo',
+              text: `${response.data.data.id} attribute Updated!`,
+              duration: 5000,
+              speed: 1000
+            })
+            this.newAttr = {options: []};
          })
          .catch(handleAxiosError);
       },
       deleteAttribute(){
         if (!roleService.hasDeletePermission(this.pageIdentity)){
-          alert("You do no have the permission to perform this action!")
+          this.$notify({
+            group: 'foo',
+            type: 'warn',
+            text: "You do no have the permission to perform this action!",
+            duration: 5000,
+            speed: 1000
+          })
           return;
         }
         axios
         .delete(`${this.backendURL}/api/v1/products/attributes/${this.currentAttribute.id}` , authHeader())
-        .then(response => (alert(`${response.data.data.id} attribute deleted!`)))
+        .then(response => (
+          this.$notify({
+            group: 'foo',
+            text: `${response.data.data.id} attribute deleted!`,
+            duration: 5000,
+            speed: 1000
+          })
+        ))
         .catch(handleAxiosError);
       },
       addOption(){
         if (!roleService.hasCreatePermission(this.pageIdentity)){
-          alert("You do no have the permission to perform this action!")
+          this.$notify({
+            group: 'foo',
+            type: 'warn',
+            text: "You do no have the permission to perform this action!",
+            duration: 5000,
+            speed: 1000
+          })
           return;
         }
         axios
@@ -315,39 +356,72 @@ export default {
       },
       deleteProductOption(opt){
         if (!roleService.hasDeletePermission(this.pageIdentity)){
-          alert("You do no have the permission to perform this action!")
+          this.$notify({
+            group: 'foo',
+            type: 'warn',
+            text: "You do no have the permission to perform this action!",
+            duration: 5000,
+            speed: 1000
+          })
           return;
         }
          axios
         .delete(`${this.backendURL}/api/v1/products/attributes/options/${opt.id}` , authHeader())
         .then(response => {
-           alert(`${response.data.data.id} option deleted!`);
-           this.handleProductOptionDelete(opt.name , this.currentAttribute.options)
+          this.$notify({
+            group: 'foo',
+            text: `${response.data.data.id} option deleted!`,
+            duration: 5000,
+            speed: 1000
+          })
+          this.handleProductOptionDelete(opt.name , this.currentAttribute.options)
         })
         .catch(handleAxiosError);
       },
       addAttributeGroup(){
         if (!roleService.hasCreatePermission(this.pageIdentity)){
-          alert("You do no have the permission to perform this action!")
+          this.$notify({
+            group: 'foo',
+            type: 'warn',
+            text: "You do no have the permission to perform this action!",
+            duration: 5000,
+            speed: 1000
+          })
           return;
         }
         axios
         .post(`${this.backendURL}/api/v1/products/attributes/groups` , this.newGroup , authHeader())
         .then(response => {
-            alert(`${response.data.data.id} attribute group Created!`);
-            this.newGroup = {};
+          this.$notify({
+            group: 'foo',
+            text: `${response.data.data.id} attribute group Created!`,
+            duration: 5000,
+            speed: 1000
+          })
+          this.newGroup = {};
         })
         .catch(handleAxiosError);
       },
       deleteAttributeGroup(group){
         if (!roleService.hasDeletePermission(this.pageIdentity)){
-          alert("You do no have the permission to perform this action!")
+          this.$notify({
+            group: 'foo',
+            type: 'warn',
+            text: "You do no have the permission to perform this action!",
+            duration: 5000,
+            speed: 1000
+          })
           return;
         }
         axios
         .delete(`${this.backendURL}/api/v1/products/attributes/groups/${group.id}` , authHeader())
         .then(response => {
-           alert(`${response.data.data.id} attribute group deleted!`);
+          this.$notify({
+            group: 'foo',
+            text: `${response.data.data.id} attribute group deleted!`,
+            duration: 5000,
+            speed: 1000
+          })
         })
         .catch(handleAxiosError);
       }

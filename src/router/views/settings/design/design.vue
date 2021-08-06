@@ -97,7 +97,13 @@ export default {
   methods:{
     saveDesignConfiguration(){
       if (!roleService.hasEditPermission(this.pageIdentity)){
-          alert("You do no have the permission to perform this action!")
+          this.$notify({
+            group: 'foo',
+            type: 'warn',
+            text: "You do no have the permission to perform this action!",
+            duration: 5000,
+            speed: 1000
+          })
           return;
       }
       var payload = {
@@ -113,7 +119,12 @@ export default {
     axios
     .post(`${this.backendURL}/api/v1/design/configurations` ,payload, authHeader())
     .then(response => {
-      alert(`${response.data.data.id} Design saved!`);
+      this.$notify({
+        group: 'foo',
+        text: `${response.data.data.id} Design saved!`,
+        duration: 5000,
+        speed: 1000
+      })
       var confID = response.data.data.id;
       this.$refs.siteLogoDropzone.setOption("url" , `${this.backendURL}/api/v1/design/configurations/${confID}/upload`);
       this.$refs.faviconDropzone.setOption("url" , `${this.backendURL}/api/v1/design/configurations/${confID}/upload`);
@@ -133,7 +144,12 @@ export default {
           axios
           .post(`${this.backendURL}/api/v1/design/configurations/${confID}/upload` , formData , header)
           .then(response => {
-            alert(`${response.data.data.id} Uploaded Design Configuration Font Files!`);
+            this.$notify({
+              group: 'foo',
+              text: `${response.data.data.id} Uploaded Design Configuration Font Files!`,
+              duration: 5000,
+              speed: 1000
+            })
             })
           .catch(handleAxiosError);
       }

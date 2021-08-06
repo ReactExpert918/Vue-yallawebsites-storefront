@@ -168,17 +168,34 @@ export default {
       },
       deleteUser(id){
         if (!roleService.hasDeletePermission(this.pageIdentity)){
-          alert("You do no have the permission to perform this action!")
+          this.$notify({
+            group: 'foo',
+            type: 'warn',
+            text: "You do no have the permission to perform this action!",
+            duration: 5000,
+            speed: 1000
+          })
           return;
         }
         axios
         .delete(`${this.backendURL}/api/v1/users/${id}` , authHeader())
-        .then(alert("Deleted!"))
+        .then(this.$notify({
+            group: 'foo',
+            text: "Deleted!",
+            duration: 5000,
+            speed: 1000
+          }))
         .catch(handleAxiosError);
       },
       createUser(e){
         if (!roleService.hasCreatePermission(this.pageIdentity)){
-          alert("You do no have the permission to perform this action!")
+          this.$notify({
+            group: 'foo',
+            type: 'warn',
+            text: "You do no have the permission to perform this action!",
+            duration: 5000,
+            speed: 1000
+          })
           return;
         }
         e.preventDefault();
@@ -186,7 +203,12 @@ export default {
         axios
         .post(`${this.backendURL}/api/v1/users` , this.createUserPayload , authHeader())
         .then(response => {
-            alert(`${response.data.data.id} Created!`);
+          this.$notify({
+            group: 'foo',
+            text: `${response.data.data.id} Created!`,
+            duration: 5000,
+            speed: 1000
+          })
             this.$refs.vueCreateDropzone.setOption("url" , `${this.backendURL}/api/v1/users/${response.data.data.id}/upload`);
             this.$refs.vueCreateDropzone.processQueue();
          })
@@ -194,7 +216,13 @@ export default {
       },
       updateUser(e){
         if (!roleService.hasEditPermission(this.pageIdentity)){
-          alert("You do no have the permission to perform this action!")
+          this.$notify({
+            group: 'foo',
+            type: 'warn',
+            text: "You do no have the permission to perform this action!",
+            duration: 5000,
+            speed: 1000
+          })
           return;
         }
         e.preventDefault();
@@ -202,7 +230,12 @@ export default {
         axios
         .put(`${this.backendURL}/api/v1/users/${this.currentUser.id}` , this.currentUser , authHeader())
         .then(response => {
-          alert(`${response.data.data.id} Updated!`);
+          this.$notify({
+            group: 'foo',
+            text: `${response.data.data.id} Updated!`,
+            duration: 5000,
+            speed: 1000
+          })
           this.$refs.myVueDropzone.processQueue();
          })
         .catch(handleAxiosError);

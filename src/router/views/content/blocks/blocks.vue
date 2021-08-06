@@ -120,12 +120,24 @@ export default {
       },
       deleteBlock(){
         if (!roleService.hasDeletePermission(this.pageIdentity)){
-          alert("You do no have the permission to perform this action!")
+          this.$notify({
+            group: 'foo',
+            type: 'warn',
+            text: "You do no have the permission to perform this action!",
+            duration: 5000,
+            speed: 1000
+          })
           return;
         }
         axios
         .delete(`${this.backendURL}/api/v1/blocks/${this.block.id}` , authHeader())
-        .then(response => (alert(`${convert(response.data.data).id} Block deleted!`)))
+        .then(response => (
+          this.$notify({
+            group: 'foo',
+            text: `${convert(response.data.data).id} Block deleted!`,
+            duration: 5000,
+            speed: 1000
+          })))
         .catch(handleAxiosError);
       },
       handlePageChange(value) {

@@ -230,7 +230,13 @@ export default {
       },
       createOrder(){
         if (!roleService.hasCreatePermission(this.pageIdentity)){
-          alert("You do no have the permission to perform this action!")
+          this.$notify({
+            group: 'foo',
+            type: 'warn',
+            text: 'You do no have the permission to perform this action!',
+            duration: 5000,
+            speed: 1000
+          });
           return;
         }
         var billingAddress = {}
@@ -256,7 +262,12 @@ export default {
         axios
         .post(`${this.backendURL}/api/v1/orders` , payload , authHeader())
         .then(response => {
-            alert(`${response.data.data.id} Order Created!`);
+            this.$notify({
+              group: 'foo',
+              text: `${response.data.data.id} Order Created!`,
+              duration: 5000,
+              speed: 1000
+            });
             this.purchase(response.data.data.id);
          })
         .catch(handleAxiosError);
@@ -294,7 +305,14 @@ export default {
           this.stripe.createToken(this.card)
           .then(result => {
             if(result.error){
-              alert("Failed to create stripe card token because: " + result.error.message);
+              this.$notify({
+                group: 'foo',
+                type: 'warn',
+                text: "Failed to create stripe card token because: " + result.error.message,
+                duration: 5000,
+                speed: 1000
+              });
+              // alert("Failed to create stripe card token because: " + result.error.message);
               return;
             }
 
@@ -308,7 +326,14 @@ export default {
             }
             axios
             .post(`${this.backendURL}/api/v1/payments/${this.currentPayment.id}/pay` , payload , authHeader())
-            .then(response => (alert(`${response.data.data.id} Got Paid!`)))
+            .then(response => (
+              this.$notify({
+                group: 'foo',
+                type: 'warn',
+                text: `${response.data.data.id} Got Paid!`,
+                duration: 5000,
+                speed: 1000
+              })))
             .catch(handleAxiosError);
           })
       },
@@ -325,7 +350,16 @@ export default {
             }
         axios
             .post(`${this.backendURL}/api/v1/payments/${this.currentPayment.id}/pay` , payload , authHeader())
-            .then(response => (alert(`${response.data.data.id} Got Paid!`)))
+            .then(response => (
+              this.$notify({
+                group: 'foo',
+                type: 'warn',
+                text: `${response.data.data.id} Got Paid!`,
+                duration: 5000,
+                speed: 1000
+              })
+              // alert(`${response.data.data.id} Got Paid!`)
+              ))
             .catch(handleAxiosError);
       },
       setCurrentPaymentType(checked , type){

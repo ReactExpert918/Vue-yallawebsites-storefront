@@ -106,7 +106,13 @@ export default {
       },
       verifyDomain(){
         if (!roleService.hasEditPermission(this.pageIdentity)){
-          alert("You do no have the permission to perform this action!")
+          this.$notify({
+            group: 'foo',
+            type: 'warn',
+            text: "You do no have the permission to perform this action!",
+            duration: 5000,
+            speed: 1000
+          })
           return;
         }
         axios
@@ -114,31 +120,66 @@ export default {
         .then(response => {
           var resp = response.data.data
           if (resp.verified){
-            alert("Domain is verified!");
+            this.$notify({
+              group: 'foo',
+              text: "Domain is verified!",
+              duration: 5000,
+              speed: 1000
+            })
           }else{
-            alert("Domain is not verified!");
+            this.$notify({
+              group: 'foo',
+              type: "warn",
+              text: "Domain is not verified!",
+              duration: 5000,
+              speed: 1000
+            })
           }
         })
         .catch(handleAxiosError);
       },
       addDomain(){
         if (!roleService.hasCreatePermission(this.pageIdentity)){
-          alert("You do no have the permission to perform this action!")
+          this.$notify({
+            group: 'foo',
+            type: 'warn',
+            text: "You do no have the permission to perform this action!",
+            duration: 5000,
+            speed: 1000
+          })
           return;
         }
          axios
         .post(`${this.backendURL}/api/v1/domains` , this.newDomainData , authHeader())
-        .then(response => (alert(`${response.data.data.id} Domain created!`)))
+        .then(response => (
+          this.$notify({
+            group: 'foo',
+            text: `${response.data.data.id} Domain created!`,
+            duration: 5000,
+            speed: 1000
+          })))
         .catch(handleAxiosError);
       },
       deleteDomain(){
         if (!roleService.hasDeletePermission(this.pageIdentity)){
-          alert("You do no have the permission to perform this action!")
+          this.$notify({
+            group: 'foo',
+            type: 'warn',
+            text: "You do no have the permission to perform this action!",
+            duration: 5000,
+            speed: 1000
+          })
           return;
       }
         axios
         .delete(`${this.backendURL}/api/v1/domains/${this.currentDomain.id}` , authHeader())
-        .then(response => (alert(`${response.data.data.id} Domain deleted!`)))
+        .then(response => (
+          this.$notify({
+            group: 'foo',
+            text: `${response.data.data.id} Domain deleted!`,
+            duration: 5000,
+            speed: 1000
+          })))
         .catch(handleAxiosError);
       },
       handlePageChange(value) {

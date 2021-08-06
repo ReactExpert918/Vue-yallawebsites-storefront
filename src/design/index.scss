@@ -78,14 +78,36 @@ File: Main Css File
 
 
 @import "icons";
-
-// @import "custom/rtl/bootstrap-rtl";
-// @import "custom/rtl/components-rtl";
-// @import "custom/rtl/float-rtl";
-// @import "custom/rtl/general-rtl";
-// @import "custom/rtl/pages-rtl";
-// @import "custom/rtl/plugins-rtl";
-// @import "custom/rtl/spacing-rtl";
-// @import "custom/rtl/structure-rtl";
-// @import "custom/rtl/text-rtl";
-
+.vue-notification {
+    // styling
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin: 0 5px 5px;
+    padding: 10px;
+    font-size: 14px;
+    font-weight: bold;
+    color: #ffffff;
+    height: 70px;
+    width: 320px;
+    
+    // default (blue)
+    background: #34CD66;
+    border-left: 5px solid #24b153;
+  
+    // types (green, amber, red)
+    &.success {
+      background: #68CD86;
+      border-left-color: #42A85F;
+    }
+  
+    &.warn {
+      background: #ffb648;
+      border-left-color: #f48a06;
+    }
+  
+    &.error {
+      background: #E54D42;
+      border-left-color: #B82E24;
+    }
+  }

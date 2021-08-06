@@ -351,7 +351,13 @@ export default {
     },
     saveGeneralConfiguration(){
       if (!roleService.hasEditPermission(this.pageIdentity)){
-          alert("You do no have the permission to perform this action!")
+          this.$notify({
+            group: 'foo',
+            type: 'warn',
+            text: "You do no have the permission to perform this action!",
+            duration: 5000,
+            speed: 1000
+          })
           return;
       }
       this.configData = {
@@ -385,13 +391,24 @@ export default {
       .post(`${this.backendURL}/api/v1/stores/general` , this.configData , authHeader())
       .then(response => {
         this.configData = {};
-        alert(`${response.data.data.id} Updated General Configuration!`);
+        this.$notify({
+            group: 'foo',
+            text: `${response.data.data.id} Updated General Configuration!`,
+            duration: 5000,
+            speed: 1000
+          })
        })
        .catch(handleAxiosError);
     },
     saveCatalogConfiguration(){
       if (!roleService.hasEditPermission(this.pageIdentity)){
-          alert("You do no have the permission to perform this action!")
+          this.$notify({
+            group: 'foo',
+            type: 'warn',
+            text: "You do no have the permission to perform this action!",
+            duration: 5000,
+            speed: 1000
+          })
           return;
       }
        this.configData = {
@@ -422,13 +439,24 @@ export default {
       .post(`${this.backendURL}/api/v1/stores/catalog` , this.configData , authHeader())
       .then(response => {
         this.configData = {};
-        alert(`${response.data.data.id} Updated Catalog Configuration!`);
+        this.$notify({
+          group: 'foo',
+          text: `${response.data.data.id} Updated Catalog Configuration!`,
+          duration: 5000,
+          speed: 1000
+        })
         })
         .catch(handleAxiosError);
     },
     saveSalesConfiguration(){
       if (!roleService.hasEditPermission(this.pageIdentity)){
-          alert("You do no have the permission to perform this action!")
+          this.$notify({
+            group: 'foo',
+            type: 'warn',
+            text: "You do no have the permission to perform this action!",
+            duration: 5000,
+            speed: 1000
+          })
           return;
       }
       this.configData = {
@@ -469,7 +497,12 @@ export default {
       .post(`${this.backendURL}/api/v1/stores/sales` , this.configData , authHeader())
       .then(response => {
           this.configData = {};
-          alert(`${response.data.data.id} Updated Sales Configuration!`);
+          this.$notify({
+            group: 'foo',
+            text: `${response.data.data.id} Updated Sales Configuration!`,
+            duration: 5000,
+            speed: 1000
+          })
           this.uploadTableRateFile();
 
         })
@@ -478,7 +511,13 @@ export default {
     },
     uploadTableRateFile(){
       if (!roleService.hasEditPermission(this.pageIdentity)){
-          alert("You do no have the permission to perform this action!")
+          this.$notify({
+            group: 'foo',
+            type: 'warn',
+            text: "You do no have the permission to perform this action!",
+            duration: 5000,
+            speed: 1000
+          })
           return;
       }
        if (this.tableRateFile != ''){
@@ -489,14 +528,25 @@ export default {
             axios
             .post(`${this.backendURL}/api/v1/stores/sales/upload` , formData , header)
             .then(response => {
-              alert(`${response.data.data.id} Upload Sales Configuration Table Rate File!`);
+              this.$notify({
+                group: 'foo',
+                text: `${response.data.data.id} Upload Sales Configuration Table Rate File!`,
+                duration: 5000,
+                speed: 1000
+              })
               })
               .catch(handleAxiosError);
        }
     },
     saveCustomerConfiguration(){
       if (!roleService.hasEditPermission(this.pageIdentity)){
-          alert("You do no have the permission to perform this action!")
+          this.$notify({
+            group: 'foo',
+            type: 'warn',
+            text: "You do no have the permission to perform this action!",
+            duration: 5000,
+            speed: 1000
+          })
           return;
       }
       this.configData = {
@@ -510,13 +560,24 @@ export default {
       .post(`${this.backendURL}/api/v1/stores/customer` , this.configData , authHeader())
       .then(response => {
         this.configData = {};
-        alert(`${response.data.data.id} Updated Customer Configuration!`);
+        this.$notify({
+          group: 'foo',
+          text: `${response.data.data.id} Updated Customer Configuration!`,
+          duration: 5000,
+          speed: 1000
+        })
         })
         .catch(handleAxiosError);
     },
     saveAdvancedConfiguration(){
       if (!roleService.hasEditPermission(this.pageIdentity)){
-          alert("You do no have the permission to perform this action!")
+          this.$notify({
+            group: 'foo',
+            type: 'warn',
+            text: "You do no have the permission to perform this action!",
+            duration: 5000,
+            speed: 1000
+          })
           return;
       }
       this.configData = {
@@ -532,7 +593,12 @@ export default {
       .post(`${this.backendURL}/api/v1/stores/advanced` , this.configData , authHeader())
       .then(response => {
         this.configData = {};
-        alert(`${response.data.data.id} Updated Advanced Configuration!`);
+        this.$notify({
+          group: 'foo',
+          text: `${response.data.data.id} Updated Advanced Configuration!`,
+          duration: 5000,
+          speed: 1000
+        })
        })
        .catch(handleAxiosError);
     },

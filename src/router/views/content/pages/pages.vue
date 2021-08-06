@@ -139,12 +139,24 @@ export default {
       },
       deletePage(){
         if (!roleService.hasDeletePermission(this.pageIdentity)){
-          alert("You do no have the permission to perform this action!")
+          this.$notify({
+            group: 'foo',
+            type: 'warn',
+            text: "You do no have the permission to perform this action!",
+            duration: 5000,
+            speed: 1000
+          })
           return;
         }
         axios
         .delete(`${this.backendURL}/api/v1/pages/${this.page.id}` , authHeader())
-        .then(response => (alert(`${response.data.data.id} Page deleted!`)))
+        .then(response => (
+          this.$notify({
+            group: 'foo',
+            text: `${response.data.data.id} Page deleted!`,
+            duration: 5000,
+            speed: 1000
+          })))
         .catch(handleAxiosError);
       }
   },

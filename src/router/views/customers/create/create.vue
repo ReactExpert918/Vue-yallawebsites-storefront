@@ -56,7 +56,13 @@ export default {
   methods:{
     createCustomer(){
       if(!roleService.hasCreatePermission(this.pageIdentity)){
-          alert("You do no have the permission to perform this action!")
+          this.$notify({
+            group: 'foo',
+            type: 'warn',
+            text: "You do no have the permission to perform this action!",
+            duration: 5000,
+            speed: 1000
+          })
           return;
       }
 
@@ -71,7 +77,14 @@ export default {
       }
       axios
       .post(`${this.backendURL}/api/v1/customers` , this.createCustomerPayload , authHeader())
-      .then(response => (alert(`${response.data.data.id} Created!`)))
+      .then(response => (
+        this.$notify({
+            group: 'foo',
+            type: 'warn',
+            text: `${response.data.data.id} Created!`,
+            duration: 5000,
+            speed: 1000
+          })))
       .catch(handleAxiosError);
     },
   }

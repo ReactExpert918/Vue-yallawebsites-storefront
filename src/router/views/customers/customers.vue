@@ -130,13 +130,24 @@ export default {
       deleteCustomer(id){
 
         if (!roleService.hasDeletePermission(this.pageIdentity)){
-          alert("You do no have the permission to perform this action!")
+          this.$notify({
+            group: 'foo',
+            type: 'warn',
+            text: "You do no have the permission to perform this action!",
+            duration: 5000,
+            speed: 1000
+          })
           return;
         }
 
         axios
         .delete(`${this.backendURL}/api/v1/customers/${id}` , authHeader())
-        .then(alert("Deleted!"))
+        .then(this.$notify({
+            group: 'foo',
+            text: "Deleted",
+            duration: 5000,
+            speed: 1000
+          }))
         .catch(handleAxiosError);
       },
       handlePageChange(value) {
