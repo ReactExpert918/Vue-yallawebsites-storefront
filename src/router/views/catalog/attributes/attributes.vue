@@ -349,6 +349,9 @@ export default {
         })
         .catch(handleAxiosError);
       },
+      cancle() {
+        this.showid = "";
+      },
       handleProductOptionDelete(name , arr){
             for( var i = 0; i < arr.length; i++){ 
         
@@ -1024,6 +1027,7 @@ export default {
                         <b-button 
                           class="mr-1 w-s m-2" 
                           variant="secondary"
+                          @click="cancle()"
                         >
                           <i class="bx bx-x d-block"></i>
                         </b-button>
