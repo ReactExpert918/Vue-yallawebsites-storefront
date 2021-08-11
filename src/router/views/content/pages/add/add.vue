@@ -101,12 +101,13 @@ export default {
       axios
       .post(`${this.backendURL}/api/v1/pages` , this.pageData , authHeader())
       .then(response => (
+        this.$router.push('/content/pages'),
         this.$notify({
           group: 'foo',
           text: `${response.data.data.id} Created!`,
           duration: 5000,
           speed: 1000
-        })
+        })       
       ))
       .catch(handleAxiosError);
     }

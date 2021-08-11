@@ -104,7 +104,7 @@ export default {
   mounted() {
       // Set the initial number of items
       this.totalRows = this.items.length;
-     axios
+      axios
       .get(`${this.backendURL}/api/v1/customers/groups?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
       .then(response => (this.customerGroupsData = response.data.data,
                         this.customerGroupsDataLength = response.data.pagination.total))
@@ -129,6 +129,7 @@ export default {
       .catch(handleAxiosError);
       },
       deleteCustomerGroup(id){
+        this.$bvModal.hide("modal-delete-customer-group");
         if(!roleService.hasDeletePermission(this.pageIdentity)){
           this.$notify({
             group: 'foo',
@@ -141,7 +142,13 @@ export default {
        }
         axios
         .delete(`${this.backendURL}/api/v1/customers/groups/${id}` , authHeader())
-        .then(this.$notify({
+        .then(
+          axios
+          .get(`${this.backendURL}/api/v1/customers/groups?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
+          .then(response => (this.customerGroupsData = response.data.data,
+                            this.customerGroupsDataLength = response.data.pagination.total))
+          .catch(handleAxiosError),
+          this.$notify({
             group: 'foo',
             text: "Deleted!",
             duration: 5000,
@@ -165,6 +172,11 @@ export default {
         axios
         .post(`${this.backendURL}/api/v1/customers/groups` , this.createGroupPayload , authHeader())
         .then(response => (
+          // axios
+          // .get(`${this.backendURL}/api/v1/customers/groups?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
+          // .then(response => (this.customerGroupsData = response.data.data,
+          //                   this.customerGroupsDataLength = response.data.pagination.total))
+          // .catch(handleAxiosError),
           this.$notify({
             group: 'foo',
             text: `${response.data.data.id} Created!`,
@@ -189,6 +201,11 @@ export default {
         axios
         .put(`${this.backendURL}/api/v1/customers/groups/${this.currentGroup.id}` , this.currentGroup , authHeader())
         .then(response => (
+          axios
+          .get(`${this.backendURL}/api/v1/customers/groups?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
+          .then(response => (this.customerGroupsData = response.data.data,
+                            this.customerGroupsDataLength = response.data.pagination.total))
+          .catch(handleAxiosError),
           this.$notify({
             group: 'foo',
             text: `${response.data.data.id} Updated!`,

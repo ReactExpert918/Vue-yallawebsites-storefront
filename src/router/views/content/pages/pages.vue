@@ -138,6 +138,7 @@ export default {
                            this.pagesDataLength = response.data.pagination.total));
       },
       deletePage(){
+        this.$bvModal.hide("modal-delete-page");
         if (!roleService.hasDeletePermission(this.pageIdentity)){
           this.$notify({
             group: 'foo',
@@ -151,6 +152,10 @@ export default {
         axios
         .delete(`${this.backendURL}/api/v1/pages/${this.page.id}` , authHeader())
         .then(response => (
+          axios
+          .get(`${this.backendURL}/api/v1/pages?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
+          .then(response => (this.pagesData = convert(response.data.data),
+                             this.pagesDataLength = response.data.pagination.total)),
           this.$notify({
             group: 'foo',
             text: `${response.data.data.id} Page deleted!`,

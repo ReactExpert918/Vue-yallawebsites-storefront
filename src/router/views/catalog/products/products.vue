@@ -95,6 +95,28 @@ export default {
       /**
         * Search the table data with search input
         */
+       deleteProduct(){
+         this.$bvModal.hide("modal-delete-page");
+        // if (!roleService.hasDeletePermission(this.pageIdentity)){
+        //   this.$notify({
+        //     group: 'foo',
+        //     type: 'warn',
+        //     text: "You do no have the permission to perform this action!",
+        //     duration: 5000,
+        //     speed: 1000
+        //   })
+        //   return;
+        // }
+        // axios
+        // .delete(`${this.backendURL}/api/v1/users/${id}` , authHeader())
+        // .then(this.$notify({
+        //     group: 'foo',
+        //     text: "Deleted!",
+        //     duration: 5000,
+        //     speed: 1000
+        //   }))
+        // .catch(handleAxiosError);
+      },
         uncheckSelectAll(){
          this.selectedAll = false
         },
@@ -255,7 +277,7 @@ export default {
     <b-modal id="modal-delete-page" centered title="Delete Product" title-class="font-18" hide-footer>
       <p>Are you sure? Pressing Delete will remove this product permenantly.</p>
       <div class="text-right">
-        <b-button variant="danger">Delete</b-button>
+        <b-button variant="danger" @click="deleteProduct()">Delete</b-button>
       </div>
     </b-modal>
   </Layout>

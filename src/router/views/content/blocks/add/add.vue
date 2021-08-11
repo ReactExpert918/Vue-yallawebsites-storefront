@@ -84,6 +84,7 @@ export default {
       axios
       .post(`${this.backendURL}/api/v1/blocks` , this.blockData , authHeader())
       .then(response => (
+        this.$router.push('/content/blocks'),
         this.$notify({
           group: 'foo',
           text: `${response.data.data.id} Created!`,

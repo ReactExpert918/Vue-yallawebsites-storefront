@@ -85,6 +85,7 @@ export default {
       axios
       .put(`${this.backendURL}/api/v1/blocks/${this.$route.params.id}` , this.blockData , authHeader())
       .then(response => (
+        this.$router.push("/content/blocks"),
         this.$notify({
           group: 'foo',
           text: `${response.data.data.id} Updated!`,

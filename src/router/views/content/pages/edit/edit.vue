@@ -108,6 +108,7 @@ export default {
       axios
       .put(`${this.backendURL}/api/v1/pages/${this.$route.params.id}` , this.pageData , authHeader())
       .then(response => (
+        this.$router.push('/content/pages'),
         this.$notify({
           group: 'foo',
           text: `${response.data.data.id} Updated!`,

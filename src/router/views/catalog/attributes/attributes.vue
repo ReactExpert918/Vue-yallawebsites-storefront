@@ -27,7 +27,8 @@ export default {
       backendURL: process.env.VUE_APP_BACKEND_URL,
       primarycheck: null, 
       lgchecked: null,
-
+      show: false,
+      showid: "",
       id: 1,
       currentAttribute:  {
             id: "",
@@ -217,7 +218,6 @@ export default {
         return false;
       },
       handleOptionAdd(){
-
         for(var i = 0; i < this.newAttr.options.length; i++){
           if(this.newAttr.options[i].name == this.newAttr.option_name){
             return;
@@ -233,6 +233,11 @@ export default {
         this.newAttr.option_name = "";
         this.newAttr.option_label = "";
         this.newAttr.option_text_label = "";
+      },
+      showDeleteConfirm(id) {
+        this.show = true;
+        this.showid = id;
+        
       },
       addAttribute(){
         if (!roleService.hasCreatePermission(this.pageIdentity)){
@@ -997,13 +1002,17 @@ export default {
                   <div class="slim-tab mb-2" v-for="group in attributeGroups" :key="group.id">
                     <span class="p-3">{{group.name}}</span>
                     <span class="actions-right cursor-ponter">
-                      <b-button 
-                        class="mr-1 w-s m-2" 
-                        variant="danger"
-                      >
-                        <i class="mdi mdi-trash-can d-block"></i>
-                      </b-button>
-                      <span class="delete-confirmation">
+                      <span v-if="group.id !== showid" class="show-delete-confirmation">
+                        <b-button 
+                          class="mr-1 w-s m-2" 
+                          variant="danger"
+                          @click="showDeleteConfirm(group.id)"
+                        >
+                          <i class="mdi mdi-trash-can d-block"></i>
+                        </b-button>
+                      </span>
+                      <div v-else-if="show && group.id == showid" class="delete-confirmation-active">
+                        <!-- <transition name="slide-fade"> -->
                         Are you sure? 
                         <b-button 
                           class="mr-1 w-s m-2" 
@@ -1018,7 +1027,8 @@ export default {
                         >
                           <i class="bx bx-x d-block"></i>
                         </b-button>
-                      </span>
+                        <!-- </transition> -->
+                      </div>
                     </span>
                   </div>
                 </div>

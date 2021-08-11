@@ -128,7 +128,7 @@ export default {
       },
 
       deleteCustomer(id){
-
+        this.$bvModal.hide("modal-delete-page");
         if (!roleService.hasDeletePermission(this.pageIdentity)){
           this.$notify({
             group: 'foo',
@@ -142,7 +142,13 @@ export default {
 
         axios
         .delete(`${this.backendURL}/api/v1/customers/${id}` , authHeader())
-        .then(this.$notify({
+        .then(
+          axios
+          .get(`${this.backendURL}/api/v1/customers?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
+          .then(response => (this.customersData = convert(response.data.data),
+                            this.customersDataLength = response.data.pagination.total))
+          .catch(handleAxiosError),
+          this.$notify({
             group: 'foo',
             text: "Deleted",
             duration: 5000,

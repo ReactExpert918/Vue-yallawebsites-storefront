@@ -119,6 +119,7 @@ export default {
           this.currentPage = 1;
       },
       deleteBlock(){
+        this.$bvModal.hide("modal-delete-page");
         if (!roleService.hasDeletePermission(this.pageIdentity)){
           this.$notify({
             group: 'foo',
@@ -132,9 +133,13 @@ export default {
         axios
         .delete(`${this.backendURL}/api/v1/blocks/${this.block.id}` , authHeader())
         .then(response => (
+          axios
+          .get(`${this.backendURL}/api/v1/blocks?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
+          .then(response => (this.blockData = convert(response.data.data),
+                            this.blockDataLength = response.data.pagination.total)),
           this.$notify({
             group: 'foo',
-            text: `${convert(response.data.data).id} Block deleted!`,
+            text: `${response.data.data.id} Block deleted!`,
             duration: 5000,
             speed: 1000
           })))
