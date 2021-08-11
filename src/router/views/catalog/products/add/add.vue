@@ -342,15 +342,13 @@ export default {
           this.newProduct.variations.push(varReq);
         })
 
-        window.console.log(this.newProduct);
-        // axios
-        // .post(`${this.backendURL}/api/v1/products` , this.newProduct , authHeader())
-        // .then(response => {
-        //   alert(`${response.data.data.id} Product Created!`);
-        //   this.$refs.myVueDropzone.setOption("url" , `${this.backendURL}/api/v1/products/${response.data.data.id}/upload`);
-        //   this.$refs.myVueDropzone.processQueue();
-        //  })
-        // .catch(handleAxiosError);
+        axios.post(`${this.backendURL}/api/v1/products` , this.newProduct , authHeader())
+        .then(response => {
+          alert(`${response.data.data.id} Product Created!`);
+          this.$refs.myVueDropzone.setOption("url" , `${this.backendURL}/api/v1/products/${response.data.data.id}/upload`);
+          this.$refs.myVueDropzone.processQueue();
+         })
+        .catch(handleAxiosError);
       },
       isBundleID(id){
         return this.newProduct.bundle_ids.indexOf(id) > -1;
