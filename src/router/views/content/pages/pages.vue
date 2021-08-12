@@ -141,23 +141,25 @@ export default {
       deletePage(){
         this.$bvModal.hide("modal-delete-page");
         if (!roleService.hasDeletePermission(this.pageIdentity)){
-          this.$notify({
-            group: 'foo',
-            type: 'warn',
-            text: "You do no have the permission to perform this action!",
-            duration: 5000,
-            speed: 1000
-          })
+          // this.$notify({
+          //   group: 'foo',
+          //   type: 'warn',
+          //   text: "You do no have the permission to perform this action!",
+          //   duration: 5000,
+          //   speed: 1000
+          // })
+          alertBox("You do no have the permission to perform this action!");
           return;
         }
         axios
         .delete(`${this.backendURL}/api/v1/pages/${this.page.id}` , authHeader())
         .then(response => (
+          this.data = response.data.data.id,
           axios
           .get(`${this.backendURL}/api/v1/pages?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
           .then(response => (this.pagesData = convert(response.data.data),
                              this.pagesDataLength = response.data.pagination.total)),
-          alertBox(`${response.data.data.id} Page deleted!`)
+          alertBox(`Page deleted succesfully!`)
           // this.$notify({
           //   group: 'foo',
           //   text: `${response.data.data.id} Page deleted!`,

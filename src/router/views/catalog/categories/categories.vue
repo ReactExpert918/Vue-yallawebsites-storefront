@@ -12,6 +12,7 @@ import {
 } from "@/helpers/authservice/auth-header";
 import {handleAxiosError} from "@/helpers/authservice/user.service";
 import {roleService} from "@/helpers/authservice/roles";
+import alertBox from "@/helpers/Alert";
 
 
 /**
@@ -26,6 +27,7 @@ export default {
   data() {
     return {
       pageIdentity: "categories",
+      data: "",
       backendURL: process.env.VUE_APP_BACKEND_URL,
       categoriesData: [],
       currentCategory: {product_sorts: []},
@@ -93,13 +95,7 @@ export default {
     },
     createCategory(){
       if (!roleService.hasCreatePermission(this.pageIdentity)){
-          this.$notify({
-            group: 'foo',
-            type: 'warn',
-            text: "You do no have the permission to perform this action!",
-            duration: 5000,
-            speed: 1000
-          })
+          alertBox("You do no have the permission to perform this action!")
           return;
       }
       this.catPayload.meta_keywords = this.catPayload.meta_keywords_str.split(" ");
@@ -109,12 +105,8 @@ export default {
       axios
       .post(`${this.backendURL}/api/v1/categories` , this.catPayload , authHeader())
       .then(response => {
-          this.$notify({
-            group: 'foo',
-            text: `${response.data.data.id} Category Created!`,
-            duration: 5000,
-            speed: 1000
-          })
+          this.data = response.data,
+          alertBox("Category Created succesfully!")
           this.$refs.vueCreateDropzone.setOption("url" , `${this.backendURL}/api/v1/categories/${response.data.data.id}/upload`);
           this.$refs.vueCreateDropzone.processQueue();
        })
@@ -122,13 +114,7 @@ export default {
     },
     updateCategory(){
       if (!roleService.hasEditPermission(this.pageIdentity)){
-          this.$notify({
-            group: 'foo',
-            type: 'warn',
-            text: "You do no have the permission to perform this action!",
-            duration: 5000,
-            speed: 1000
-          })
+          alertBox("You do no have the permission to perform this action!")
           return;
       }
       this.currentCategory.meta_keywords = this.currentCategory.meta_keywords_str.split(" ");
@@ -146,12 +132,8 @@ export default {
       axios
       .put(`${this.backendURL}/api/v1/categories/${this.currentCategory.id}` , this.currentCategory , authHeader())
       .then(response => {
-          this.$notify({
-            group: 'foo',
-            text: `${response.data.data.id} Category Updated!`,
-            duration: 5000,
-            speed: 1000
-          })
+        this.data = response.data,
+        alertBox("Category Updated succesfully!")
           this.$refs.myVueDropzone.processQueue();
        })
       .catch(handleAxiosError);
@@ -161,25 +143,14 @@ export default {
     },
     deleteCategory(){
       if (!roleService.hasDeletePermission(this.pageIdentity)){
-          this.$notify({
-            group: 'foo',
-            type: 'warn',
-            text: "You do no have the permission to perform this action!",
-            duration: 5000,
-            speed: 1000
-          })
+          alertBox("You do no have the permission to perform this action!")
           return;
       }
       axios
       .delete(`${this.backendURL}/api/v1/categories/${this.currentCategory.id}` , authHeader())
       .then(response => (
-        this.$notify({
-          group: 'foo',
-          type: 'warn',
-          text: `${response.data.data.id} Category deleted!`,
-          duration: 5000,
-          speed: 1000
-        })
+        this.data = response.data,
+        alertBox("Category Deleted successfully")
       ))
       .catch(handleAxiosError);
     },

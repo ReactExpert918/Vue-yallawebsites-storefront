@@ -9,6 +9,7 @@ import {
 import {handleAxiosError} from "@/helpers/authservice/user.service";
 import {roleService} from "@/helpers/authservice/roles";
 import convert from "@/helpers/convertObject";
+import alertBox from "@/helpers/Alert";
 
 /**
  * Block component
@@ -27,6 +28,7 @@ export default {
       blockData: [],
       blockDataLength: 1,
       block: {},
+      data: "",
       title: "Blocks",
       items: [
         {
@@ -121,13 +123,7 @@ export default {
       deleteBlock(){
         this.$bvModal.hide("modal-delete-page");
         if (!roleService.hasDeletePermission(this.pageIdentity)){
-          this.$notify({
-            group: 'foo',
-            type: 'warn',
-            text: "You do no have the permission to perform this action!",
-            duration: 5000,
-            speed: 1000
-          })
+          alertBox("You do no have the permission to perform this action!")
           return;
         }
         axios
@@ -137,12 +133,9 @@ export default {
           .get(`${this.backendURL}/api/v1/blocks?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
           .then(response => (this.blockData = convert(response.data.data),
                             this.blockDataLength = response.data.pagination.total)),
-          this.$notify({
-            group: 'foo',
-            text: `${response.data.data.id} Block deleted!`,
-            duration: 5000,
-            speed: 1000
-          })))
+          this.data = response.data,
+          alertBox("Block Deleted succesfully")
+          ))
         .catch(handleAxiosError);
       },
       handlePageChange(value) {

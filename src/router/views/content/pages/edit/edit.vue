@@ -11,6 +11,7 @@ import {
 } from "@/helpers/authservice/auth-header";
 import {handleAxiosError} from "@/helpers/authservice/user.service";
 import {roleService} from "@/helpers/authservice/roles";
+import alertBox from "@/helpers/Alert";
 
 /**
  * Pages component
@@ -24,6 +25,7 @@ export default {
   data() {
     return {
       pageIdentity: "pages",
+      data: "",
       backendURL: process.env.VUE_APP_BACKEND_URL,
       pageData: {layout:{} , meta_keywords_str:""},
       layouts: [],
@@ -91,13 +93,7 @@ export default {
   methods:{
     editPage(){
       if (!roleService.hasEditPermission(this.pageIdentity)){
-          this.$notify({
-            group: 'foo',
-            type: 'warn',
-            text: "You do no have the permission to perform this action!",
-            duration: 5000,
-            speed: 1000
-          })
+          alertBox("You do no have the permission to perform this action!")
           return;
       }
       this.pageData.meta_keywords = this.pageData.meta_keywords_str.split(" ");
@@ -109,12 +105,9 @@ export default {
       .put(`${this.backendURL}/api/v1/pages/${this.$route.params.id}` , this.pageData , authHeader())
       .then(response => (
         this.$router.push('/content/pages'),
-        this.$notify({
-          group: 'foo',
-          text: `${response.data.data.id} Updated!`,
-          duration: 5000,
-          speed: 1000
-        })))
+        this.data = response,
+        alertBox("Page Updated succesfully")
+        ))
       .catch(handleAxiosError);
     }
   }

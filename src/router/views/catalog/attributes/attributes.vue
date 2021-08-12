@@ -235,6 +235,7 @@ export default {
         this.newAttr.option_text_label = "";
       },
       showDeleteConfirm(id) {
+        
         this.show = true;
         this.showid = id;
         

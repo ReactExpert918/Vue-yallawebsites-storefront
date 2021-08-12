@@ -71,15 +71,4 @@ export default {
     90%  {opacity: 1; right: 0; top:0px;}
     100% {visibility: hidden; right: -100%; top:0px;}
 }
-.delete-confirmation-active {
-    animation-name: example1;
-    animation-duration: 2s;
-    position: relative;
-    width: 200.88px;
-}
-
-@keyframes example1 {
-    0%   {right: -100%;}
-    100%  {right: 0;}
-}
 </style>

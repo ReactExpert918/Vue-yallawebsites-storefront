@@ -11,6 +11,7 @@ import {
 } from "@/helpers/authservice/auth-header";
 import {handleAxiosError} from "@/helpers/authservice/user.service";
 import {roleService} from "@/helpers/authservice/roles";
+import alertBox from "@/helpers/Alert";
 
 /**
  * Pages component
@@ -26,6 +27,7 @@ export default {
       pageIdentity: "pages",
       title: "Add Page",
       backendURL: process.env.VUE_APP_BACKEND_URL,
+      data: "",
       pageData: {
         title: "",
         content: "",
@@ -85,14 +87,8 @@ export default {
   methods:{
     addPage(){
       if (!roleService.hasCreatePermission(this.pageIdentity)){
-          this.$notify({
-            group: 'foo',
-            type: 'warn',
-            text: "You do no have the permission to perform this action!",
-            duration: 5000,
-            speed: 1000
-          })
-          return;
+        alertBox("You do no have the permission to perform this action!")
+        return;
       }
       this.pageData.meta_keywords = this.pageData.meta_keywords_str.split(" ");
       if (this.pageData.meta_keywords[0] == ""){
@@ -101,13 +97,9 @@ export default {
       axios
       .post(`${this.backendURL}/api/v1/pages` , this.pageData , authHeader())
       .then(response => (
-        this.$router.push('/content/pages'),
-        this.$notify({
-          group: 'foo',
-          text: `${response.data.data.id} Created!`,
-          duration: 5000,
-          speed: 1000
-        })       
+        this.$router.push('/content/pages'),   
+        this.data = response.data.data.id,
+        alertBox(`Page Created succesfully!`) 
       ))
       .catch(handleAxiosError);
     }
