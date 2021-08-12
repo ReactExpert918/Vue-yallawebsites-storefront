@@ -190,6 +190,9 @@ export default {
       /**
         * Search the table data with search input 
         */
+       addProduct() {
+         this.$bvModal.hide("modal-scrollable");
+       },
       handlePageChange(value) {
         this.currentPage = value;
         axios
@@ -268,7 +271,7 @@ export default {
               duration: 5000,
               speed: 1000
             });
-            this.purchase(response.data.data.id);
+            // this.purchase(response.data.data.id);
          })
         .catch(handleAxiosError);
       },
@@ -745,7 +748,10 @@ export default {
           </div>
         </div>
       <div class="text-sm-right">
-        <b-button variant="primary">
+        <b-button 
+          variant="primary"
+          @click="addProduct()"
+        >
               <i class="bx bx-check-double font-size-16 align-middle mr-2"></i>
               Add
           </b-button>

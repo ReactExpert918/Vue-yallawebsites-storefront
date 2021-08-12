@@ -9,6 +9,7 @@ import {
 import {handleAxiosError} from "@/helpers/authservice/user.service";
 import {roleService} from "@/helpers/authservice/roles";
 import convert from "@/helpers/convertObject";
+import alertBox from "@/helpers/Alert";
 
 /**
  * Pages component
@@ -156,12 +157,14 @@ export default {
           .get(`${this.backendURL}/api/v1/pages?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
           .then(response => (this.pagesData = convert(response.data.data),
                              this.pagesDataLength = response.data.pagination.total)),
-          this.$notify({
-            group: 'foo',
-            text: `${response.data.data.id} Page deleted!`,
-            duration: 5000,
-            speed: 1000
-          })))
+          alertBox(`${response.data.data.id} Page deleted!`)
+          // this.$notify({
+          //   group: 'foo',
+          //   text: `${response.data.data.id} Page deleted!`,
+          //   duration: 5000,
+          //   speed: 1000
+          // })
+          ))
         .catch(handleAxiosError);
       }
   },
