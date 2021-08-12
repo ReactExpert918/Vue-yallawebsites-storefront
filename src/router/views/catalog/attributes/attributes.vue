@@ -7,6 +7,7 @@ import {
 } from "@/helpers/authservice/auth-header";
 import {handleAxiosError} from "@/helpers/authservice/user.service";
 import {roleService} from "@/helpers/authservice/roles";
+import alertBox from "@/helpers/Alert";
 
 import appConfig from "@/app.config";
 
@@ -30,6 +31,7 @@ export default {
       show: false,
       showid: "",
       id: 1,
+      data: "",
       currentAttribute:  {
             id: "",
             name: "",
@@ -242,38 +244,22 @@ export default {
       },
       addAttribute(){
         if (!roleService.hasCreatePermission(this.pageIdentity)){
-          this.$notify({
-            group: 'foo',
-            type: 'warn',
-            text: "You do no have the permission to perform this action!",
-            duration: 5000,
-            speed: 1000
-          })
+          alertBox("You do no have the permission to perform this action!")
           return;
         }
           this.newAttr.sort_order = parseInt(this.newAttr.sort_order);
           axios
          .post(`${this.backendURL}/api/v1/products/attributes` , this.newAttr , authHeader())
          .then(response => {
-            this.$notify({
-              group: 'foo',
-              text: `${response.data.data.id} attribute Created!`,
-              duration: 5000,
-              speed: 1000
-            })
+           this.data = response.data,
+            alertBox("Attribute Created Successfully!")
           this.newAttr = {options: []};
          })
          .catch(handleAxiosError);
       },
       updateAttribute(){
         if (!roleService.hasEditPermission(this.pageIdentity)){
-          this.$notify({
-            group: 'foo',
-            type: 'warn',
-            text: "You do no have the permission to perform this action!",
-            duration: 5000,
-            speed: 1000
-          })
+          alertBox("You do no have the permission to perform this action!")
           return;
         }
         this.newAttr = {
@@ -293,48 +279,28 @@ export default {
         axios
          .put(`${this.backendURL}/api/v1/products/attributes/${this.currentAttribute.id}` , this.newAttr , authHeader())
          .then(response => {
-            this.$notify({
-              group: 'foo',
-              text: `${response.data.data.id} attribute Updated!`,
-              duration: 5000,
-              speed: 1000
-            })
+            this.data = response.data,
+            alertBox("Attribute Updated Successfully!")
             this.newAttr = {options: []};
          })
          .catch(handleAxiosError);
       },
       deleteAttribute(){
         if (!roleService.hasDeletePermission(this.pageIdentity)){
-          this.$notify({
-            group: 'foo',
-            type: 'warn',
-            text: "You do no have the permission to perform this action!",
-            duration: 5000,
-            speed: 1000
-          })
+          alertBox("You do no have the permission to perform this action!")
           return;
         }
         axios
         .delete(`${this.backendURL}/api/v1/products/attributes/${this.currentAttribute.id}` , authHeader())
         .then(response => (
-          this.$notify({
-            group: 'foo',
-            text: `${response.data.data.id} attribute deleted!`,
-            duration: 5000,
-            speed: 1000
-          })
+          this.data = response.data,
+          alertBox("Attribute Deleted Successfully!")
         ))
         .catch(handleAxiosError);
       },
       addOption(){
         if (!roleService.hasCreatePermission(this.pageIdentity)){
-          this.$notify({
-            group: 'foo',
-            type: 'warn',
-            text: "You do no have the permission to perform this action!",
-            duration: 5000,
-            speed: 1000
-          })
+          alertBox("You do no have the permission to perform this action!")
           return;
         }
         axios
@@ -365,72 +331,50 @@ export default {
       },
       deleteProductOption(opt){
         if (!roleService.hasDeletePermission(this.pageIdentity)){
-          this.$notify({
-            group: 'foo',
-            type: 'warn',
-            text: "You do no have the permission to perform this action!",
-            duration: 5000,
-            speed: 1000
-          })
+          alertBox("You do no have the permission to perform this action!")
           return;
         }
          axios
         .delete(`${this.backendURL}/api/v1/products/attributes/options/${opt.id}` , authHeader())
         .then(response => {
-          this.$notify({
-            group: 'foo',
-            text: `${response.data.data.id} option deleted!`,
-            duration: 5000,
-            speed: 1000
-          })
+          this.data = response.data,
+          alertBox("Option Deleted Successfully!")
           this.handleProductOptionDelete(opt.name , this.currentAttribute.options)
         })
         .catch(handleAxiosError);
       },
       addAttributeGroup(){
+        this.$bvModal.hide("modal-attribute-groups");
         if (!roleService.hasCreatePermission(this.pageIdentity)){
-          this.$notify({
-            group: 'foo',
-            type: 'warn',
-            text: "You do no have the permission to perform this action!",
-            duration: 5000,
-            speed: 1000
-          })
+          alertBox("You do no have the permission to perform this action!")
           return;
         }
         axios
         .post(`${this.backendURL}/api/v1/products/attributes/groups` , this.newGroup , authHeader())
         .then(response => {
-          this.$notify({
-            group: 'foo',
-            text: `${response.data.data.id} attribute group Created!`,
-            duration: 5000,
-            speed: 1000
-          })
+          this.data = response.data,
+          axios
+          .get(`${this.backendURL}/api/v1/products/attributes/groups` , authHeader())
+          .then(response => (this.attributeGroups = response.data.data))
+          alertBox("Attribute Group Created Successfully!")
           this.newGroup = {};
         })
         .catch(handleAxiosError);
       },
       deleteAttributeGroup(group){
+        this.$bvModal.hide("modal-attribute-groups");
         if (!roleService.hasDeletePermission(this.pageIdentity)){
-          this.$notify({
-            group: 'foo',
-            type: 'warn',
-            text: "You do no have the permission to perform this action!",
-            duration: 5000,
-            speed: 1000
-          })
+          alertBox("You do no have the permission to perform this action!")
           return;
         }
         axios
         .delete(`${this.backendURL}/api/v1/products/attributes/groups/${group.id}` , authHeader())
         .then(response => {
-          this.$notify({
-            group: 'foo',
-            text: `${response.data.data.id} attribute group deleted!`,
-            duration: 5000,
-            speed: 1000
-          })
+          this.data = response.data,
+          alertBox("Attribute Group Deleted Successfully!"),
+          axios
+          .get(`${this.backendURL}/api/v1/products/attributes/groups` , authHeader())
+          .then(response => (this.attributeGroups = response.data.data))
         })
         .catch(handleAxiosError);
       }

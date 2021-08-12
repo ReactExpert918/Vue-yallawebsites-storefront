@@ -15,6 +15,7 @@ import {
 import {handleAxiosError} from "@/helpers/authservice/user.service";
 import {roleService} from "@/helpers/authservice/roles";
 import {copyArrayOfObjects} from "@/helpers/common";
+import alertBox from "@/helpers/Alert";
 
 /**
  * Pages component
@@ -30,6 +31,7 @@ export default {
     return {
       pageIdentity: "products",
       backendURL: process.env.VUE_APP_BACKEND_URL,
+      data: "",
       productData: {
         layout:{} , 
         meta_keywords_str:"" ,
@@ -351,13 +353,7 @@ export default {
       },
       updateProduct(){
         if (!roleService.hasEditPermission(this.pageIdentity)){
-          this.$notify({
-            group: 'foo',
-            type: 'warn',
-            text: "You do no have the permission to perform this action!",
-            duration: 5000,
-            speed: 1000
-          })
+          alertBox("You do no have the permission to perform this action!")
           return;
         }
         this.productData.meta_keywords = this.productData.meta_keywords_str.split(" ");
@@ -451,12 +447,9 @@ export default {
         axios
         .put(`${this.backendURL}/api/v1/products/${this.$route.params.id}` , productReq , authHeader())
         .then(response => {
-          this.$notify({
-            group: 'foo',
-            text: `${response.data.data.id} Product Updated!`,
-            duration: 5000,
-            speed: 1000
-          })
+          this.$router.push('/catalog/products'),
+          this.data = response.data;
+          alertBox("Product Updated successfully!")
           this.$refs.myVueDropzone.processQueue();
         })
         .catch(handleAxiosError);
@@ -464,25 +457,16 @@ export default {
 
       deleteProduct(){
         if (!roleService.hasDeletePermission(this.pageIdentity)){
-          this.$notify({
-            group: 'foo',
-            type: 'warn',
-            text: "You do no have the permission to perform this action!",
-            duration: 5000,
-            speed: 1000
-          })
+          alertBox("You do no have the permission to perform this action!")
           return;
         }
         axios
         .delete(`${this.backendURL}/api/v1/products/${this.productData.id}` , authHeader())
         .then(
           response => (
-            this.$notify({
-              group: 'foo',
-              text: `${response.data.data.id} Product deleted!`,
-              duration: 5000,
-              speed: 1000
-            })))
+            this.$router.push('/catalog/products'),
+            this.data = response.data,
+            alertBox("Product Deleted successfully!")))
         .catch(handleAxiosError);
       },
 

@@ -9,6 +9,7 @@ import appConfig from "@/app.config";
 import {handleAxiosError} from "@/helpers/authservice/user.service";
 import {roleService} from "@/helpers/authservice/roles";
 import convert from "@/helpers/convertObject";
+import alertBox from "@/helpers/Alert";
 
 /**
  * Pages component
@@ -128,15 +129,9 @@ export default {
       },
 
       deleteCustomer(id){
-        this.$bvModal.hide("modal-delete-page");
+        this.$bvModal.hide("modal-delete-customer");
         if (!roleService.hasDeletePermission(this.pageIdentity)){
-          this.$notify({
-            group: 'foo',
-            type: 'warn',
-            text: "You do no have the permission to perform this action!",
-            duration: 5000,
-            speed: 1000
-          })
+          alertBox("You do no have the permission to perform this action!")
           return;
         }
 
@@ -148,12 +143,8 @@ export default {
           .then(response => (this.customersData = convert(response.data.data),
                             this.customersDataLength = response.data.pagination.total))
           .catch(handleAxiosError),
-          this.$notify({
-            group: 'foo',
-            text: "Deleted",
-            duration: 5000,
-            speed: 1000
-          }))
+            alertBox("Customer Deleted Successfully!")
+          )
         .catch(handleAxiosError);
       },
       handlePageChange(value) {

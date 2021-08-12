@@ -9,6 +9,7 @@ import {
 } from "@/helpers/authservice/auth-header";
 import {handleAxiosError} from "@/helpers/authservice/user.service";
 import {roleService} from "@/helpers/authservice/roles";
+// import alertBox from "@/helpers/Alert";
 
 /**
  * Pages component
@@ -23,6 +24,7 @@ export default {
     return {
       pageIdentity: "orders",
       backendURL: process.env.VUE_APP_BACKEND_URL,
+      data: "",
       order: {
         total: {},
         status: {} , 
@@ -217,8 +219,15 @@ export default {
         this.currentAttribut = this.products[id]
       },
       getSubTotal(){
+        // for(let i = 0; i < this.order.products.length; i++){
+        //     var op = this.order.products[i];
+        //     op.product.order_quantity = op.quantity;
+        //     op.product.price = op.price;
+        //     op.product.order_product_id = op.id;
+        //     this.selectedProducts.push(op.product);
+        //   }
         var subTotal = 0.0;
-        for(var i = 0; i < this.selectedProducts.length; i++){
+        for(let i = 0; i < this.selectedProducts.length; i++){
           subTotal += (this.selectedProducts[i].price * this.selectedProducts[i].order_quantity);
         }
         return subTotal;

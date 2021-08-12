@@ -8,6 +8,7 @@ import {
 } from "@/helpers/authservice/auth-header";
 import {handleAxiosError} from "@/helpers/authservice/user.service";
 import {roleService} from "@/helpers/authservice/roles";
+import alertBox from "@/helpers/Alert";
 
 /**
  * Pages component
@@ -22,6 +23,7 @@ export default {
     return {
       pageIdentity: "customer_groups",
       selectedAll: false,
+      data: "",
       backendURL: process.env.VUE_APP_BACKEND_URL,
       customerGroupsData: [],
       customerGroupsDataLength: [],
@@ -129,15 +131,10 @@ export default {
       .catch(handleAxiosError);
       },
       deleteCustomerGroup(id){
+        alert(id);
         this.$bvModal.hide("modal-delete-customer-group");
         if(!roleService.hasDeletePermission(this.pageIdentity)){
-          this.$notify({
-            group: 'foo',
-            type: 'warn',
-            text: "You do no have the permission to perform this action!",
-            duration: 5000,
-            speed: 1000
-          })
+          alertBox("You do no have the permission to perform this action!")
           return;
        }
         axios
@@ -148,23 +145,13 @@ export default {
           .then(response => (this.customerGroupsData = response.data.data,
                             this.customerGroupsDataLength = response.data.pagination.total))
           .catch(handleAxiosError),
-          this.$notify({
-            group: 'foo',
-            text: "Deleted!",
-            duration: 5000,
-            speed: 1000
-          }))
+          alertBox("Customer Group Deleted Successfully!")
+          )
         .catch(handleAxiosError);
       },
       createCustomerGroup(e){
         if(!roleService.hasCreatePermission(this.pageIdentity)){
-          this.$notify({
-            group: 'foo',
-            type: 'warn',
-            text: "You do no have the permission to perform this action!",
-            duration: 5000,
-            speed: 1000
-          })
+          alertBox("You do no have the permission to perform this action!")
           return;
        }
         e.preventDefault();
@@ -172,28 +159,19 @@ export default {
         axios
         .post(`${this.backendURL}/api/v1/customers/groups` , this.createGroupPayload , authHeader())
         .then(response => (
-          // axios
-          // .get(`${this.backendURL}/api/v1/customers/groups?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
-          // .then(response => (this.customerGroupsData = response.data.data,
-          //                   this.customerGroupsDataLength = response.data.pagination.total))
-          // .catch(handleAxiosError),
-          this.$notify({
-            group: 'foo',
-            text: `${response.data.data.id} Created!`,
-            duration: 5000,
-            speed: 1000
-          })))
+          axios
+          .get(`${this.backendURL}/api/v1/customers/groups?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
+          .then(response => (this.customerGroupsData = response.data.data,
+                            this.customerGroupsDataLength = response.data.pagination.total))
+          .catch(handleAxiosError),
+          this.data = response.data,
+          alertBox("Customer Group Created Successfully!")
+          ))
         .catch(handleAxiosError);
       },
       updateCustomerGroup(e){
         if(!roleService.hasEditPermission(this.pageIdentity)){
-          this.$notify({
-            group: 'foo',
-            type: 'warn',
-            text: "You do no have the permission to perform this action!",
-            duration: 5000,
-            speed: 1000
-          })
+          alertBox("You do no have the permission to perform this action!")
           return;
        }
         e.preventDefault();
@@ -206,12 +184,8 @@ export default {
           .then(response => (this.customerGroupsData = response.data.data,
                             this.customerGroupsDataLength = response.data.pagination.total))
           .catch(handleAxiosError),
-          this.$notify({
-            group: 'foo',
-            text: `${response.data.data.id} Updated!`,
-            duration: 5000,
-            speed: 1000
-          })))
+          this.data = response.data,
+          alertBox("Customer Group Updated Successfully!")))
         .catch(handleAxiosError);
       },
       handlePageChange(value) {

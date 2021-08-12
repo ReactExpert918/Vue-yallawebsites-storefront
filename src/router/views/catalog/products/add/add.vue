@@ -14,6 +14,7 @@ import {
 import {handleAxiosError} from "@/helpers/authservice/user.service";
 import {roleService} from "@/helpers/authservice/roles";
 import {copyArrayOfObjects} from "@/helpers/common";
+import alertBox from "@/helpers/Alert";
 
 /**
  * Pages component
@@ -30,6 +31,7 @@ export default {
       backendURL: process.env.VUE_APP_BACKEND_URL,
       allProductsData: [],
       allProductsDataLength: 1,
+      data: "",
       attrs: [],
       attrGroups: [],
       preVariation: [],
@@ -274,13 +276,7 @@ export default {
       },
       createProduct(){
         if (!roleService.hasCreatePermission(this.pageIdentity)){
-          this.$notify({
-            group: 'foo',
-            type: 'warn',
-            text: "You do no have the permission to perform this action!",
-            duration: 5000,
-            speed: 1000
-          })
+          alertBox("You do no have the permission to perform this action!")
           return;
         }
         this.newProduct.meta_keywords = this.newProduct.meta_keywords_str.split(" ");
@@ -350,7 +346,7 @@ export default {
 
         axios.post(`${this.backendURL}/api/v1/products` , this.newProduct , authHeader())
         .then(response => {
-          alert(`${response.data.data.id} Product Created!`);
+          alertBox("Products Created succesfully!")
           this.$refs.myVueDropzone.setOption("url" , `${this.backendURL}/api/v1/products/${response.data.data.id}/upload`);
           this.$refs.myVueDropzone.processQueue();
          })
