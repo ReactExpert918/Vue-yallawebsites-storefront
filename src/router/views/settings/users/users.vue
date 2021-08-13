@@ -9,6 +9,7 @@ import {
 } from "@/helpers/authservice/auth-header";
 import { handleAxiosError } from "@/helpers/authservice/user.service"
 import {roleService} from "@/helpers/authservice/roles";
+import alertBox from "@/helpers/Alert";
 
 /**
  * Users component
@@ -23,6 +24,7 @@ export default {
     return {
       pageIdentity: "user_management",
       selectedAll: false,
+      data: "",
       backendURL: process.env.VUE_APP_BACKEND_URL,
       usersData: [],
       usersDataLength: 1,
@@ -167,35 +169,26 @@ export default {
           this.currentPage = 1;
       },
       deleteUser(id){
+        this.$bvModal.hide("modal-delete-user")
         if (!roleService.hasDeletePermission(this.pageIdentity)){
-          this.$notify({
-            group: 'foo',
-            type: 'warn',
-            text: "You do no have the permission to perform this action!",
-            duration: 5000,
-            speed: 1000
-          })
+          alertBox("You do no have the permission to perform this action!")
           return;
         }
         axios
         .delete(`${this.backendURL}/api/v1/users/${id}` , authHeader())
-        .then(this.$notify({
-            group: 'foo',
-            text: "Deleted!",
-            duration: 5000,
-            speed: 1000
-          }))
+        .then(
+          axios
+        .get(`${this.backendURL}/api/v1/users?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
+        .then(response => (this.usersData = response.data.data,
+                           this.usersDataLength = response.data.pagination.total)),
+          alertBox("User deleted successfully!")
+          )
         .catch(handleAxiosError);
       },
       createUser(e){
+        this.$bvModal.hide("modal-scrollable-add-user")
         if (!roleService.hasCreatePermission(this.pageIdentity)){
-          this.$notify({
-            group: 'foo',
-            type: 'warn',
-            text: "You do no have the permission to perform this action!",
-            duration: 5000,
-            speed: 1000
-          })
+          alertBox("You do no have the permission to perform this action!")
           return;
         }
         e.preventDefault();
@@ -203,26 +196,20 @@ export default {
         axios
         .post(`${this.backendURL}/api/v1/users` , this.createUserPayload , authHeader())
         .then(response => {
-          this.$notify({
-            group: 'foo',
-            text: `${response.data.data.id} Created!`,
-            duration: 5000,
-            speed: 1000
-          })
+          axios
+        .get(`${this.backendURL}/api/v1/users?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
+        .then(response => (this.usersData = response.data.data,
+                           this.usersDataLength = response.data.pagination.total)),
+          alertBox("User Created successfully!")
             this.$refs.vueCreateDropzone.setOption("url" , `${this.backendURL}/api/v1/users/${response.data.data.id}/upload`);
             this.$refs.vueCreateDropzone.processQueue();
          })
         .catch(handleAxiosError);
       },
       updateUser(e){
+        this.$bvModal.hide("modal-scrollable-edit-user")
         if (!roleService.hasEditPermission(this.pageIdentity)){
-          this.$notify({
-            group: 'foo',
-            type: 'warn',
-            text: "You do no have the permission to perform this action!",
-            duration: 5000,
-            speed: 1000
-          })
+          alertBox("You do no have the permission to perform this action!")
           return;
         }
         e.preventDefault();
@@ -230,12 +217,12 @@ export default {
         axios
         .put(`${this.backendURL}/api/v1/users/${this.currentUser.id}` , this.currentUser , authHeader())
         .then(response => {
-          this.$notify({
-            group: 'foo',
-            text: `${response.data.data.id} Updated!`,
-            duration: 5000,
-            speed: 1000
-          })
+          axios
+        .get(`${this.backendURL}/api/v1/users?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
+        .then(response => (this.usersData = response.data.data,
+                           this.usersDataLength = response.data.pagination.total)),
+          this.data = response.data,
+          alertBox("User Updated Successfully!")
           this.$refs.myVueDropzone.processQueue();
          })
         .catch(handleAxiosError);

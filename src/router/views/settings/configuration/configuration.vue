@@ -9,6 +9,7 @@ import {
 } from "@/helpers/authservice/auth-header";
 import {handleAxiosError} from "@/helpers/authservice/user.service";
 import {roleService} from "@/helpers/authservice/roles";
+import alertBox from "@/helpers/Alert";
 
 export default {
   page: {
@@ -25,6 +26,7 @@ export default {
       pageIdentity: "configurations",
       backendURL: process.env.VUE_APP_BACKEND_URL,
       configData: {},
+      data: "",
       general_config: {
         id: "",
         domain:{},
@@ -351,13 +353,7 @@ export default {
     },
     saveGeneralConfiguration(){
       if (!roleService.hasEditPermission(this.pageIdentity)){
-          this.$notify({
-            group: 'foo',
-            type: 'warn',
-            text: "You do no have the permission to perform this action!",
-            duration: 5000,
-            speed: 1000
-          })
+          alertBox("You do no have the permission to perform this action!")
           return;
       }
       this.configData = {
@@ -391,24 +387,14 @@ export default {
       .post(`${this.backendURL}/api/v1/stores/general` , this.configData , authHeader())
       .then(response => {
         this.configData = {};
-        this.$notify({
-            group: 'foo',
-            text: `${response.data.data.id} Updated General Configuration!`,
-            duration: 5000,
-            speed: 1000
-          })
+        this.data = response.data,
+          alertBox("Updated General Configuration!")
        })
        .catch(handleAxiosError);
     },
     saveCatalogConfiguration(){
       if (!roleService.hasEditPermission(this.pageIdentity)){
-          this.$notify({
-            group: 'foo',
-            type: 'warn',
-            text: "You do no have the permission to perform this action!",
-            duration: 5000,
-            speed: 1000
-          })
+          alertBox("You do no have the permission to perform this action!")
           return;
       }
        this.configData = {
@@ -439,24 +425,14 @@ export default {
       .post(`${this.backendURL}/api/v1/stores/catalog` , this.configData , authHeader())
       .then(response => {
         this.configData = {};
-        this.$notify({
-          group: 'foo',
-          text: `${response.data.data.id} Updated Catalog Configuration!`,
-          duration: 5000,
-          speed: 1000
-        })
+        this.data = response.data,
+        alertBox("Updated Catalog Configuration!")
         })
         .catch(handleAxiosError);
     },
     saveSalesConfiguration(){
       if (!roleService.hasEditPermission(this.pageIdentity)){
-          this.$notify({
-            group: 'foo',
-            type: 'warn',
-            text: "You do no have the permission to perform this action!",
-            duration: 5000,
-            speed: 1000
-          })
+          alertBox("You do no have the permission to perform this action!")
           return;
       }
       this.configData = {
@@ -497,12 +473,8 @@ export default {
       .post(`${this.backendURL}/api/v1/stores/sales` , this.configData , authHeader())
       .then(response => {
           this.configData = {};
-          this.$notify({
-            group: 'foo',
-            text: `${response.data.data.id} Updated Sales Configuration!`,
-            duration: 5000,
-            speed: 1000
-          })
+          this.data = response.data,
+          alertBox("Updated Sales Configuration!")
           this.uploadTableRateFile();
 
         })
@@ -511,13 +483,7 @@ export default {
     },
     uploadTableRateFile(){
       if (!roleService.hasEditPermission(this.pageIdentity)){
-          this.$notify({
-            group: 'foo',
-            type: 'warn',
-            text: "You do no have the permission to perform this action!",
-            duration: 5000,
-            speed: 1000
-          })
+          alertBox("You do no have the permission to perform this action!")
           return;
       }
        if (this.tableRateFile != ''){
@@ -528,25 +494,15 @@ export default {
             axios
             .post(`${this.backendURL}/api/v1/stores/sales/upload` , formData , header)
             .then(response => {
-              this.$notify({
-                group: 'foo',
-                text: `${response.data.data.id} Upload Sales Configuration Table Rate File!`,
-                duration: 5000,
-                speed: 1000
-              })
+              this.data = response.data,
+              alertBox("Upload Sales Configuration Table Rate File!")
               })
               .catch(handleAxiosError);
        }
     },
     saveCustomerConfiguration(){
       if (!roleService.hasEditPermission(this.pageIdentity)){
-          this.$notify({
-            group: 'foo',
-            type: 'warn',
-            text: "You do no have the permission to perform this action!",
-            duration: 5000,
-            speed: 1000
-          })
+          alertBox("You do no have the permission to perform this action!")
           return;
       }
       this.configData = {
@@ -560,24 +516,14 @@ export default {
       .post(`${this.backendURL}/api/v1/stores/customer` , this.configData , authHeader())
       .then(response => {
         this.configData = {};
-        this.$notify({
-          group: 'foo',
-          text: `${response.data.data.id} Updated Customer Configuration!`,
-          duration: 5000,
-          speed: 1000
-        })
+        this.data = response.data,
+        alertBox("Updated Customer Configuration!")
         })
         .catch(handleAxiosError);
     },
     saveAdvancedConfiguration(){
       if (!roleService.hasEditPermission(this.pageIdentity)){
-          this.$notify({
-            group: 'foo',
-            type: 'warn',
-            text: "You do no have the permission to perform this action!",
-            duration: 5000,
-            speed: 1000
-          })
+          alertBox("You do no have the permission to perform this action!")
           return;
       }
       this.configData = {
@@ -593,12 +539,8 @@ export default {
       .post(`${this.backendURL}/api/v1/stores/advanced` , this.configData , authHeader())
       .then(response => {
         this.configData = {};
-        this.$notify({
-          group: 'foo',
-          text: `${response.data.data.id} Updated Advanced Configuration!`,
-          duration: 5000,
-          speed: 1000
-        })
+        this.data = response.data,
+        alertBox("Updated Advanced Configuration!")
        })
        .catch(handleAxiosError);
     },
