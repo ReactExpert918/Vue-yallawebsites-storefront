@@ -283,7 +283,6 @@ export default {
         if (this.newProduct.meta_keywords[0] == ""){
           this.newProduct.meta_keywords = [];
         } 
-
         for(var i = 0; i < this.selectedCategories.length; i++){ 
            this.newProduct.category_ids.push(this.selectedCategories[i].id);
         }
@@ -293,20 +292,21 @@ export default {
         this.newProduct.quantity = parseInt(this.newProduct.quantity);
         
         this.newProduct.attribute_group_id = this.currentAttrGroup.id;
-        for(var j = 0; j < this.currentAttrGroup.attributes.length; j++){
-            var attr = this.currentAttrGroup.attributes[j];
-            if (attr){
-              if (attr.option_id == ""){
-                continue;
-              }
-              this.newProduct.attributes.push({
-              id: attr.id,
-              value: attr.value,
-              option_id: attr.option_id,
-            });
-          }
-        }
-
+        
+        // window.console.log(this.currentAttrGroup.attributes.length);
+        // for(var j = 0; j < this.currentAttrGroup.attributes.length; j++){
+        //     var attr = this.currentAttrGroup.attributes[j];
+        //     if (attr){
+        //       if (attr.option_id == ""){
+        //         continue;
+        //       }
+        //       this.newProduct.attributes.push({
+        //       id: attr.id,
+        //       value: attr.value,
+        //       option_id: attr.option_id,
+        //     });
+        //   }
+        // }
         this.variationsData.forEach((v) => {
           var spec = {
             name: v.name,
@@ -317,7 +317,6 @@ export default {
           })
           this.newProduct.specifications.push(spec);
         })
-
         this.variations.forEach((v) => {
           var varReq = {
             labels: v.options,
@@ -333,7 +332,6 @@ export default {
             varReq.image_name = v.image_name;
             varReq.image_content = v.image_content;
           }
-
           v.subitem.specs.forEach((spec) => {
             varReq.custom_specs.push({
               attribute_id: spec.id,
@@ -343,10 +341,11 @@ export default {
   
           this.newProduct.variations.push(varReq);
         })
-
-        axios.post(`${this.backendURL}/api/v1/products` , this.newProduct , authHeader())
+        axios
+        .post(`${this.backendURL}/api/v1/products` , this.newProduct , authHeader())
         .then(response => {
-          alertBox("Products Created succesfully!")
+          this.$router.push('/catalog/products'), 
+          alertBox(`Product Created Successfully!`);
           this.$refs.myVueDropzone.setOption("url" , `${this.backendURL}/api/v1/products/${response.data.data.id}/upload`);
           this.$refs.myVueDropzone.processQueue();
          })

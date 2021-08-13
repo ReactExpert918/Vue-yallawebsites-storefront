@@ -1,7 +1,6 @@
 <script>
 import Layout from "../../../layouts/main";
 import PageHeader from "@/components/page-header";
-
 import axios from "axios";
 import appConfig from "@/app.config";
 import {
@@ -9,7 +8,6 @@ import {
 } from "@/helpers/authservice/auth-header";
 import {handleAxiosError} from "@/helpers/authservice/user.service";
 import {roleService} from "@/helpers/authservice/roles";
-
 /**
  * Pages component
  */
@@ -72,13 +70,7 @@ export default {
   methods:{
      updateCustomer(){
        if(!roleService.hasEditPermission(this.pageIdentity)){
-          this.$notify({
-            group: 'foo',
-            type: 'warn',
-            text: "You do no have the permission to perform this action!",
-            duration: 5000,
-            speed: 1000
-          })
+          alert("You do no have the permission to perform this action!")
           return;
        }
        // Using hardcoded country code for now as there is no option in front-end for selecting country from a list now, Need to add that and remove the following loops
@@ -92,13 +84,7 @@ export default {
       }
         axios
         .put(`${this.backendURL}/api/v1/customers/${this.$route.params.id}` , this.customer , authHeader())
-        .then(response => (
-          this.$notify({
-            group: 'foo',
-            text: `${response.data.data.id} Updated!`,
-            duration: 5000,
-            speed: 1000
-          })))
+        .then(response => (alert(`${response.data.data.id} Updated!`)))
         .catch(handleAxiosError);
       },
   }

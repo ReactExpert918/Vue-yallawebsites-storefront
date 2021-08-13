@@ -6,6 +6,9 @@ import appConfig from "@/app.config";
 import {
   authHeader,
 } from "@/helpers/authservice/auth-header";
+import {handleAxiosError} from "@/helpers/authservice/user.service";
+import {roleService} from "@/helpers/authservice/roles";
+import alertBox from "@/helpers/Alert";
 
 /**
  * Pages component
@@ -20,6 +23,7 @@ export default {
     return {
       backendURL: process.env.VUE_APP_BACKEND_URL,
       selectedAll: false,
+      data: "",
       productsData: [],
       productsDataLength: 1,
       totalRows: 1,
@@ -97,25 +101,16 @@ export default {
         */
        deleteProduct(){
          this.$bvModal.hide("modal-delete-page");
-        // if (!roleService.hasDeletePermission(this.pageIdentity)){
-        //   this.$notify({
-        //     group: 'foo',
-        //     type: 'warn',
-        //     text: "You do no have the permission to perform this action!",
-        //     duration: 5000,
-        //     speed: 1000
-        //   })
-        //   return;
-        // }
-        // axios
-        // .delete(`${this.backendURL}/api/v1/users/${id}` , authHeader())
-        // .then(this.$notify({
-        //     group: 'foo',
-        //     text: "Deleted!",
-        //     duration: 5000,
-        //     speed: 1000
-        //   }))
-        // .catch(handleAxiosError);
+        if (!roleService.hasDeletePermission(this.pageIdentity)){
+          alertBox("You do no have the permission to perform this action!")
+          return;
+        }
+        axios
+        .delete(`${this.backendURL}/api/v1/users/${this.currentProduct.id}` , authHeader())
+        .then(
+            this.data = "",
+            alertBox("Product Deleted Successfully!"))
+        .catch(handleAxiosError);
       },
         uncheckSelectAll(){
          this.selectedAll = false
@@ -243,6 +238,7 @@ export default {
                           </b-dropdown-item>
                           <b-dropdown-item 
                             v-b-modal.modal-delete-page
+                            @click="currentProduct = data.item"
                           >
                             <i class="fas fa-trash-alt text-danger mr-1"></i> 
                             Delete

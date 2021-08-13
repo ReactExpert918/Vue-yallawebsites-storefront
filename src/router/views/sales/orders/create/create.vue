@@ -528,21 +528,23 @@ export default {
               </div>
               <div class="col-sm-3">
                 <h5>Billing Address</h5>
-                <div>
-                  <p class="billing-fullname"> </p>
-                  <p class="billing-street_address"> </p>
-                  <p class="billing-city"> </p>
-                  <p class="billing-postzip"> </p>
-                  <p class="billing-phonenumber"> </p>
-                </div>
+                <p>
+                  {{order.billingAddressCustomerName}}<br>
+                  {{order.billingAddressStreetAddress}}<br>
+                  {{order.billingAddressCity}}<br>
+                  {{order.billingAddressPostCodeZip}}<br>
+                  {{order.billingAddressCountry}}
+                  {{order.billingAddressTelephoneNumber}}
+                </p>
                 <h5>Shipping Address</h5>
-                <div>
-                  <p class="shipping-fullname"> </p>
-                  <p class="shipping-street_address"> </p>
-                  <p class="shipping-city"> </p>
-                  <p class="shipping-postzip"> </p>
-                  <p class="shipping-phonenumber"> </p>
-                </div>
+                <p>
+                  {{order.shippingAddressCustomerName}}<br>
+                  {{order.shippingAddressStreetAddress}}<br>
+                  {{order.shippingAddressCity}}<br>
+                  {{order.shippingAddressPostCodeZip}}<br>
+                  {{order.shippingAddressCountry}}
+                  {{order.shippingAddressTelephoneNumber}}
+                </p>
               </div>
             </div>
             <div class="row card-body">

@@ -130,7 +130,7 @@ export default {
       .then(response => (this.taxClasses = response.data.data))
       .catch(handleAxiosError);
       },
-      deleteCustomerGroup(id){
+      deleteCustomerGroup(id) {
         alert(id);
         this.$bvModal.hide("modal-delete-customer-group");
         if(!roleService.hasDeletePermission(this.pageIdentity)){

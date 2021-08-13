@@ -94,6 +94,7 @@ export default {
      
     },
     createCategory(){
+      this.$bvModal.hide("modal-add-category");
       if (!roleService.hasCreatePermission(this.pageIdentity)){
           alertBox("You do no have the permission to perform this action!")
           return;
@@ -105,6 +106,10 @@ export default {
       axios
       .post(`${this.backendURL}/api/v1/categories` , this.catPayload , authHeader())
       .then(response => {
+          axios
+          .get(`${this.backendURL}/api/v1/categories?tree=true` , authHeader())
+          .then(response => (this.categoriesData = response.data.data))
+          .catch(handleAxiosError);
           this.data = response.data,
           alertBox("Category Created succesfully!")
           this.$refs.vueCreateDropzone.setOption("url" , `${this.backendURL}/api/v1/categories/${response.data.data.id}/upload`);
@@ -132,8 +137,13 @@ export default {
       axios
       .put(`${this.backendURL}/api/v1/categories/${this.currentCategory.id}` , this.currentCategory , authHeader())
       .then(response => {
-        this.data = response.data,
-        alertBox("Category Updated succesfully!")
+          this.data = response.data,
+          axios
+          .get(`${this.backendURL}/api/v1/categories?tree=true` , authHeader())
+          .then(response => (this.currentCategory = {},this.categoriesData = response.data.data))
+          .catch(handleAxiosError),
+          this.currentCategory = {},
+          alertBox("Category Updated succesfully!")
           this.$refs.myVueDropzone.processQueue();
        })
       .catch(handleAxiosError);
@@ -142,6 +152,7 @@ export default {
       this.$refs.myVueDropzone.setOption("url" , `${this.backendURL}/api/v1/categories/${this.currentCategory.id}/upload`);
     },
     deleteCategory(){
+      this.$bvModal.hide("modal-delete-category");
       if (!roleService.hasDeletePermission(this.pageIdentity)){
           alertBox("You do no have the permission to perform this action!")
           return;
@@ -149,6 +160,11 @@ export default {
       axios
       .delete(`${this.backendURL}/api/v1/categories/${this.currentCategory.id}` , authHeader())
       .then(response => (
+        axios
+        .get(`${this.backendURL}/api/v1/categories?tree=true` , authHeader())
+        .then(response => (this.currentCategory = {},this.categoriesData = response.data.data))
+        .catch(handleAxiosError),
+        this.currentCategory = {},
         this.data = response.data,
         alertBox("Category Deleted successfully")
       ))

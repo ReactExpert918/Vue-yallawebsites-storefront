@@ -286,6 +286,7 @@ export default {
          .catch(handleAxiosError);
       },
       deleteAttribute(){
+        this.$bvModal.hide("modal-delete-page");
         if (!roleService.hasDeletePermission(this.pageIdentity)){
           alertBox("You do no have the permission to perform this action!")
           return;
@@ -293,6 +294,12 @@ export default {
         axios
         .delete(`${this.backendURL}/api/v1/products/attributes/${this.currentAttribute.id}` , authHeader())
         .then(response => (
+          axios
+          .get(`${this.backendURL}/api/v1/products/attributes?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
+          .then(response => {
+              this.attributesData = response.data.data,
+              this.attributesDataLength = response.data.pagination.total;
+          }),
           this.data = response.data,
           alertBox("Attribute Deleted Successfully!")
         ))
@@ -344,7 +351,7 @@ export default {
         .catch(handleAxiosError);
       },
       addAttributeGroup(){
-        this.$bvModal.hide("modal-attribute-groups");
+        
         if (!roleService.hasCreatePermission(this.pageIdentity)){
           alertBox("You do no have the permission to perform this action!")
           return;
