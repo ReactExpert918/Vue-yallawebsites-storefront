@@ -319,7 +319,7 @@ export default {
         })
         this.variations.forEach((v) => {
           var varReq = {
-            labels: v.options,
+            labels: v.labels,
             quantity: parseInt(v.subitem.qty),
             price: parseFloat(v.subitem.price),
             cost_price: parseFloat(v.subitem.costprice),
@@ -361,25 +361,28 @@ export default {
         }
         this.newProduct.bundle_ids.push(id);
       },
-      addTag (searchQuery, id) {
+      addTag (searchQuery, id , varName) {
           let optionValue = {
-            name: searchQuery
+            name: searchQuery,
+            varspec: searchQuery + "_" + varName,
           }
           this.variationsData[id].options.push(optionValue)
+          this.variationsData[id].labels[optionValue] = this.variationsData[id].name;
           this.id = []
           this.tempArr = []
           this.variations = []
           this.variationsData.forEach( i => {
-            i.options.forEach( i => this.id.push(i.name) )
+            i.options.forEach( i => this.id.push(i.varspec) )
             this.tempArr.push(this.id)
             this.id = []
           })
         this.tempArr2 = this.cartesianProduct(this.tempArr)
-        this.tempArr2.forEach( i => {
+        this.tempArr2.forEach( opts => {
           let tag = {
             id: this.variations.length+1,
             name: this.variationsData[id].name,
             options: [],
+            labels: [],
             subitem: { 
                     id: this.variations.length+1,
                     price: 0.0,
@@ -391,9 +394,18 @@ export default {
                     specs: [], 
             },
             custom_specs: copyArrayOfObjects(this.custom_specs), // this is a temporary one
-          }   
-          tag.options = i      
-          this.variations.push(tag)  
+          }
+          
+          var options = [];
+          opts.forEach(opt =>{
+            var obj = {};
+            var data = opt.split("_");
+            options.push(data[0]);
+            obj[data[1]] = data[0];
+            tag.labels.push(obj);
+          })
+          tag.options = options;      
+          this.variations.push(tag);
         })
 
       },
@@ -406,6 +418,7 @@ export default {
         let variation = {
           name: '',
           options: [],
+          labels: {},
           required: false
         }
         this.variationsData.push(variation)
@@ -670,7 +683,7 @@ export default {
                     :multiple="true" 
                     :taggable="true" 
                     :id="index"
-                    @tag="addTag"
+                    @tag="(sq , id) => addTag(sq , id , item.name)"
                     @remove="deleteOption"
                     v-model="item.options" 
                     label="name"  
