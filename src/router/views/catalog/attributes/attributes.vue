@@ -247,6 +247,7 @@ export default {
           alertBox("You do no have the permission to perform this action!")
           return;
         }
+        window.console.log(this.newAttr);
           this.newAttr.sort_order = parseInt(this.newAttr.sort_order);
           axios
          .post(`${this.backendURL}/api/v1/products/attributes` , this.newAttr , authHeader())

@@ -8,6 +8,7 @@ import {
 } from "@/helpers/authservice/auth-header";
 import {handleAxiosError} from "@/helpers/authservice/user.service";
 import {roleService} from "@/helpers/authservice/roles";
+import alertBox from "@/helpers/Alert";
 
 import axios from "axios";
 import appConfig from "@/app.config";
@@ -233,13 +234,7 @@ export default {
       },
       createOrder(){
         if (!roleService.hasCreatePermission(this.pageIdentity)){
-          this.$notify({
-            group: 'foo',
-            type: 'warn',
-            text: 'You do no have the permission to perform this action!',
-            duration: 5000,
-            speed: 1000
-          });
+          alertBox('You do no have the permission to perform this action!')
           return;
         }
         var billingAddress = {}
@@ -265,12 +260,9 @@ export default {
         axios
         .post(`${this.backendURL}/api/v1/orders` , payload , authHeader())
         .then(response => {
-            this.$notify({
-              group: 'foo',
-              text: `${response.data.data.id} Order Created!`,
-              duration: 5000,
-              speed: 1000
-            });
+          this.$router.push('/sales/orders'),   
+          this.data = response.data,
+            alertBox("Order Created Successfully!")
             // this.purchase(response.data.data.id);
          })
         .catch(handleAxiosError);
@@ -308,14 +300,7 @@ export default {
           this.stripe.createToken(this.card)
           .then(result => {
             if(result.error){
-              this.$notify({
-                group: 'foo',
-                type: 'warn',
-                text: "Failed to create stripe card token because: " + result.error.message,
-                duration: 5000,
-                speed: 1000
-              });
-              // alert("Failed to create stripe card token because: " + result.error.message);
+              alertBox("Failed to create stripe card token because: " + result.error.message);
               return;
             }
 
@@ -330,13 +315,9 @@ export default {
             axios
             .post(`${this.backendURL}/api/v1/payments/${this.currentPayment.id}/pay` , payload , authHeader())
             .then(response => (
-              this.$notify({
-                group: 'foo',
-                type: 'warn',
-                text: `${response.data.data.id} Got Paid!`,
-                duration: 5000,
-                speed: 1000
-              })))
+              this.data = response.data,
+              alertBox("Got paid Successfully")
+              ))
             .catch(handleAxiosError);
           })
       },
@@ -354,14 +335,8 @@ export default {
         axios
             .post(`${this.backendURL}/api/v1/payments/${this.currentPayment.id}/pay` , payload , authHeader())
             .then(response => (
-              this.$notify({
-                group: 'foo',
-                type: 'warn',
-                text: `${response.data.data.id} Got Paid!`,
-                duration: 5000,
-                speed: 1000
-              })
-              // alert(`${response.data.data.id} Got Paid!`)
+              this.data = response.data,
+              alertBox(`Got Paid Successfully!`)
               ))
             .catch(handleAxiosError);
       },
