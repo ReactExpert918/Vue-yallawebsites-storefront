@@ -5,8 +5,8 @@ import axios from "axios";
 import {
   authHeader,
 } from "@/helpers/authservice/auth-header";
-import {handleAxiosError} from "@/helpers/authservice/user.service";
 import {roleService} from "@/helpers/authservice/roles";
+import {handleAxiosError} from "@/helpers/authservice/user.service";
 import alertBox from "@/helpers/Alert";
 
 import appConfig from "@/app.config";
@@ -244,7 +244,7 @@ export default {
       },
       addAttribute(){
         if (!roleService.hasCreatePermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!")
+          alertBox("You do no have the permission to perform this action!", false)
           return;
         }
         window.console.log(this.newAttr);
@@ -253,14 +253,14 @@ export default {
          .post(`${this.backendURL}/api/v1/products/attributes` , this.newAttr , authHeader())
          .then(response => {
            this.data = response.data,
-            alertBox("Attribute Created Successfully!")
+            alertBox("Attribute Created Successfully!", true)
           this.newAttr = {options: []};
          })
          .catch(handleAxiosError);
       },
       updateAttribute(){
         if (!roleService.hasEditPermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!")
+          alertBox("You do no have the permission to perform this action!", false)
           return;
         }
         this.newAttr = {
@@ -281,7 +281,7 @@ export default {
          .put(`${this.backendURL}/api/v1/products/attributes/${this.currentAttribute.id}` , this.newAttr , authHeader())
          .then(response => {
             this.data = response.data,
-            alertBox("Attribute Updated Successfully!")
+            alertBox("Attribute Updated Successfully!", true)
             this.newAttr = {options: []};
          })
          .catch(handleAxiosError);
@@ -289,7 +289,7 @@ export default {
       deleteAttribute(){
         this.$bvModal.hide("modal-delete-page");
         if (!roleService.hasDeletePermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!")
+          alertBox("You do no have the permission to perform this action!", false)
           return;
         }
         axios
@@ -302,13 +302,13 @@ export default {
               this.attributesDataLength = response.data.pagination.total;
           }),
           this.data = response.data,
-          alertBox("Attribute Deleted Successfully!")
+          alertBox("Attribute Deleted Successfully!", true)
         ))
         .catch(handleAxiosError);
       },
       addOption(){
         if (!roleService.hasCreatePermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!")
+          alertBox("You do no have the permission to perform this action!", false)
           return;
         }
         axios
@@ -339,14 +339,14 @@ export default {
       },
       deleteProductOption(opt){
         if (!roleService.hasDeletePermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!")
+          alertBox("You do no have the permission to perform this action!", false)
           return;
         }
          axios
         .delete(`${this.backendURL}/api/v1/products/attributes/options/${opt.id}` , authHeader())
         .then(response => {
           this.data = response.data,
-          alertBox("Option Deleted Successfully!")
+          alertBox("Option Deleted Successfully!", true)
           this.handleProductOptionDelete(opt.name , this.currentAttribute.options)
         })
         .catch(handleAxiosError);
@@ -354,7 +354,7 @@ export default {
       addAttributeGroup(){
         
         if (!roleService.hasCreatePermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!")
+          alertBox("You do no have the permission to perform this action!", false)
           return;
         }
         axios
@@ -364,7 +364,7 @@ export default {
           axios
           .get(`${this.backendURL}/api/v1/products/attributes/groups` , authHeader())
           .then(response => (this.attributeGroups = response.data.data))
-          alertBox("Attribute Group Created Successfully!")
+          alertBox("Attribute Group Created Successfully!", true)
           this.newGroup = {};
         })
         .catch(handleAxiosError);
@@ -372,14 +372,14 @@ export default {
       deleteAttributeGroup(group){
         this.$bvModal.hide("modal-attribute-groups");
         if (!roleService.hasDeletePermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!")
+          alertBox("You do no have the permission to perform this action!", false)
           return;
         }
         axios
         .delete(`${this.backendURL}/api/v1/products/attributes/groups/${group.id}` , authHeader())
         .then(response => {
           this.data = response.data,
-          alertBox("Attribute Group Deleted Successfully!"),
+          alertBox("Attribute Group Deleted Successfully!", true),
           axios
           .get(`${this.backendURL}/api/v1/products/attributes/groups` , authHeader())
           .then(response => (this.attributeGroups = response.data.data))

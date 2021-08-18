@@ -6,8 +6,8 @@ import appConfig from "@/app.config";
 import {
   authHeader,
 } from "@/helpers/authservice/auth-header";
-import {handleAxiosError} from "@/helpers/authservice/user.service";
 import {roleService} from "@/helpers/authservice/roles";
+import {handleAxiosError} from "@/helpers/authservice/user.service";
 import alertBox from "@/helpers/Alert";
 
 /**
@@ -131,10 +131,9 @@ export default {
       .catch(handleAxiosError);
       },
       deleteCustomerGroup(id) {
-        alert(id);
         this.$bvModal.hide("modal-delete-customer-group");
         if(!roleService.hasDeletePermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!")
+          alertBox("You do no have the permission to perform this action!", false)
           return;
        }
         axios
@@ -145,13 +144,13 @@ export default {
           .then(response => (this.customerGroupsData = response.data.data,
                             this.customerGroupsDataLength = response.data.pagination.total))
           .catch(handleAxiosError),
-          alertBox("Customer Group Deleted Successfully!")
+          alertBox("Customer Group Deleted Successfully!", true)
           )
         .catch(handleAxiosError);
       },
       createCustomerGroup(e){
         if(!roleService.hasCreatePermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!")
+          alertBox("You do no have the permission to perform this action!", false)
           return;
        }
         e.preventDefault();
@@ -165,13 +164,13 @@ export default {
                             this.customerGroupsDataLength = response.data.pagination.total))
           .catch(handleAxiosError),
           this.data = response.data,
-          alertBox("Customer Group Created Successfully!")
+          alertBox("Customer Group Created Successfully!", true)
           ))
         .catch(handleAxiosError);
       },
       updateCustomerGroup(e){
         if(!roleService.hasEditPermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!")
+          alertBox("You do no have the permission to perform this action!", false)
           return;
        }
         e.preventDefault();
@@ -185,7 +184,7 @@ export default {
                             this.customerGroupsDataLength = response.data.pagination.total))
           .catch(handleAxiosError),
           this.data = response.data,
-          alertBox("Customer Group Updated Successfully!")))
+          alertBox("Customer Group Updated Successfully!", true)))
         .catch(handleAxiosError);
       },
       handlePageChange(value) {

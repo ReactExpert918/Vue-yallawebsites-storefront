@@ -9,9 +9,9 @@ import appConfig from "@/app.config";
 import {
   authHeader,
 } from "@/helpers/authservice/auth-header";
-import {handleAxiosError} from "@/helpers/authservice/user.service";
 import {roleService} from "@/helpers/authservice/roles";
 import alertBox from "@/helpers/Alert";
+import {handleAxiosError} from "@/helpers/authservice/user.service";
 
 /**
  * Pages component
@@ -93,7 +93,7 @@ export default {
   methods:{
     editPage(){
       if (!roleService.hasEditPermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!")
+          alertBox("You do no have the permission to perform this action!", false)
           return;
       }
       this.pageData.meta_keywords = this.pageData.meta_keywords_str.split(" ");
@@ -106,7 +106,7 @@ export default {
       .then(response => (
         this.$router.push('/content/pages'),
         this.data = response,
-        alertBox("Page Updated succesfully")
+        alertBox("Page Updated succesfully", true)
         ))
       .catch(handleAxiosError);
     }

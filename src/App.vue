@@ -12,6 +12,7 @@ export default {
       return title ? `${title} | ${appConfig.title}` : appConfig.title;
     }
   },
+  
   mounted() {},
   watch: {
     /**
@@ -32,7 +33,8 @@ export default {
 <template>
   <div id="app">
     <div id="alert"></div>
-    <notifications group="foo" />
+    <div id="warnalert"></div>
+    <notifications />
     <RouterView />
   </div>
 </template>
@@ -55,14 +57,14 @@ export default {
     width: 320px;
     height: 80px;
     padding: 10px;
+    font-family: "Arial";
     font-size: 15px;
     font-weight: bold;
     color: white;
     border-radius: 20px;
-    background-color: rgb(32, 226, 106);
+    /* background-color: rgb(32, 226, 106); */
     z-index: 1005;
   }
-
   @keyframes example {
     0%   {opacity: 0; right: -100%; top:0px;}
     25%  {opacity: 1; right: 0; top:0px;}

@@ -2,6 +2,7 @@
 import { authHeader } from './auth-header';
 import { createJWTToken } from '../common';
 import { parseAndVerifyJWTToken } from '../common';
+import alertBox from '../Alert';
 import axios from "axios";
 
 export const userService = {
@@ -98,7 +99,7 @@ export function handleAxiosError(error) {
             location.reload(true);
         }
         const errorMsg = (data && data.message) || error.response.statusText;
-
+        alertBox(errorMsg);
         return Promise.reject(errorMsg);
     }
 }

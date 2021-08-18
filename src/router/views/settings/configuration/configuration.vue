@@ -353,7 +353,7 @@ export default {
     },
     saveGeneralConfiguration(){
       if (!roleService.hasEditPermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!")
+          alertBox("You do no have the permission to perform this action!", false)
           return;
       }
       this.configData = {
@@ -388,13 +388,13 @@ export default {
       .then(response => {
         this.configData = {};
         this.data = response.data,
-          alertBox("Updated General Configuration!")
+          alertBox("Updated General Configuration!", true)
        })
        .catch(handleAxiosError);
     },
     saveCatalogConfiguration(){
       if (!roleService.hasEditPermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!")
+          alertBox("You do no have the permission to perform this action!", false)
           return;
       }
        this.configData = {
@@ -426,13 +426,13 @@ export default {
       .then(response => {
         this.configData = {};
         this.data = response.data,
-        alertBox("Updated Catalog Configuration!")
+        alertBox("Updated Catalog Configuration!", true)
         })
         .catch(handleAxiosError);
     },
     saveSalesConfiguration(){
       if (!roleService.hasEditPermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!")
+          alertBox("You do no have the permission to perform this action!", false)
           return;
       }
       this.configData = {
@@ -474,7 +474,7 @@ export default {
       .then(response => {
           this.configData = {};
           this.data = response.data,
-          alertBox("Updated Sales Configuration!")
+          alertBox("Updated Sales Configuration!", true)
           this.uploadTableRateFile();
 
         })
@@ -483,7 +483,7 @@ export default {
     },
     uploadTableRateFile(){
       if (!roleService.hasEditPermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!")
+          alertBox("You do no have the permission to perform this action!", false)
           return;
       }
        if (this.tableRateFile != ''){
@@ -495,14 +495,14 @@ export default {
             .post(`${this.backendURL}/api/v1/stores/sales/upload` , formData , header)
             .then(response => {
               this.data = response.data,
-              alertBox("Upload Sales Configuration Table Rate File!")
+              alertBox("Upload Sales Configuration Table Rate File!", true)
               })
               .catch(handleAxiosError);
        }
     },
     saveCustomerConfiguration(){
       if (!roleService.hasEditPermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!")
+          alertBox("You do no have the permission to perform this action!", false)
           return;
       }
       this.configData = {
@@ -517,13 +517,13 @@ export default {
       .then(response => {
         this.configData = {};
         this.data = response.data,
-        alertBox("Updated Customer Configuration!")
+        alertBox("Updated Customer Configuration!", true)
         })
         .catch(handleAxiosError);
     },
     saveAdvancedConfiguration(){
       if (!roleService.hasEditPermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!")
+          alertBox("You do no have the permission to perform this action!", false)
           return;
       }
       this.configData = {
@@ -540,7 +540,7 @@ export default {
       .then(response => {
         this.configData = {};
         this.data = response.data,
-        alertBox("Updated Advanced Configuration!")
+        alertBox("Updated Advanced Configuration!", true)
        })
        .catch(handleAxiosError);
     },

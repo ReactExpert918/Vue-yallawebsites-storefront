@@ -171,7 +171,7 @@ export default {
       deleteUser(id){
         this.$bvModal.hide("modal-delete-user")
         if (!roleService.hasDeletePermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!")
+          alertBox("You do no have the permission to perform this action!", false)
           return;
         }
         axios
@@ -181,14 +181,14 @@ export default {
         .get(`${this.backendURL}/api/v1/users?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
         .then(response => (this.usersData = response.data.data,
                            this.usersDataLength = response.data.pagination.total)),
-          alertBox("User deleted successfully!")
+          alertBox("User deleted successfully!", true)
           )
         .catch(handleAxiosError);
       },
       createUser(e){
         this.$bvModal.hide("modal-scrollable-add-user")
         if (!roleService.hasCreatePermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!")
+          alertBox("You do no have the permission to perform this action!", false)
           return;
         }
         e.preventDefault();
@@ -200,7 +200,7 @@ export default {
         .get(`${this.backendURL}/api/v1/users?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
         .then(response => (this.usersData = response.data.data,
                            this.usersDataLength = response.data.pagination.total)),
-          alertBox("User Created successfully!")
+          alertBox("User Created successfully!", true)
             this.$refs.vueCreateDropzone.setOption("url" , `${this.backendURL}/api/v1/users/${response.data.data.id}/upload`);
             this.$refs.vueCreateDropzone.processQueue();
          })
@@ -209,7 +209,7 @@ export default {
       updateUser(e){
         this.$bvModal.hide("modal-scrollable-edit-user")
         if (!roleService.hasEditPermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!")
+          alertBox("You do no have the permission to perform this action!", false)
           return;
         }
         e.preventDefault();
@@ -222,7 +222,7 @@ export default {
         .then(response => (this.usersData = response.data.data,
                            this.usersDataLength = response.data.pagination.total)),
           this.data = response.data,
-          alertBox("User Updated Successfully!")
+          alertBox("User Updated Successfully!", true)
           this.$refs.myVueDropzone.processQueue();
          })
         .catch(handleAxiosError);

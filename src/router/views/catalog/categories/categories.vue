@@ -7,13 +7,12 @@ import PageHeader from "@/components/page-header";
 import draggable from 'vuedraggable'
 import axios from "axios";
 import vue2Dropzone from "vue2-dropzone";
+import {handleAxiosError} from "@/helpers/authservice/user.service";
 import {
   authHeader,
 } from "@/helpers/authservice/auth-header";
-import {handleAxiosError} from "@/helpers/authservice/user.service";
 import {roleService} from "@/helpers/authservice/roles";
 import alertBox from "@/helpers/Alert";
-
 
 /**
  * Catalog component
@@ -96,7 +95,7 @@ export default {
     createCategory(){
       this.$bvModal.hide("modal-add-category");
       if (!roleService.hasCreatePermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!")
+          alertBox("You do no have the permission to perform this action!", false)
           return;
       }
       this.catPayload.meta_keywords = this.catPayload.meta_keywords_str.split(" ");
@@ -111,7 +110,7 @@ export default {
           .then(response => (this.categoriesData = response.data.data))
           .catch(handleAxiosError);
           this.data = response.data,
-          alertBox("Category Created succesfully!")
+          alertBox("Category Created succesfully!", true)
           this.$refs.vueCreateDropzone.setOption("url" , `${this.backendURL}/api/v1/categories/${response.data.data.id}/upload`);
           this.$refs.vueCreateDropzone.processQueue();
        })
@@ -119,7 +118,7 @@ export default {
     },
     updateCategory(){
       if (!roleService.hasEditPermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!")
+          alertBox("You do no have the permission to perform this action!", false)
           return;
       }
       this.currentCategory.meta_keywords = this.currentCategory.meta_keywords_str.split(" ");
@@ -143,7 +142,7 @@ export default {
           .then(response => (this.currentCategory = {},this.categoriesData = response.data.data))
           .catch(handleAxiosError),
           this.currentCategory = {},
-          alertBox("Category Updated succesfully!")
+          alertBox("Category Updated succesfully!", true)
           this.$refs.myVueDropzone.processQueue();
        })
       .catch(handleAxiosError);
@@ -154,7 +153,7 @@ export default {
     deleteCategory(){
       this.$bvModal.hide("modal-delete-category");
       if (!roleService.hasDeletePermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!")
+          alertBox("You do no have the permission to perform this action!", false)
           return;
       }
       axios
@@ -166,7 +165,7 @@ export default {
         .catch(handleAxiosError),
         this.currentCategory = {},
         this.data = response.data,
-        alertBox("Category Deleted successfully")
+        alertBox("Category Deleted successfully", true)
       ))
       .catch(handleAxiosError);
     },

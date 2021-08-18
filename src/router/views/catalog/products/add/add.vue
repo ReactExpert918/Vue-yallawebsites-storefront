@@ -276,7 +276,7 @@ export default {
       },
       createProduct(){
         if (!roleService.hasCreatePermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!")
+          alertBox("You do no have the permission to perform this action!", false)
           return;
         }
         this.newProduct.meta_keywords = this.newProduct.meta_keywords_str.split(" ");
@@ -292,21 +292,7 @@ export default {
         this.newProduct.quantity = parseInt(this.newProduct.quantity);
         
         this.newProduct.attribute_group_id = this.currentAttrGroup.id;
-        
-        // window.console.log(this.currentAttrGroup.attributes.length);
-        // for(var j = 0; j < this.currentAttrGroup.attributes.length; j++){
-        //     var attr = this.currentAttrGroup.attributes[j];
-        //     if (attr){
-        //       if (attr.option_id == ""){
-        //         continue;
-        //       }
-        //       this.newProduct.attributes.push({
-        //       id: attr.id,
-        //       value: attr.value,
-        //       option_id: attr.option_id,
-        //     });
-        //   }
-        // }
+
         this.variationsData.forEach((v) => {
           var spec = {
             name: v.name,
@@ -345,7 +331,7 @@ export default {
         .post(`${this.backendURL}/api/v1/products` , this.newProduct , authHeader())
         .then(response => {
           this.$router.push('/catalog/products'), 
-          alertBox(`Product Created Successfully!`);
+          alertBox(`Product Created Successfully!`, true);
           this.$refs.myVueDropzone.setOption("url" , `${this.backendURL}/api/v1/products/${response.data.data.id}/upload`);
           this.$refs.myVueDropzone.processQueue();
          })

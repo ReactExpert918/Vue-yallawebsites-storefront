@@ -99,7 +99,7 @@ export default {
   methods:{
     saveDesignConfiguration(){
       if (!roleService.hasEditPermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!")
+          alertBox("You do no have the permission to perform this action!", false)
           return;
       }
       var payload = {
@@ -116,7 +116,7 @@ export default {
     .post(`${this.backendURL}/api/v1/design/configurations` ,payload, authHeader())
     .then(response => {
       this.data = response.data,
-      alertBox("Design saved Successfully!")
+      alertBox("Design saved Successfully!", true)
       var confID = response.data.data.id;
       this.$refs.siteLogoDropzone.setOption("url" , `${this.backendURL}/api/v1/design/configurations/${confID}/upload`);
       this.$refs.faviconDropzone.setOption("url" , `${this.backendURL}/api/v1/design/configurations/${confID}/upload`);
@@ -137,7 +137,7 @@ export default {
           .post(`${this.backendURL}/api/v1/design/configurations/${confID}/upload` , formData , header)
           .then(response => {
             this.data = response.data,
-            alertBox("Uploaded Design Configuration Font Files!")
+            alertBox("Uploaded Design Configuration Font Files!", true)
             })
           .catch(handleAxiosError);
       }

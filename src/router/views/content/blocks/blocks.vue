@@ -6,8 +6,8 @@ import appConfig from "@/app.config";
 import {
   authHeader,
 } from "@/helpers/authservice/auth-header";
-import {handleAxiosError} from "@/helpers/authservice/user.service";
 import {roleService} from "@/helpers/authservice/roles";
+import {handleAxiosError} from "@/helpers/authservice/user.service";
 import convert from "@/helpers/convertObject";
 import alertBox from "@/helpers/Alert";
 
@@ -123,7 +123,7 @@ export default {
       deleteBlock(){
         this.$bvModal.hide("modal-delete-page");
         if (!roleService.hasDeletePermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!")
+          alertBox("You do no have the permission to perform this action!", false)
           return;
         }
         axios
@@ -134,7 +134,7 @@ export default {
           .then(response => (this.blockData = convert(response.data.data),
                             this.blockDataLength = response.data.pagination.total)),
           this.data = response.data,
-          alertBox("Block Deleted succesfully")
+          alertBox("Block Deleted succesfully", true)
           ))
         .catch(handleAxiosError);
       },

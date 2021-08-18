@@ -7,8 +7,8 @@ import appConfig from "@/app.config";
 import {
   authHeader,
 } from "@/helpers/authservice/auth-header";
-import {handleAxiosError} from "@/helpers/authservice/user.service";
 import {roleService} from "@/helpers/authservice/roles";
+import {handleAxiosError} from "@/helpers/authservice/user.service";
 import alertBox from "@/helpers/Alert";
 
 /**
@@ -58,7 +58,7 @@ export default {
   methods:{
     createCustomer(){
       if(!roleService.hasCreatePermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!")
+          alertBox("You do no have the permission to perform this action!", false)
           return;
       }
 
@@ -76,7 +76,7 @@ export default {
       .then(response => (
         this.data = response.data,
         this.$router.push('/customers'),  
-          alertBox("Customer Created Successfully!")
+          alertBox("Customer Created Successfully!", true)
           ))
       .catch(handleAxiosError);
     },

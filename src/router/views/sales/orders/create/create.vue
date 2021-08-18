@@ -6,10 +6,9 @@ import { viewData } from "./create-data";
 import {
   authHeader,
 } from "@/helpers/authservice/auth-header";
-import {handleAxiosError} from "@/helpers/authservice/user.service";
 import {roleService} from "@/helpers/authservice/roles";
 import alertBox from "@/helpers/Alert";
-
+import {handleAxiosError} from "@/helpers/authservice/user.service";
 import axios from "axios";
 import appConfig from "@/app.config";
 
@@ -234,7 +233,7 @@ export default {
       },
       createOrder(){
         if (!roleService.hasCreatePermission(this.pageIdentity)){
-          alertBox('You do no have the permission to perform this action!')
+          alertBox('You do no have the permission to perform this action!', false)
           return;
         }
         var billingAddress = {}
@@ -262,7 +261,7 @@ export default {
         .then(response => {
           this.$router.push('/sales/orders'),   
           this.data = response.data,
-            alertBox("Order Created Successfully!")
+            alertBox("Order Created Successfully!", true)
             // this.purchase(response.data.data.id);
          })
         .catch(handleAxiosError);
@@ -300,7 +299,7 @@ export default {
           this.stripe.createToken(this.card)
           .then(result => {
             if(result.error){
-              alertBox("Failed to create stripe card token because: " + result.error.message);
+              alertBox("Failed to create stripe card token because: " + result.error.message, false);
               return;
             }
 
@@ -316,7 +315,7 @@ export default {
             .post(`${this.backendURL}/api/v1/payments/${this.currentPayment.id}/pay` , payload , authHeader())
             .then(response => (
               this.data = response.data,
-              alertBox("Got paid Successfully")
+              alertBox("Got paid Successfully", true)
               ))
             .catch(handleAxiosError);
           })
@@ -336,7 +335,7 @@ export default {
             .post(`${this.backendURL}/api/v1/payments/${this.currentPayment.id}/pay` , payload , authHeader())
             .then(response => (
               this.data = response.data,
-              alertBox(`Got Paid Successfully!`)
+              alertBox(`Got Paid Successfully!`, true)
               ))
             .catch(handleAxiosError);
       },

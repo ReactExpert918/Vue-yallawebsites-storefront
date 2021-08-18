@@ -6,8 +6,8 @@ import appConfig from "@/app.config";
 import {
   authHeader,
 } from "@/helpers/authservice/auth-header";
-import {handleAxiosError} from "@/helpers/authservice/user.service";
 import {roleService} from "@/helpers/authservice/roles";
+import {handleAxiosError} from "@/helpers/authservice/user.service";
 import alertBox from "@/helpers/Alert";
 
 /**
@@ -99,17 +99,17 @@ export default {
       /**
         * Search the table data with search input
         */
-       deleteProduct(){
-         this.$bvModal.hide("modal-delete-page");
+       deleteProduct() {
+        this.$bvModal.hide("modal-delete-page");
         if (!roleService.hasDeletePermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!")
+          alertBox("You do no have the permission to perform this action!", false)
           return;
         }
         axios
         .delete(`${this.backendURL}/api/v1/users/${this.currentProduct.id}` , authHeader())
         .then(
             this.data = "",
-            alertBox("Product Deleted Successfully!"))
+            alertBox("Product Deleted Successfully!", true))
         .catch(handleAxiosError);
       },
         uncheckSelectAll(){

@@ -12,8 +12,8 @@ import appConfig from "@/app.config";
 import {
   authHeader,
 } from "@/helpers/authservice/auth-header";
-import {handleAxiosError} from "@/helpers/authservice/user.service";
 import {roleService} from "@/helpers/authservice/roles";
+import {handleAxiosError} from "@/helpers/authservice/user.service";
 import {copyArrayOfObjects} from "@/helpers/common";
 import alertBox from "@/helpers/Alert";
 
@@ -357,7 +357,7 @@ export default {
       },
       updateProduct(){
         if (!roleService.hasEditPermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!")
+          alertBox("You do no have the permission to perform this action!", false)
           return;
         }
         this.productData.meta_keywords = this.productData.meta_keywords_str.split(" ");
@@ -453,7 +453,7 @@ export default {
         .then(response => {
           this.$router.push('/catalog/products'),
           this.data = response.data;
-          alertBox("Product Updated successfully!")
+          alertBox("Product Updated successfully!", true)
           this.$refs.myVueDropzone.processQueue();
         })
         .catch(handleAxiosError);
@@ -461,7 +461,7 @@ export default {
 
       deleteProduct(){
         if (!roleService.hasDeletePermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!")
+          alertBox("You do no have the permission to perform this action!", false)
           return;
         }
         axios
@@ -470,7 +470,7 @@ export default {
           response => (
             this.$router.push('/catalog/products'),
             this.data = response.data,
-            alertBox("Product Deleted successfully!")))
+            alertBox("Product Deleted successfully!", true)))
         .catch(handleAxiosError);
       },
 

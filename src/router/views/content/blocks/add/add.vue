@@ -9,8 +9,8 @@ import appConfig from "@/app.config";
 import {
   authHeader,
 } from "@/helpers/authservice/auth-header";
-import {handleAxiosError} from "@/helpers/authservice/user.service";
 import {roleService} from "@/helpers/authservice/roles";
+import {handleAxiosError} from "@/helpers/authservice/user.service";
 import alertBox from "@/helpers/Alert";
 
 /**
@@ -74,7 +74,7 @@ export default {
   methods:{
     addBlock(){
       if (!roleService.hasCreatePermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!")
+          alertBox("You do no have the permission to perform this action!", false)
           return;
       }
       axios
@@ -82,7 +82,7 @@ export default {
       .then(response => (
         this.$router.push('/content/blocks'),
         this.data = response.data,
-        alertBox("Blocks Created successfully")
+        alertBox("Blocks Created successfully", true) 
       ))
       .catch(handleAxiosError);
     }

@@ -109,7 +109,7 @@ export default {
       verifyDomain(){
         this.$bvModal.hide("modal-scrollable-verify-domain")
         if (!roleService.hasEditPermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!")
+          alertBox("You do no have the permission to perform this action!", false)
           return;
         }
         axios
@@ -127,9 +127,9 @@ export default {
               duration: 5000,
               speed: 1000
             })
-            alertBox("Domain is verified!")
+            alertBox("Domain is verified!", true)
           }else{
-            alertBox("Domain is not verified!")
+            alertBox("Domain is not verified!", false)
           }
         })
         .catch(handleAxiosError);
@@ -137,7 +137,7 @@ export default {
       addDomain(){
         this.$bvModal.hide("modal-scrollable-add-domain")
         if (!roleService.hasCreatePermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!")
+          alertBox("You do no have the permission to perform this action!", false)
           return;
         }
          axios
@@ -148,14 +148,14 @@ export default {
           .then(response => (this.domainsData = response.data.data,
                             this.domainsDataLength = response.data.pagination.total)),
           this.data = response.data,
-          alertBox("Domain created successfully!")
+          alertBox("Domain created successfully!", true)
           ))
         .catch(handleAxiosError);
       },
       deleteDomain(){
         this.$bvModal.hide("modal-scrollable-delete-domain")
         if (!roleService.hasDeletePermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!")
+          alertBox("You do no have the permission to perform this action!", false)
           return;
       }
         axios
@@ -166,7 +166,7 @@ export default {
         .then(response => (this.domainsData = response.data.data,
                            this.domainsDataLength = response.data.pagination.total)),
           this.data = response.data,
-          alertBox("Domain deleted successfully!")))
+          alertBox("Domain deleted successfully!", true)))
         .catch(handleAxiosError);
       },
       handlePageChange(value) {

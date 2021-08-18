@@ -9,9 +9,11 @@ import appConfig from "@/app.config";
 import {
   authHeader,
 } from "@/helpers/authservice/auth-header";
-import {handleAxiosError} from "@/helpers/authservice/user.service";
+// import {warnBox("Something Went Wrong!")} from "@/helpers/authservice/user.service";
 import {roleService} from "@/helpers/authservice/roles";
+import {handleAxiosError} from "@/helpers/authservice/user.service";
 import alertBox from "@/helpers/Alert";
+// import warnBox from "@/helpers/warn";
 
 /**
  * Pages component
@@ -87,7 +89,7 @@ export default {
   methods:{
     addPage(){
       if (!roleService.hasCreatePermission(this.pageIdentity)){
-        alertBox("You do no have the permission to perform this action!")
+        alertBox("You do no have the permission to perform this action!", false)
         return;
       }
       this.pageData.meta_keywords = this.pageData.meta_keywords_str.split(" ");
@@ -99,7 +101,7 @@ export default {
       .then(response => (
         this.$router.push('/content/pages'),   
         this.data = response.data.data.id,
-        alertBox(`Page Created succesfully!`) 
+        alertBox(`Page Created succesfully!`, true) 
       ))
       .catch(handleAxiosError);
     }
