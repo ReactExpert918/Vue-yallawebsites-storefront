@@ -23,6 +23,7 @@ import i18n from './i18n'
 import { configureFakeBackend } from './helpers/fake-backend';
 
 import tinymce from 'vue-tinymce-editor'
+Vue.use(Vuelidate)
 Vue.component('tinymce', tinymce)
 
 

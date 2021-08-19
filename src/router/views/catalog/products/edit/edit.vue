@@ -160,6 +160,14 @@ export default {
     };
   },
   computed: {
+    isdisable() {
+      if(this.productData.name == "" || this.productData.short_description == "" || this.productData.long_description == "" || this.productData.sku == "" || this.productData.ean == "" || this.productData.price <= 0 
+      || this.productData.cost_price <= 0 || this.productData.sale_price <= 0 || this.productData.quantity == "" || this.productData.visibility == "" || this.productData.layout_id == "") {
+        return true;
+      } else {
+        return false;
+      }
+    },
       rows() {
           return this.allProductsDataLength;
       },
@@ -669,19 +677,19 @@ export default {
               </div>
               <div class="col-4">
                 <label class="mt-3">Product Price</label>
-                <b-form-input for="text" v-model="productData.price"></b-form-input>
+                <b-form-input for="text" type="number" v-model="productData.price"></b-form-input>
               </div>
               <div class="col-4">
                 <label class="mt-3">Product Cost Price</label>
-                <b-form-input for="text" v-model="productData.cost_price"></b-form-input>
+                <b-form-input for="text" type="number" v-model="productData.cost_price"></b-form-input>
               </div>
               <div class="col-4">
                 <label class="mt-3">Product Sale Price</label>
-                <b-form-input for="text" v-model="productData.sale_price"></b-form-input>
+                <b-form-input for="text" type="number" v-model="productData.sale_price"></b-form-input>
               </div>
               <div class="col-4">
                 <label class="mt-3">Qty</label>
-                <b-form-input for="text" v-model="productData.quantity"></b-form-input>
+                <b-form-input for="text" type="number" v-model="productData.quantity"></b-form-input>
               </div>
               <div class="col-4">
                 <label class="mt-3">SKU</label>
@@ -849,11 +857,11 @@ export default {
                             <div class="col-8 row">
                               <div class="col-4">
                                 <label class="mt-3">Price</label>
-                                <b-form-input for="text" v-model="variation.subitem.price"></b-form-input>
+                                <b-form-input for="text" type="number" v-model="variation.subitem.price"></b-form-input>
                               </div>
                               <div class="col-4">
                                 <label class="mt-3">Qty</label>
-                                <b-form-input for="text" v-model="variation.subitem.qty"></b-form-input>
+                                <b-form-input for="text" type="number" v-model="variation.subitem.qty"></b-form-input>
                               </div>
                               <div class="col-4">
                                 <label class="mt-3">SKU</label>
@@ -1077,7 +1085,7 @@ export default {
                           </b-button>
                         </div>
                         <div class="col-md-12">
-                         <b-button variant="primary" class="btn-block" @click="updateProduct()">
+                         <b-button variant="primary" class="btn-block" :disabled="isdisable"  @click="updateProduct()">
                               <i class="bx bx-check-double font-size-16 align-middle mr-2"></i>
                               Publish
                           </b-button>

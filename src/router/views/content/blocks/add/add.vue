@@ -28,6 +28,7 @@ export default {
       title: "Add Block",
       backendURL: process.env.VUE_APP_BACKEND_URL,
       data: "",
+      disable: false,
       blockData: {
         title: "",
         shortcode: "",
@@ -71,8 +72,17 @@ export default {
       lgchecked: false,
     };
   },
-  methods:{
-    addBlock(){
+  computed: {
+    isdisable() {
+      if(this.blockData.title == "" || this.blockData.shortcode == "" || this.blockData.paragraph == "") {
+        return true;
+      } else {
+        return false;
+      }
+    }
+  },
+  methods: {
+    addBlock() {
       if (!roleService.hasCreatePermission(this.pageIdentity)){
           alertBox("You do no have the permission to perform this action!", false)
           return;
@@ -125,7 +135,7 @@ export default {
                     </div>
                     <div class="form-group row">
                         <div class="col-md-12">
-                         <b-button variant="primary" @click="addBlock()">
+                         <b-button variant="primary" :disabled="isdisable" @click="addBlock()">
                               <i class="bx bx-check-double font-size-16 align-middle mr-2"></i>
                               Publish
                           </b-button>

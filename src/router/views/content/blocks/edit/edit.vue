@@ -66,6 +66,15 @@ export default {
       lgchecked: false,
     };
   },
+  computed: {
+    isdisable() {
+      if(this.blockData.title == "" || this.blockData.shortcode == "" || this.blockData.paragraph == "") {
+        return true;
+      } else {
+        return false;
+      }
+    }
+  },
   mounted(){
      axios
     .get(`${this.backendURL}/api/v1/blocks/${this.$route.params.id}` , authHeader())
@@ -126,7 +135,7 @@ export default {
                     </div>
                     <div class="form-group row">
                         <div class="col-md-12">
-                         <b-button variant="primary" @click="editBlock()">
+                         <b-button variant="primary" :disabled="isdisable" @click="editBlock()">
                               <i class="bx bx-check-double font-size-16 align-middle mr-2"></i>
                               Publish
                           </b-button>

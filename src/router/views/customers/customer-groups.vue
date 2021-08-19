@@ -88,6 +88,15 @@ export default {
       /**
         * Total no. of records
         */
+      isdisable() {
+        if(this.createGroupPayload.name == "" || this.createGroupPayload.rule.tax_class == "" 
+        || this.createGroupPayload.rule.calculation <= 0 || this.createGroupPayload.rule.metric == "" || this.createGroupPayload.rule.value <= 0) {
+          return true;
+        }
+        else {
+          return false;
+        }
+      },
       rows() {
           return this.customerGroupsDataLength;
       },
@@ -350,7 +359,7 @@ export default {
       </div>
       <br>
       <div class="text-sm-right">
-        <b-button variant="primary" type="submit">
+        <b-button variant="primary" :disabled="isdisable" type="submit">
             <i class="bx bx-check-double font-size-16 align-middle mr-2"></i>
             Add Group
         </b-button>

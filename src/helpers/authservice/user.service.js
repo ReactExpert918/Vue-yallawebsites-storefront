@@ -99,7 +99,7 @@ export function handleAxiosError(error) {
             location.reload(true);
         }
         const errorMsg = (data && data.message) || error.response.statusText;
-        alertBox(errorMsg);
+        alertBox("Something Went Wrong!");
         return Promise.reject(errorMsg);
     }
 }

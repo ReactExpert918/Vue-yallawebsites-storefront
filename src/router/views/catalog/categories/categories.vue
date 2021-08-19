@@ -65,7 +65,20 @@ export default {
     };
   },
   computed: {
-    console: () => console 
+    isdisable() {
+      if(this.catPayload.name == "" || this.catPayload.content == "") {
+        return true;
+      } else {
+        return false;
+      }
+    },
+    updateDisable() {
+      if(this.currentCategory.name == "" || this.currentCategory.content == "") {
+        return true;
+      } else {
+        return false;
+      }
+    }
   },
   mounted(){
     axios
@@ -413,6 +426,7 @@ export default {
                 <b-button 
                   class="ml-1 w-lg" 
                   variant="primary" 
+                  :disabled="updateDisable"
                   @click="updateCategory()"
                 >
                   Save
@@ -516,6 +530,7 @@ export default {
             <b-button 
               class="mt-2" 
               variant="primary" 
+              :disabled="isdisable"
               @click="createCategory()"
             >
               Save

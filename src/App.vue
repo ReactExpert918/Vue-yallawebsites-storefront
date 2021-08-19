@@ -62,7 +62,6 @@ export default {
     font-weight: bold;
     color: white;
     border-radius: 20px;
-    /* background-color: rgb(32, 226, 106); */
     z-index: 1005;
   }
   @keyframes example {

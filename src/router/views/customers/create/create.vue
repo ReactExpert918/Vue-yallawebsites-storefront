@@ -10,6 +10,7 @@ import {
 import {roleService} from "@/helpers/authservice/roles";
 import {handleAxiosError} from "@/helpers/authservice/user.service";
 import alertBox from "@/helpers/Alert";
+import {mailValidate} from "@/helpers/validate";
 
 /**
  * Pages component
@@ -48,6 +49,17 @@ export default {
         },
       ]
     };
+  },
+  computed: {
+    isdisable() {
+    if(this.createCustomerPayload.first_name == "" || this.createCustomerPayload.last_name == "" || this.createCustomerPayload.billing_addresses == ""
+      || this.createCustomerPayload.password_confirmation == "" || this.createCustomerPayload.password != this.createCustomerPayload.password_confirmation
+      || !mailValidate(this.createCustomerPayload.email)) {
+        return true;
+      } else {
+        return false;
+      }
+    }
   },
   mounted(){
     axios
@@ -98,7 +110,7 @@ export default {
                   <button type="button" class="btn btn btn-rounded mb-2 mr-2">
                     <i class="mdi mdi-trash mr-1"></i> Back
                   </button>
-                  <b-button v-b-modal variant="primary" @click="createCustomer()">
+                  <b-button v-b-modal variant="primary" :disabled="isdisable" @click="createCustomer()">
                     <i class="mdi mdi-plus mr-1"></i> Save Customer
                   </b-button>
                 </div>
@@ -119,7 +131,7 @@ export default {
                   </div>
                   <div class="col-sm-3">
                     <label class="mt-3">Email</label>
-                    <b-form-input for="text" v-model="createCustomerPayload.email"></b-form-input>
+                    <b-form-input for="text" type="email" v-model="createCustomerPayload.email"></b-form-input>
                   </div>
                   <div class="col-sm-2">
                     <label class="mt-3">Customer Group</label>

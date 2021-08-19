@@ -125,6 +125,14 @@ export default {
       /**
         * Total no. of records
         */
+        isdisable() {
+          window.console.log(this.selectedCustomer.name);
+          if(this.selectedProducts.length <= 0 || this.selectedCustomer.name == undefined) {
+            return true;
+          } else {
+            return false;
+          }
+        },
       rows() {
           return this.products.length;
       },
@@ -644,7 +652,7 @@ export default {
             </div>
             <div class="row card-body">
               <div class="col-sm-12 text-sm-right">
-                <b-button variant="primary" @click="createOrder">
+                <b-button variant="primary" :disabled="isdisable" @click="createOrder">
                     <i class="bx bx-check-double font-size-16 align-middle mr-2"></i>
                     Submit Order
                 </b-button>

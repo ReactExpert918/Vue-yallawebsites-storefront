@@ -176,6 +176,14 @@ export default {
       /**
         * Total no. of records
         */
+      isdisable() {
+        if(this.newProduct.name == "" || this.newProduct.short_description == "" || this.newProduct.long_description == "" || this.newProduct.sku == "" || this.newProduct.ean == "" || this.newProduct.price <= 0 
+        || this.newProduct.cost_price <= 0 || this.newProduct.sale_price <= 0 || this.newProduct.quantity == "" || this.newProduct.visibility == "" || this.newProduct.layout_id == "") {
+          return true;
+        } else {
+          return false;
+        }
+      },
       rows() {
           return this.allProductsDataLength;
       },
@@ -191,7 +199,7 @@ export default {
             this.variations[i].subitem.specs = [];
             this.variations[i].custom_specs = copyArrayOfObjects(this.custom_specs);
           }
-        }
+        }       
       }
   },
   mounted() {
@@ -506,19 +514,19 @@ export default {
               </div>
               <div class="col-4">
                 <label class="mt-3">Product Price</label>
-                <b-form-input for="text" v-model="newProduct.price"></b-form-input>
+                <b-form-input for="text" type="number" v-model="newProduct.price"></b-form-input>
               </div>
               <div class="col-4">
                 <label class="mt-3">Product Cost Price</label>
-                <b-form-input for="text" v-model="newProduct.cost_price"></b-form-input>
+                <b-form-input for="text" type="number" v-model="newProduct.cost_price"></b-form-input>
               </div>
               <div class="col-4">
                 <label class="mt-3">Product Sale Price</label>
-                <b-form-input for="text" v-model="newProduct.sale_price"></b-form-input>
+                <b-form-input for="text" type="number" v-model="newProduct.sale_price"></b-form-input>
               </div>
               <div class="col-4">
                 <label class="mt-3">Qty</label>
-                <b-form-input for="text" v-model="newProduct.quantity"></b-form-input>
+                <b-form-input for="text" type="number" v-model="newProduct.quantity"></b-form-input>
               </div>
               <div class="col-4">
                 <label class="mt-3">SKU</label>
@@ -936,7 +944,7 @@ export default {
                           </b-button>
                         </div>
                         <div class="col-md-6 pl-0">
-                         <b-button variant="primary" class="btn-block" @click="createProduct()">
+                         <b-button variant="primary" class="btn-block" :disabled="isdisable" @click="createProduct()">
                               <i class="bx bx-check-double font-size-16 align-middle mr-2"></i>
                               Publish
                           </b-button>

@@ -57,7 +57,7 @@ export default {
       attrTypes: [],
       newOption: {},
       newAttr: { options: []},
-      newGroup: {},
+      newGroup: {name: ""},
       title: "Attributes",
       items: [
         {
@@ -118,10 +118,24 @@ export default {
       /**
         * Total no. of records
         */
-      rows() {
-          return this.attributesDataLength;
-      },
-      console: () => console
+    groupDisable() {
+      if(this.newGroup.name == "") {
+        return true;
+      } else {
+        return false;
+      }
+    },
+    isdisable() {
+      if(this.newAttr.name == "") {
+        return true;
+      } else {
+        return false;
+      }
+    },
+    rows() {
+        return this.attributesDataLength;
+    },
+    console: () => console
   },
   watch: {
     selectedAll: function() {
@@ -252,6 +266,12 @@ export default {
           axios
          .post(`${this.backendURL}/api/v1/products/attributes` , this.newAttr , authHeader())
          .then(response => {
+            axios
+            .get(`${this.backendURL}/api/v1/products/attributes?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
+            .then(response => {
+                this.attributesData = response.data.data,
+                this.attributesDataLength = response.data.pagination.total;
+            }),
            this.data = response.data,
             alertBox("Attribute Created Successfully!", true)
           this.newAttr = {options: []};
@@ -365,7 +385,7 @@ export default {
           .get(`${this.backendURL}/api/v1/products/attributes/groups` , authHeader())
           .then(response => (this.attributeGroups = response.data.data))
           alertBox("Attribute Group Created Successfully!", true)
-          this.newGroup = {};
+          this.newGroup = {name: ""};
         })
         .catch(handleAxiosError);
       },
@@ -927,7 +947,7 @@ export default {
                 </b-tab>
               </b-tabs>
               <div class="text-sm-right">
-                <b-button variant="primary" @click="addAttribute()">
+                <b-button variant="primary" :disabled="isdisable" @click="addAttribute()">
                   <i class="bx bx-check-double font-size-16 align-middle mr-2"></i>
                   Publish
                 </b-button>
@@ -1000,6 +1020,7 @@ export default {
                   <b-button 
                     variant="primary" 
                     class="btn-block" 
+                    :disabled="groupDisable"
                     @click="addAttributeGroup()"
                   >
                     <i class="bx bx-check-double font-size-16 align-middle mr-2"></i>

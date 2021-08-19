@@ -80,6 +80,15 @@ export default {
       lgchecked: false,
     };
   },
+  computed: {
+    isdisable() {
+      if(this.pageData.title == "" || this.pageData.content == "" || this.pageData.layout_id == "" || this.pageData.visibility == "") {
+        return true;
+      } else {
+        return false;
+      }
+    }
+  },
  mounted() {
       axios
       .get(`${this.backendURL}/api/v1/pages/layouts` , authHeader())
@@ -202,7 +211,7 @@ export default {
                           </b-button>
                         </div>
                         <div class="col-md-6">
-                         <b-button variant="primary" @click="addPage()">
+                         <b-button variant="primary" :disabled="isdisable" @click="addPage()">
                               <i class="bx bx-check-double font-size-16 align-middle mr-2"></i>
                               Publish
                           </b-button>
