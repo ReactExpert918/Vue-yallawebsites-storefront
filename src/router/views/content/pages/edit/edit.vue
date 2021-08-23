@@ -132,7 +132,9 @@ export default {
         <div class="card">
           <div class="card-body">
             <div class="pageEditor">
+              <span class="red"> *</span>
                <b-form-input for="text" class="mb-3" v-model="pageData.title"></b-form-input>
+              <span class="red"> *</span>
                <ckeditor :editor="editor" v-model="pageData.content"></ckeditor>
             </div>
           </div>
@@ -187,7 +189,7 @@ export default {
                       </div>
                     </div>
                     <div class="form-group row">
-                      <label class="col-md-6 col-form-label">Visibility</label>
+                      <label class="col-md-6 col-form-label">Visibility <span class="red"> *</span></label>
                       <div class="col-md-6 align-right pl-0">
                         <select class="custom-select" v-model="pageData.visibility">
                           <option value="public" selected>Public</option>
@@ -196,7 +198,7 @@ export default {
                       </div>
                     </div>
                     <div class="form-group row">
-                      <label class="col-md-6 col-form-label">Layout</label>
+                      <label class="col-md-6 col-form-label">Layout <span class="red"> *</span></label>
                       <div class="col-md-6 align-right pl-0">
                         <select class="custom-select" v-model="pageData.layout.id">
                           <option v-for="layout in layouts" v-bind:value="layout.id" :key="layout.id">{{layout.name}}</option>

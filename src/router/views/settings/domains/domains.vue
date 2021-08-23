@@ -71,6 +71,14 @@ export default {
       /**
         * Total no. of records
         */
+      isDisable() {
+        if(this.newDomainData.domain == undefined) {
+          return true
+        }
+        else {
+          return false
+        }
+      },
       rows() {
           return this.domainsDataLength;
       }
@@ -314,13 +322,13 @@ export default {
           <p>Add your domain here to use it for your website</p>
         </div>
         <div class="col-sm-6">
-          <label class="mt-3">Domain Name</label>
+          <label class="mt-3">Domain Name <span class="red"> *</span></label>
           <b-form-input for="text" placeholder="Your domain name" v-model="newDomainData.domain"></b-form-input>
         </div>
       </div>
       <br>
       <div class="text-sm-right">
-        <b-button variant="primary" @click="addDomain()">
+        <b-button variant="primary" :disabled="isDisable" @click="addDomain()">
             <i class="bx bx-check-double font-size-16 align-middle mr-2"></i>
             Add
         </b-button>

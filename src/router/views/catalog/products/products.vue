@@ -21,6 +21,7 @@ export default {
   components: { Layout, PageHeader },
   data() {
     return {
+      pageIdentity: "products",
       backendURL: process.env.VUE_APP_BACKEND_URL,
       selectedAll: false,
       data: "",
@@ -106,9 +107,12 @@ export default {
           return;
         }
         axios
-        .delete(`${this.backendURL}/api/v1/users/${this.currentProduct.id}` , authHeader())
+        .delete(`${this.backendURL}/api/v1/products/${this.currentProduct.id}` , authHeader())
         .then(
-            this.data = "",
+            axios
+            .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
+            .then(response => (this.productsData = response.data.data,
+                              this.productsDataLength = response.data.pagination.total)),
             alertBox("Product Deleted Successfully!", true))
         .catch(handleAxiosError);
       },

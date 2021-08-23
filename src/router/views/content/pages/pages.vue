@@ -140,6 +140,7 @@ export default {
       },
       deletePage(){
         this.$bvModal.hide("modal-delete-page");
+        window.console.log(this.pageIdentity);
         if (!roleService.hasDeletePermission(this.pageIdentity)){
           return;
         }

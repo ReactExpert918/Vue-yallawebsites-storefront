@@ -109,7 +109,9 @@ export default {
         <div class="card">
           <div class="card-body">
             <div class="pageEditor">
+              <span class="red"> *</span>
                <b-form-input for="text" class="mb-3" v-model="blockData.title"></b-form-input>
+               <span class="red"> *</span>
                <ckeditor :editor="editor" v-model="blockData.paragraph"></ckeditor>
             </div>
           </div>
@@ -128,7 +130,7 @@ export default {
                       </div>
                     </div>
                     <div class="form-group row">
-                      <label class="col-md-6 col-form-label">Block ID</label>
+                      <label class="col-md-6 col-form-label">Block ID<span class="red"> *</span></label>
                       <div class="col-md-6 align-right pl-0">
                         <b-form-input for="text" v-model="blockData.shortcode"></b-form-input>
                       </div>

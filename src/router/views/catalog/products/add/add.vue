@@ -49,7 +49,7 @@ export default {
            layout_id: "",
            ean: "",
            sku: "",
-           visibility: "",
+           visibility: "public",
            url_key: "",
            quantity: "",
            enabled: false,
@@ -205,7 +205,8 @@ export default {
   mounted() {
       axios
       .get(`${this.backendURL}/api/v1/pages/layouts` , authHeader())
-      .then(response => (this.layouts = response.data.data))
+      .then(response => (this.layouts = response.data.data,
+      this.newProduct.layout_id = this.layouts[0].id))
       .catch(handleAxiosError);
       axios
       .get(`${this.backendURL}/api/v1/categories` , authHeader())
@@ -500,7 +501,7 @@ export default {
           <h4 class="card-title mt-3">General</h4>
             <div class="row">
               <div class="col-9">
-                <label class="mt-3">Product Name</label>
+                <label class="mt-3">Product Name <span class="red"> *</span></label>
                 <b-form-input for="text" v-model="newProduct.name"></b-form-input>
               </div>
               <div class="col-3">
@@ -513,27 +514,27 @@ export default {
                 </select>
               </div>
               <div class="col-4">
-                <label class="mt-3">Product Price</label>
+                <label class="mt-3">Product Price <span class="red"> *</span></label>
                 <b-form-input for="text" type="number" v-model="newProduct.price"></b-form-input>
               </div>
               <div class="col-4">
-                <label class="mt-3">Product Cost Price</label>
+                <label class="mt-3">Product Cost Price <span class="red"> *</span></label>
                 <b-form-input for="text" type="number" v-model="newProduct.cost_price"></b-form-input>
               </div>
               <div class="col-4">
-                <label class="mt-3">Product Sale Price</label>
+                <label class="mt-3">Product Sale Price <span class="red"> *</span></label>
                 <b-form-input for="text" type="number" v-model="newProduct.sale_price"></b-form-input>
               </div>
               <div class="col-4">
-                <label class="mt-3">Qty</label>
+                <label class="mt-3">Qty <span class="red"> *</span></label>
                 <b-form-input for="text" type="number" v-model="newProduct.quantity"></b-form-input>
               </div>
               <div class="col-4">
-                <label class="mt-3">SKU</label>
+                <label class="mt-3">SKU <span class="red"> *</span></label>
                 <b-form-input for="text" v-model="newProduct.sku"></b-form-input>
               </div>
               <div class="col-4">
-                <label class="mt-3">EAN</label>
+                <label class="mt-3">EAN <span class="red"> *</span></label>
                 <b-form-input for="text" v-model="newProduct.ean"></b-form-input>
               </div>
             </div>
@@ -542,7 +543,7 @@ export default {
 
         <div class="card">
           <div class="card-body">
-          <h4 class="card-title mt-3">Short Description</h4>
+          <h4 class="card-title mt-3">Short Description <span class="red"> *</span></h4>
           <div class="row">
             <div class="col-12">
               <ckeditor :editor="editor" v-model="newProduct.short_description"></ckeditor>
@@ -553,7 +554,7 @@ export default {
 
         <div class="card">
           <div class="card-body">
-            <h4 class="card-title mt-3">Full Product Description</h4>
+            <h4 class="card-title mt-3">Full Product Description <span class="red"> *</span></h4>
             <div class="row">
               <div class="col-12">
                 <ckeditor :editor="editor" v-model="newProduct.long_description"></ckeditor>
@@ -911,16 +912,16 @@ export default {
                       </div>
                     </div>
                     <div class="form-group row">
-                      <label class="col-md-6 col-form-label">Visibility</label>
+                      <label class="col-md-6 col-form-label">Visibility <span class="red"> *</span></label>
                       <div class="col-md-6 align-right pl-0">
                         <select class="custom-select" v-model="newProduct.visibility">
-                          <option value="public" selected>Public</option>
+                          <option value="public">Public</option>
                           <option value="private">Private</option>
                         </select>
                       </div>
                     </div>
                     <div class="form-group row">
-                      <label class="col-md-6 col-form-label">Layout</label>
+                      <label class="col-md-6 col-form-label">Layout <span class="red"> *</span></label>
                       <div class="col-md-6 align-right pl-0">
                         <select class="custom-select" v-model="newProduct.layout_id">
                          <option v-for="layout in layouts" v-bind:value="layout.id" :key="layout.id">{{layout.name}}</option>

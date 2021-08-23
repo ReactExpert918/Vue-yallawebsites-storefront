@@ -83,7 +83,8 @@ export default {
   mounted(){
     axios
     .get(`${this.backendURL}/api/v1/categories?tree=true` , authHeader())
-    .then(response => (this.categoriesData = response.data.data))
+    .then(response => (this.categoriesData = response.data.data, this.catPayload.parent_id = response.data.data[0].id)
+                      )
     .catch(handleAxiosError);
   },
   methods: {
@@ -334,7 +335,7 @@ export default {
               </div>
               <div class="input-group mb-3">
                 <div class="input-group-prepend">
-                  <label class="input-group-text">Category Name</label>
+                  <label class="input-group-text">Category Name <span class="red"> *</span></label>
                 </div>
                 <input 
                   type="text" 
@@ -344,7 +345,7 @@ export default {
               </div>
               <div class="input-group mb-3">
                 <div class="input-group-prepend">
-                  <label class="input-group-text">Content</label>
+                  <label class="input-group-text">Content <span class="red"> *</span></label>
                 </div>
                 <textarea 
                   type="text" 
@@ -446,14 +447,14 @@ export default {
     >
       <div class="form-group row">
         <div class="col-md-6">
-          <label class="mt-3">Category Name</label>
+          <label class="mt-3">Category Name <span class="red"> *</span></label>
           <b-form-input 
             for="text" 
             v-model="catPayload.name"
           ></b-form-input>
         </div>
         <div class="col-md-6">
-          <label class="mt-3">Parent Category</label>
+          <label class="mt-3">Parent Category </label>
             <select class="custom-select" v-model="catPayload.parent_id">
               <option 
                 v-for="category in categoriesData" 
@@ -465,7 +466,7 @@ export default {
             </select>
         </div>
         <div class="col-md-12">
-            <label class="mt-3">Content</label>
+            <label class="mt-3">Content <span class="red"> *</span></label>
             <textarea   
               type="text" 
               class="form-control" 

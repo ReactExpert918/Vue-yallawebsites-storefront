@@ -179,6 +179,24 @@ export default {
     };
   },
   computed: {
+    generalSave() {
+      if(this.general_config.country == "" || this.general_config.city == "" || this.general_config.street_address == ""
+      || this.general_config.state == "" || this.general_config.postalcode == "" || this.general_config.allowed_country_ids == ""
+      || this.general_config.currency.id == "" || this.general_config.allowed_currencies == "") {
+        return true
+      }
+      else {
+        return false
+      }
+    },
+    categorySave() {
+      if(this.catalog_config.products_per_page == "" || this.catalog_config.out_of_stock_threshold == "") {
+        return true;
+      }
+      else {
+        return false;
+      }
+    }
   },
   mounted() {
     axios
@@ -577,7 +595,7 @@ export default {
                   <span class="d-none d-sm-inline-block">General</span>
                 </template>
 
-                <b-button v-b-modal.modal-scrollable variant="primary" @click="saveGeneralConfiguration()">
+                <b-button v-b-modal.modal-scrollable variant="primary" :disabled="generalSave" @click="saveGeneralConfiguration()">
                     <i class="mdi mdi-plus mr-1"></i> Save
                 </b-button>
                 
@@ -604,51 +622,51 @@ export default {
                   <h4 class="card-title mb-3">Store Information</h4>
                   <div class="row">
                     <div class="col-md-3">
-                      <label>Store Country</label>
+                      <label>Store Country <span class="red"> *</span></label>
                       <select class="form-control" v-model="general_config.country.id"> 
                         <option v-for="country in countries" v-bind:value="country.id" :key="country.id" :selected="general_config.country.id == country.id">{{country.name}}</option>
                       </select>
                     </div>
                     <div class="col-md-3">
-                      <label>Store State / Region</label>
+                      <label>Store State / Region <span class="red"> *</span></label>
                       <b-form-input for="text" v-model="general_config.state" v-bind:value="general_config.state"></b-form-input>
                     </div>
                     <div class="col-md-3">
-                      <label>City</label>
+                      <label>City <span class="red"> *</span></label>
                       <b-form-input for="text" v-model="general_config.city" v-bind:value="general_config.city"></b-form-input>
                     </div>
                     <div class="col-md-3">
-                      <label>Street Address</label>
+                      <label>Street Address <span class="red"> *</span></label>
                       <b-form-input for="text" v-model="general_config.street_address" v-bind:value="general_config.street_address"></b-form-input>
                     </div>
                     <div class="col-md-3">
-                      <label>Zip / Postal Code</label>
+                      <label>Zip / Postal Code <span class="red"> *</span></label>
                       <b-form-input for="text" v-model="general_config.postalcode" v-bind:value="general_config.postalcode"></b-form-input>
                     </div>
                   </div>
                   <h4 class="card-title mb-3">Country Options</h4>
                   <div class="row">
                     <div class="col-md-3">
-                      <label>Allow Countries</label>
+                      <label>Allow Countries <span class="red"> *</span></label>
                       <select class="form-control" multiple v-model="general_config.allowed_countries">
                         <option v-for="country in countries" v-bind:value="country" :key="country.id" :selected="isCountryAllowed(country.id)">{{country.name}}</option>
                       </select>
                     </div>
                      <div class="col-md-3">
-                      <label>Enable Language Dropdown</label>
+                      <label>Enable Language Dropdown <span class="red"> *</span></label>
                       <b-form-checkbox switch size="lg" v-model="general_config.language_dropdown_enabled"></b-form-checkbox>
                     </div>
                   </div>
                   <h4 class="card-title mb-3">Currency Options</h4>
                   <div class="row">
                     <div class="col-md-3">
-                      <label>Default Currency</label>
+                      <label>Default Currency <span class="red"> *</span></label>
                       <select class="form-control" v-model="general_config.currency.id">
                         <option v-for="currency in currencies" v-bind:value="currency.id" :key="currency.id" :selected="general_config.currency.id == currency.id">{{currency.name}}</option>
                       </select>
                     </div>
                    <div class="col-md-3">
-                      <label>Allow Currency</label>
+                      <label>Allow Currency <span class="red"> *</span></label>
                       <select class="form-control" multiple v-model="general_config.allowed_currencies"> 
                         <option v-for="currency in currencies" v-bind:value="currency" :key="currency.id" :selected="isCurrencyAllowed(currency.id)">{{currency.name}}</option>
                       </select>
@@ -657,7 +675,7 @@ export default {
                   <h4 class="card-title mb-3">Store Email Addresses</h4>
                   <div class="row">
                     <div class="col-md-3">
-                      <label>General Contact</label>
+                      <label>General Contact <span class="red"> *</span></label>
                       <b-form-input for="text" v-model="general_config.general_contact" v-bind:value="general_config.general_contact"></b-form-input>
                     </div>
                     <div class="col-md-3">
@@ -684,7 +702,7 @@ export default {
                   <span class="d-none d-sm-inline-block">Catalog</span>
                 </template>
 
-                <b-button v-b-modal.modal-scrollable variant="primary" @click="saveCatalogConfiguration()">
+                <b-button v-b-modal.modal-scrollable variant="primary" :disabled="categorySave" @click="saveCatalogConfiguration()">
                     <i class="mdi mdi-plus mr-1"></i> Save
                 </b-button>
                 

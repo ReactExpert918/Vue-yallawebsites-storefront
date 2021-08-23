@@ -126,7 +126,8 @@ export default {
       }
     },
     isdisable() {
-      if(this.newAttr.name == "") {
+      if(this.newAttr.name == undefined || this.newAttr.name == "" || this.newAttr.code == "" || this.newAttr.code == undefined
+      || this.newAttr.option_name == "" || this.newAttr.option_name == undefined|| this.newAttr.option_label == "" || this.newAttr.option_label == undefined) {
         return true;
       } else {
         return false;
@@ -167,10 +168,12 @@ export default {
        .catch(handleAxiosError);
       axios
       .get(`${this.backendURL}/api/v1/products/attributes/groups` , authHeader())
-      .then(response => (this.attributeGroups = response.data.data))
+      .then(response => (this.attributeGroups = response.data.data,
+      this.currentAttribute.group = response.data.data[0]))
        axios
       .get(`${this.backendURL}/api/v1/products/attributes/types` , authHeader())
-      .then(response => (this.attrTypes = response.data.data))
+      .then(response => (this.attrTypes = response.data.data,
+      this.currentAttribute.type.id = response.data.data[0].id))
       .catch(handleAxiosError);
   },
   methods: {
@@ -257,11 +260,11 @@ export default {
         
       },
       addAttribute(){
+        this.$bvModal.hide("modal-scrollable-add");
         if (!roleService.hasCreatePermission(this.pageIdentity)){
           alertBox("You do no have the permission to perform this action!", false)
           return;
         }
-        window.console.log(this.newAttr);
           this.newAttr.sort_order = parseInt(this.newAttr.sort_order);
           axios
          .post(`${this.backendURL}/api/v1/products/attributes` , this.newAttr , authHeader())
@@ -279,6 +282,7 @@ export default {
          .catch(handleAxiosError);
       },
       updateAttribute(){
+        this.$bvModal.hide("modal-scrollable-edit");
         if (!roleService.hasEditPermission(this.pageIdentity)){
           alertBox("You do no have the permission to perform this action!", false)
           return;
@@ -358,6 +362,7 @@ export default {
             }
       },
       deleteProductOption(opt){
+        this.$bvModal.hide("modal-attribute-groups");
         if (!roleService.hasDeletePermission(this.pageIdentity)){
           alertBox("You do no have the permission to perform this action!", false)
           return;
@@ -372,7 +377,7 @@ export default {
         .catch(handleAxiosError);
       },
       addAttributeGroup(){
-        
+        this.$bvModal.hide("modal-attribute-groups");
         if (!roleService.hasCreatePermission(this.pageIdentity)){
           alertBox("You do no have the permission to perform this action!", false)
           return;
@@ -560,7 +565,7 @@ export default {
                   </template>
                   <div class="row">
                     <div class="col-sm-6">
-                      <label class="mt-3">Attribute Name</label>
+                      <label class="mt-3">Attribute Name <span class="red"> *</span></label>
                       <b-form-input 
                         for="text"  
                         v-model="currentAttribute.name"
@@ -570,7 +575,7 @@ export default {
                           switch size="lg"       
                           v-model="currentAttribute.required"
                         ></b-form-checkbox>
-                      <label class="mt-3">Option Type</label>
+                      <label class="mt-3">Option Type <span class="red"> *</span></label>
                       <select 
                         class="custom-select" 
                         v-model="currentAttribute.type.id"
@@ -583,14 +588,14 @@ export default {
                           {{attrType.name}}
                         </option>
                       </select>
-                      <label class="mt-3">Attribute Code</label>
+                      <label class="mt-3">Attribute Code <span class="red"> *</span></label>
                       <b-form-input 
                         for="text" 
                         v-model="currentAttribute.code"
                       ></b-form-input>
                     </div>
                     <div class="col-sm-6">
-                      <label class="mt-3">Attribute Group</label>
+                      <label class="mt-3">Attribute Group <span class="red"> *</span></label>
                       <select class="custom-select" v-model="currentAttribute.group.id">
                         <option 
                           v-for="group in attributeGroups" 
@@ -618,6 +623,7 @@ export default {
                   <div class="dropdownOptions">
                     <div class="row mb-3">
                       <div class="col-sm-12 mb-3">
+                        <span class="red"> *</span>
                         <b-form-input 
                           for="text" 
                           placeholder="Option Label" 
@@ -625,6 +631,7 @@ export default {
                         ></b-form-input>
                       </div>
                       <div class="col-sm-9">
+                        <span class="red"> *</span>
                         <b-form-input 
                           for="text" 
                           placeholder="Option Name" 
@@ -767,7 +774,7 @@ export default {
                   </template>
                   <div class="row">
                     <div class="col-sm-6">
-                      <label class="mt-3">Attribute Name</label>
+                      <label class="mt-3">Attribute Name <span class="red"> *</span></label>
                       <b-form-input 
                         for="text" 
                         v-model="newAttr.name"
@@ -777,7 +784,7 @@ export default {
                         switch size="lg"
                         v-model="newAttr.required"
                       ></b-form-checkbox>
-                      <label class="mt-3">Option Type</label>
+                      <label class="mt-3">Option Type <span class="red"> *</span></label>
                       <select class="custom-select" v-model="newAttr.type_id">
                          <option 
                           v-for="attrType in attrTypes" 
@@ -787,14 +794,14 @@ export default {
                           {{attrType.name}}
                         </option>
                       </select>
-                      <label class="mt-3">Attribute Code</label>
+                      <label class="mt-3">Attribute Code <span class="red"> *</span></label>
                       <b-form-input 
                         for="text" 
                         v-model="newAttr.code"
                       ></b-form-input>
                     </div>
                     <div class="col-sm-6">
-                      <label class="mt-3">Attribute Group</label>
+                      <label class="mt-3">Attribute Group <span class="red"> *</span></label>
                       <select class="custom-select" v-model="newAttr.group_id">
                         <option 
                           v-for="group in attributeGroups" 
@@ -822,6 +829,7 @@ export default {
                   <div class="dropdown-options">
                     <div class="row mb-3">
                       <div class="col-sm-12 mb-3">
+                        <span class="red"> *</span>
                         <b-form-input 
                           for="text" 
                           placeholder="Option Label" 
@@ -829,12 +837,14 @@ export default {
                         ></b-form-input>
                       </div>
                       <div class="col-sm-9">
+                        <span class="red"> *</span>
                         <b-form-input 
                           for="text" 
                           placeholder="Option Name" 
                           v-model="newAttr.option_name"
                         ></b-form-input>
                       </div>
+                      
                       <div class="col-sm-3">
                         <b-button 
                           variant="primary" 
@@ -1010,6 +1020,7 @@ export default {
                   </div>
                 </div>
                 <div class="col-sm-9">
+                  <span class="red"> *</span>
                   <b-form-input 
                     for="text" 
                     placeholder="Attribute Group Name" 

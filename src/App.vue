@@ -71,5 +71,5 @@ export default {
     70%  {opacity: 1; right: 0; top:0px;}
     90%  {opacity: 1; right: 0; top:0px;}
     100% {visibility: hidden; right: -100%; top:0px;}
-}
+  }
 </style>

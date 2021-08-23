@@ -23,6 +23,7 @@ export default {
   data() {
     return {
       backendURL: process.env.VUE_APP_BACKEND_URL,
+      pageIdentity: "orders",
       selectedAll: false,
       data: "",
       ordersData: [],
@@ -119,7 +120,7 @@ export default {
           return;
         }
         axios
-        .delete(`${this.backendURL}/api/v1/orders/${this.order.id}` , authHeader())
+        .delete(`${this.backendURL}/api/v1/orders/${this.order.id}/cancel` , authHeader())
         .then(response => (
           this.data = response.data.data.id,
           axios

@@ -10,6 +10,7 @@ import {
 import { handleAxiosError } from "@/helpers/authservice/user.service"
 import {roleService} from "@/helpers/authservice/roles";
 import alertBox from "@/helpers/Alert";
+import {mailValidate, passValidate} from "@/helpers/validate";
 
 /**
  * Users component
@@ -109,6 +110,16 @@ export default {
       /**
         * Total no. of records
         */
+      isDisible() {
+        window.console.log(this.createUserPayload.first_name)
+        if(this.createUserPayload.first_name == "" || this.createUserPayload.last_name == "" || this.createUserPayload.billing_addresses == ""
+        || this.createUserPayload.password_confirmation == "" || this.createUserPayload.password != this.createUserPayload.password_confirmation
+        || !mailValidate(this.createUserPayload.email || !passValidate(this.createUserPayload.password, this.createUserPayload.password_confirmation))) {
+          return true;
+        } else {
+          return false;
+        }
+      },
       rows() {
           return this.usersDataLength;
       },
@@ -127,7 +138,7 @@ export default {
   mounted() {
       // Set the initial number of items
       this.totalRows = this.items.length;
-       axios
+      axios
       .get(`${this.backendURL}/api/v1/users?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
       .then(response => {
          this.usersData = response.data.data,
@@ -160,7 +171,7 @@ export default {
       /**
         * Search the table data with search input
         */
-       uncheckSelectAll(){
+      uncheckSelectAll(){
          this.selectedAll = false
        },
       onFiltered(filteredItems) {
@@ -178,9 +189,24 @@ export default {
         .delete(`${this.backendURL}/api/v1/users/${id}` , authHeader())
         .then(
           axios
-        .get(`${this.backendURL}/api/v1/users?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
-        .then(response => (this.usersData = response.data.data,
-                           this.usersDataLength = response.data.pagination.total)),
+          .get(`${this.backendURL}/api/v1/users?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
+          .then(response => {
+            this.usersData = response.data.data,
+            this.usersDataLength = response.data.pagination.total;
+            for(var i = 0; i < this.usersData.length; i++){
+              var user = this.usersData[i];
+              user.role_content_ids = [];
+              if (user.role == null){
+                user.role = {
+                  contents: [],
+                }
+              }else{
+                for(var j = 0; j < user.role.contents.length; j++){
+                  user.role_content_ids.push(user.role.contents[j].id);
+                }
+              }
+            }
+          }),
           alertBox("User deleted successfully!", true)
           )
         .catch(handleAxiosError);
@@ -197,9 +223,24 @@ export default {
         .post(`${this.backendURL}/api/v1/users` , this.createUserPayload , authHeader())
         .then(response => {
           axios
-        .get(`${this.backendURL}/api/v1/users?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
-        .then(response => (this.usersData = response.data.data,
-                           this.usersDataLength = response.data.pagination.total)),
+          .get(`${this.backendURL}/api/v1/users?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
+          .then(response => {
+            this.usersData = response.data.data,
+            this.usersDataLength = response.data.pagination.total;
+            for(var i = 0; i < this.usersData.length; i++){
+              var user = this.usersData[i];
+              user.role_content_ids = [];
+              if (user.role == null){
+                user.role = {
+                  contents: [],
+                }
+              }else{
+                for(var j = 0; j < user.role.contents.length; j++){
+                  user.role_content_ids.push(user.role.contents[j].id);
+                }
+              }
+            }
+          }),
           alertBox("User Created successfully!", true)
             this.$refs.vueCreateDropzone.setOption("url" , `${this.backendURL}/api/v1/users/${response.data.data.id}/upload`);
             this.$refs.vueCreateDropzone.processQueue();
@@ -218,9 +259,24 @@ export default {
         .put(`${this.backendURL}/api/v1/users/${this.currentUser.id}` , this.currentUser , authHeader())
         .then(response => {
           axios
-        .get(`${this.backendURL}/api/v1/users?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
-        .then(response => (this.usersData = response.data.data,
-                           this.usersDataLength = response.data.pagination.total)),
+          .get(`${this.backendURL}/api/v1/users?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
+          .then(response => {
+            this.usersData = response.data.data,
+            this.usersDataLength = response.data.pagination.total;
+            for(var i = 0; i < this.usersData.length; i++){
+              var user = this.usersData[i];
+              user.role_content_ids = [];
+              if (user.role == null){
+                user.role = {
+                  contents: [],
+                }
+              }else{
+                for(var j = 0; j < user.role.contents.length; j++){
+                  user.role_content_ids.push(user.role.contents[j].id);
+                }
+              }
+            }
+          }),
           this.data = response.data,
           alertBox("User Updated Successfully!", true)
           this.$refs.myVueDropzone.processQueue();
@@ -404,19 +460,19 @@ export default {
           </template>
           <div class="row">
             <div class="col-sm-6">
-              <label class="mt-3">First Name</label>
+              <label class="mt-3">First Name <span class="red"> *</span></label>
               <b-form-input for="text" value="" v-model="createUserPayload.first_name"></b-form-input>
-              <label class="mt-3">Username</label>
+              <label class="mt-3">Username <span class="red"> *</span></label>
               <b-form-input for="text" value="" v-model="createUserPayload.username"></b-form-input>
-              <label class="mt-3">Password</label>
+              <label class="mt-3">Password <span class="red"> *</span></label>
               <b-form-input type="password" for="password" value="" v-model="createUserPayload.password"></b-form-input>
             </div>
             <div class="col-sm-6">
-              <label class="mt-3">Last Name</label>
+              <label class="mt-3">Last Name <span class="red"> *</span></label>
               <b-form-input for="text" value="" v-model="createUserPayload.last_name"></b-form-input>
-              <label class="mt-3">Email</label>
+              <label class="mt-3">Email <span class="red"> *</span></label>
               <b-form-input for="text" value="" v-model="createUserPayload.email"></b-form-input>
-              <label class="mt-3">Password Confirmation</label>
+              <label class="mt-3">Password Confirmation <span class="red"> *</span></label>
               <b-form-input type="password" for="password" value="" v-model="createUserPayload.password_confirmation"></b-form-input>
             </div>
             <div class="col-md-6">
@@ -492,8 +548,7 @@ export default {
       </b-tabs>
       <br>
       <div class="text-sm-right">
-        <b-button variant="primary" type="submit">
-            <i class="bx bx-check-double font-size-16 align-middle mr-2"></i>
+        <b-button variant="primary" :disable="isDisible" type="submit">
             Add
         </b-button>
       </div>

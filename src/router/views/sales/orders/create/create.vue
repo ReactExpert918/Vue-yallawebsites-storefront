@@ -431,7 +431,7 @@ export default {
                         <span class="d-inline-block d-sm-none">
                           <i class="far fa-envelope"></i>
                         </span>
-                        <span class="d-none d-sm-inline-block">Existing Customer</span>
+                        <span class="d-none d-sm-inline-block">Existing Customer <span class="red"> *</span></span>
                       </template>
                       <div class="card-body">
                           <div class="row mt-4">
@@ -537,10 +537,10 @@ export default {
                     <thead>
                       <tr>
                         <th>Thumbnail</th>
-                        <th>Product Name</th>
+                        <th>Product Name <span class="red"> *</span></th>
                         <th>SKU</th>
                         <th>Unit Price</th>
-                        <th>Qty</th>
+                        <th>Qty <span class="red"> *</span></th>
                         <th>Total Price</th>
                       </tr>
                     </thead>

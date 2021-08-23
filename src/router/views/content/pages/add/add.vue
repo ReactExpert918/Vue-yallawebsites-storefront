@@ -9,11 +9,9 @@ import appConfig from "@/app.config";
 import {
   authHeader,
 } from "@/helpers/authservice/auth-header";
-// import {warnBox("Something Went Wrong!")} from "@/helpers/authservice/user.service";
 import {roleService} from "@/helpers/authservice/roles";
 import {handleAxiosError} from "@/helpers/authservice/user.service";
 import alertBox from "@/helpers/Alert";
-// import warnBox from "@/helpers/warn";
 
 /**
  * Pages component
@@ -34,7 +32,7 @@ export default {
         title: "",
         content: "",
         layout_id: "",
-        visibility: "",
+        visibility: "public",
         meta_title: "",
         meta_keywords: [],
         meta_keywords_str: "",
@@ -42,6 +40,7 @@ export default {
         enabled: false
       },
       layouts: [],
+      selected: "",
       items: [
         {
           text: "Content",
@@ -92,7 +91,8 @@ export default {
  mounted() {
       axios
       .get(`${this.backendURL}/api/v1/pages/layouts` , authHeader())
-      .then(response => (this.layouts = response.data.data))
+      .then(response => (this.layouts = response.data.data,
+                        this.pageData.layout_id = this.layouts[0].id))
       .catch(handleAxiosError);
   },
   methods:{
@@ -127,7 +127,9 @@ export default {
         <div class="card">
           <div class="card-body">
             <div class="pageEditor">
+                <span class="red"> *</span>
                <b-form-input for="text" class="mb-3" v-model="pageData.title"></b-form-input>
+                <span class="red"> *</span>
                <ckeditor :editor="editor" v-model="pageData.content"></ckeditor>
             </div>
           </div>
@@ -176,22 +178,22 @@ export default {
                 <div class="col-12">
                   <form class="form-horizontal pagesSidebar" role="form">
                     <div class="form-group row">
-                      <label class="col-md-6 col-form-label">Enabled</label>
+                      <label class="col-md-6 col-form-label">Enabled </label> 
                       <div class="col-md-6 align-right">
                         <b-form-checkbox switch size="lg" v-model="pageData.enabled" class="text-right"></b-form-checkbox>
                       </div>
                     </div>
                     <div class="form-group row">
-                      <label class="col-md-6 col-form-label">Visibility</label>
+                      <label class="col-md-6 col-form-label">Visibility <span class="red"> *</span></label>
                       <div class="col-md-6 align-right pl-0">
                         <select class="custom-select" v-model="pageData.visibility">
-                          <option value="public" selected>Public</option>
+                          <option value="public" >Public</option>
                           <option value="private">Private</option>
                         </select>
                       </div>
                     </div>
                     <div class="form-group row">
-                      <label class="col-md-6 col-form-label">Layout</label>
+                      <label class="col-md-6 col-form-label">Layout <span class="red"> *</span></label>
                       <div class="col-md-6 align-right pl-0">
                         <select class="custom-select" v-model="pageData.layout_id">
                           <option v-for="layout in layouts" v-bind:value="layout.id" :key="layout.id">{{layout.name}}</option>

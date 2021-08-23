@@ -136,7 +136,10 @@ export default {
       fetchTaxClasses(){
         axios
       .get(`${this.backendURL}/api/v1/tax/classes` , authHeader())
-      .then(response => (this.taxClasses = response.data.data))
+      .then(response => (this.taxClasses = response.data.data,
+                        this.createGroupPayload.rule.tax_class = this.taxClasses[0].country_code,
+                        this.createGroupPayload.rule.metric = "%",
+                        this.createGroupPayload.rule.calculation = "+"))
       .catch(handleAxiosError);
       },
       deleteCustomerGroup(id) {
@@ -335,22 +338,22 @@ export default {
       <form @submit="createCustomerGroup">
       <div class="row">
         <div class="col-sm-6">
-          <label class="mt-3">Customer Group Name</label>
+          <label class="mt-3">Customer Group Name <span class="red"> *</span></label>
           <b-form-input for="text" v-model="createGroupPayload.name"></b-form-input>
-          <label class="mt-3">Tax Class</label>
+          <label class="mt-3">Tax Class <span class="red"> *</span></label>
           <select class="custom-select" v-model="createGroupPayload.rule.tax_class">
             <option v-for="taxClass in taxClasses" v-bind:value="taxClass.country_code" :key="taxClass.country_code">{{taxClass.country_name}}- {{taxClass.country_code}}</option>
           </select>
         </div>
         <div class="col-sm-6">
-          <label class="mt-3">Price Rule</label>
+          <label class="mt-3">Price Rule <span class="red"> *</span></label>
           <select class="custom-select" v-model="createGroupPayload.rule.calculation">
             <option value="+">+</option>
             <option value="-">-</option>
           </select>
-          <label class="mt-3">Price Amount</label>
+          <label class="mt-3">Price Amount <span class="red"> *</span></label>
           <b-form-input type="number" for="number" step="0.01" v-model="createGroupPayload.rule.value"></b-form-input>
-          <label class="mt-3">Price Metric</label>
+          <label class="mt-3">Price Metric <span class="red"> *</span></label>
           <select class="custom-select" v-model="createGroupPayload.rule.metric">
             <option value="%">Percentage</option>
             <option value="$">Fixed</option>
