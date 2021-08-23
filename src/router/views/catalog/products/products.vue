@@ -109,10 +109,7 @@ export default {
         axios
         .delete(`${this.backendURL}/api/v1/products/${this.currentProduct.id}` , authHeader())
         .then(
-            axios
-            .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
-            .then(response => (this.productsData = response.data.data,
-                              this.productsDataLength = response.data.pagination.total)),
+            this.handlePageChange(1),
             alertBox("Product Deleted Successfully!", true))
         .catch(handleAxiosError);
       },

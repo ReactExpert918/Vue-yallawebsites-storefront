@@ -138,10 +138,7 @@ export default {
         axios
         .delete(`${this.backendURL}/api/v1/customers/${id}` , authHeader())
         .then(
-          axios
-          .get(`${this.backendURL}/api/v1/customers?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
-          .then(response => (this.customersData = convert(response.data.data),
-                            this.customersDataLength = response.data.pagination.total)),
+          this.handlePageChange(1),
           alertBox("Customer Deleted Successfully!", true)
           )
         .catch(handleAxiosError);

@@ -193,19 +193,6 @@ export default {
           .then(response => {
             this.usersData = response.data.data,
             this.usersDataLength = response.data.pagination.total;
-            for(var i = 0; i < this.usersData.length; i++){
-              var user = this.usersData[i];
-              user.role_content_ids = [];
-              if (user.role == null){
-                user.role = {
-                  contents: [],
-                }
-              }else{
-                for(var j = 0; j < user.role.contents.length; j++){
-                  user.role_content_ids.push(user.role.contents[j].id);
-                }
-              }
-            }
           }),
           alertBox("User deleted successfully!", true)
           )
@@ -222,25 +209,7 @@ export default {
         axios
         .post(`${this.backendURL}/api/v1/users` , this.createUserPayload , authHeader())
         .then(response => {
-          axios
-          .get(`${this.backendURL}/api/v1/users?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
-          .then(response => {
-            this.usersData = response.data.data,
-            this.usersDataLength = response.data.pagination.total;
-            for(var i = 0; i < this.usersData.length; i++){
-              var user = this.usersData[i];
-              user.role_content_ids = [];
-              if (user.role == null){
-                user.role = {
-                  contents: [],
-                }
-              }else{
-                for(var j = 0; j < user.role.contents.length; j++){
-                  user.role_content_ids.push(user.role.contents[j].id);
-                }
-              }
-            }
-          }),
+          this.handlePageChange(10),
           alertBox("User Created successfully!", true)
             this.$refs.vueCreateDropzone.setOption("url" , `${this.backendURL}/api/v1/users/${response.data.data.id}/upload`);
             this.$refs.vueCreateDropzone.processQueue();

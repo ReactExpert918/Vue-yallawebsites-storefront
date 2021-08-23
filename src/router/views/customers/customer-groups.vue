@@ -138,7 +138,7 @@ export default {
       .get(`${this.backendURL}/api/v1/tax/classes` , authHeader())
       .then(response => (this.taxClasses = response.data.data,
                         this.createGroupPayload.rule.tax_class = this.taxClasses[0].country_code,
-                        this.createGroupPayload.rule.metric = "%",
+                        this.createGroupPayload.rule.metric = "percentage",
                         this.createGroupPayload.rule.calculation = "+"))
       .catch(handleAxiosError);
       },
@@ -161,6 +161,7 @@ export default {
         .catch(handleAxiosError);
       },
       createCustomerGroup(e){
+        this.$bvModal.hide("modal-add-group")
         if(!roleService.hasCreatePermission(this.pageIdentity)){
           alertBox("You do no have the permission to perform this action!", false)
           return;
@@ -181,6 +182,7 @@ export default {
         .catch(handleAxiosError);
       },
       updateCustomerGroup(e){
+        this.$bvModal.hide("modal-edit-group")
         if(!roleService.hasEditPermission(this.pageIdentity)){
           alertBox("You do no have the permission to perform this action!", false)
           return;
@@ -355,8 +357,8 @@ export default {
           <b-form-input type="number" for="number" step="0.01" v-model="createGroupPayload.rule.value"></b-form-input>
           <label class="mt-3">Price Metric <span class="red"> *</span></label>
           <select class="custom-select" v-model="createGroupPayload.rule.metric">
-            <option value="%">Percentage</option>
-            <option value="$">Fixed</option>
+            <option value="percentage">Percentage</option>
+            <option value="flat">Fixed</option>
           </select>
         </div>
       </div>
@@ -390,8 +392,8 @@ export default {
           <b-form-input type="number" step="0.01" for="number" v-model="currentGroup.rule.value"></b-form-input>
           <label class="mt-3">Price Metric</label>
           <select class="custom-select" v-model="currentGroup.rule.metric">
-            <option value="%" :selected="currentGroup.rule.metric == '%'">Percentage</option>
-            <option value="$" :selected="currentGroup.rule.metric == '$'">Fixed</option>
+            <option value="percentage" :selected="currentGroup.rule.metric == 'percentage'">Percentage</option>
+            <option value="flat" :selected="currentGroup.rule.metric == 'flat'">Flat</option>
           </select>
         </div>
       </div>
