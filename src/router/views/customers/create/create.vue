@@ -7,8 +7,10 @@ import appConfig from "@/app.config";
 import {
   authHeader,
 } from "@/helpers/authservice/auth-header";
-import {handleAxiosError} from "@/helpers/authservice/user.service";
 import {roleService} from "@/helpers/authservice/roles";
+import {handleAxiosError} from "@/helpers/authservice/user.service";
+import alertBox from "@/helpers/Alert";
+import {mailValidate, passValidate} from "@/helpers/validate";
 
 /**
  * Pages component
@@ -25,6 +27,7 @@ export default {
       title: "Create Customer",
       backendURL: process.env.VUE_APP_BACKEND_URL,
       customerGroups: [],
+      data: "",
       createCustomerPayload: {
         first_name: "",
         last_name: "",
@@ -47,16 +50,28 @@ export default {
       ]
     };
   },
+  computed: {
+    isdisable() {
+    if(this.createCustomerPayload.first_name == "" || this.createCustomerPayload.last_name == "" || this.createCustomerPayload.billing_addresses == ""
+      || this.createCustomerPayload.password_confirmation == "" || this.createCustomerPayload.password != this.createCustomerPayload.password_confirmation
+      || !mailValidate(this.createCustomerPayload.email || !passValidate(this.createCustomerPayload.password, this.createCustomerPayload.password_confirmation))) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+  },
   mounted(){
     axios
     .get(`${this.backendURL}/api/v1/customers/groups?per_page=-1` , authHeader())
-    .then(response => (this.customerGroups = response.data.data))
+    .then(response => (this.customerGroups = response.data.data,
+          this.createCustomerPayload.group_id = response.data.data[0].id))
     .catch(handleAxiosError);
   },
   methods:{
     createCustomer(){
       if(!roleService.hasCreatePermission(this.pageIdentity)){
-          alert("You do no have the permission to perform this action!")
+          alertBox("You do no have the permission to perform this action!", false)
           return;
       }
 
@@ -71,7 +86,11 @@ export default {
       }
       axios
       .post(`${this.backendURL}/api/v1/customers` , this.createCustomerPayload , authHeader())
-      .then(response => (alert(`${response.data.data.id} Created!`)))
+      .then(response => (
+        this.data = response.data,
+        this.$router.push('/customers'),  
+          alertBox("Customer Created Successfully!", true)
+          ))
       .catch(handleAxiosError);
     },
   }
@@ -92,7 +111,7 @@ export default {
                   <button type="button" class="btn btn btn-rounded mb-2 mr-2">
                     <i class="mdi mdi-trash mr-1"></i> Back
                   </button>
-                  <b-button v-b-modal variant="primary" @click="createCustomer()">
+                  <b-button v-b-modal variant="primary" :disabled="isdisable" @click="createCustomer()">
                     <i class="mdi mdi-plus mr-1"></i> Save Customer
                   </b-button>
                 </div>
@@ -104,16 +123,16 @@ export default {
                 <h4>General Information</h4>
                 <div class="row">
                   <div class="col-sm-3">
-                    <label class="mt-3">First Name</label>
+                    <label class="mt-3">First Name <span class="red"> *</span></label>
                     <b-form-input for="text" v-model="createCustomerPayload.first_name"></b-form-input>
                   </div>
                   <div class="col-sm-3">
-                    <label class="mt-3">Last Name</label>
+                    <label class="mt-3">Last Name <span class="red"> *</span></label>
                     <b-form-input for="text" v-model="createCustomerPayload.last_name"></b-form-input>
                   </div>
                   <div class="col-sm-3">
-                    <label class="mt-3">Email</label>
-                    <b-form-input for="text" v-model="createCustomerPayload.email"></b-form-input>
+                    <label class="mt-3">Email <span class="red"> *</span></label>
+                    <b-form-input for="text" type="email" v-model="createCustomerPayload.email"></b-form-input>
                   </div>
                   <div class="col-sm-2">
                     <label class="mt-3">Customer Group</label>
@@ -126,11 +145,11 @@ export default {
                     <b-form-checkbox switch size="lg" v-model="createCustomerPayload.newsletter_subscriber"></b-form-checkbox>
                   </div>
                   <div class="col-sm-3">
-                    <label class="mt-3">Password</label>
+                    <label class="mt-3">Password <span class="red"> *</span></label>
                     <b-form-input type="password" for="password" v-model="createCustomerPayload.password"></b-form-input>
                   </div>
                   <div class="col-sm-3">
-                    <label class="mt-3">Confirm Password</label>
+                    <label class="mt-3">Confirm Password <span class="red"> *</span></label>
                     <b-form-input type="password" for="password" v-model="createCustomerPayload.password_confirmation"></b-form-input>
                   </div>
                 </div>
@@ -138,7 +157,7 @@ export default {
             </div>
             <div class="row card-body">
               <div class="col-sm-12">
-                <h4>Addresses</h4>
+                <h4>Addresses <span class="red"> *</span></h4>
                 <div class="row">
                   <div class="col-sm-6">
                     <h5>Billing Address</h5>

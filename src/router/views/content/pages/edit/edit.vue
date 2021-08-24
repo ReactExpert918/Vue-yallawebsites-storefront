@@ -9,8 +9,9 @@ import appConfig from "@/app.config";
 import {
   authHeader,
 } from "@/helpers/authservice/auth-header";
-import {handleAxiosError} from "@/helpers/authservice/user.service";
 import {roleService} from "@/helpers/authservice/roles";
+import alertBox from "@/helpers/Alert";
+import {handleAxiosError} from "@/helpers/authservice/user.service";
 
 /**
  * Pages component
@@ -24,6 +25,7 @@ export default {
   data() {
     return {
       pageIdentity: "pages",
+      data: "",
       backendURL: process.env.VUE_APP_BACKEND_URL,
       pageData: {layout:{} , meta_keywords_str:""},
       layouts: [],
@@ -66,6 +68,15 @@ export default {
       lgchecked: false,
     };
   },
+  computed: {
+    isdisable() {
+      if(this.pageData.title == "" || this.pageData.content == "" || this.pageData.layout_id == "" || this.pageData.visibility == "") {
+        return true;
+      } else {
+        return false;
+      }
+    }
+  },
   mounted(){
     axios
     .get(`${this.backendURL}/api/v1/pages/layouts` , authHeader())
@@ -91,7 +102,7 @@ export default {
   methods:{
     editPage(){
       if (!roleService.hasEditPermission(this.pageIdentity)){
-          alert("You do no have the permission to perform this action!")
+          alertBox("You do no have the permission to perform this action!", false)
           return;
       }
       this.pageData.meta_keywords = this.pageData.meta_keywords_str.split(" ");
@@ -101,7 +112,11 @@ export default {
       } 
       axios
       .put(`${this.backendURL}/api/v1/pages/${this.$route.params.id}` , this.pageData , authHeader())
-      .then(response => (alert(`${response.data.data.id} Updated!`)))
+      .then(response => (
+        this.$router.push('/content/pages'),
+        this.data = response,
+        alertBox("Page Updated succesfully", true)
+        ))
       .catch(handleAxiosError);
     }
   }
@@ -117,7 +132,9 @@ export default {
         <div class="card">
           <div class="card-body">
             <div class="pageEditor">
+              <span class="red"> *</span>
                <b-form-input for="text" class="mb-3" v-model="pageData.title"></b-form-input>
+              <span class="red"> *</span>
                <ckeditor :editor="editor" v-model="pageData.content"></ckeditor>
             </div>
           </div>
@@ -172,7 +189,7 @@ export default {
                       </div>
                     </div>
                     <div class="form-group row">
-                      <label class="col-md-6 col-form-label">Visibility</label>
+                      <label class="col-md-6 col-form-label">Visibility <span class="red"> *</span></label>
                       <div class="col-md-6 align-right pl-0">
                         <select class="custom-select" v-model="pageData.visibility">
                           <option value="public" selected>Public</option>
@@ -181,7 +198,7 @@ export default {
                       </div>
                     </div>
                     <div class="form-group row">
-                      <label class="col-md-6 col-form-label">Layout</label>
+                      <label class="col-md-6 col-form-label">Layout <span class="red"> *</span></label>
                       <div class="col-md-6 align-right pl-0">
                         <select class="custom-select" v-model="pageData.layout.id">
                           <option v-for="layout in layouts" v-bind:value="layout.id" :key="layout.id">{{layout.name}}</option>
@@ -201,7 +218,7 @@ export default {
                           </b-button>
                         </div>
                         <div class="col-md-6">
-                         <b-button variant="primary" @click="editPage()">
+                         <b-button variant="primary" :disabled="isdisable" @click="editPage()">
                               <i class="bx bx-check-double font-size-16 align-middle mr-2"></i>
                               Publish
                           </b-button>

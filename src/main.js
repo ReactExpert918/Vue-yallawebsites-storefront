@@ -7,8 +7,9 @@ import VueMask from 'v-mask'
 import VueRouter from 'vue-router'
 import vco from "v-click-outside"
 import router from './router/index'
-import Scrollspy from 'vue2-scrollspy';
 import VueSweetalert2 from 'vue-sweetalert2';
+import Notifications from 'vue-notification';
+import velocity      from 'velocity-animate'
 
 import "@/design/index.scss";
 
@@ -22,6 +23,7 @@ import i18n from './i18n'
 import { configureFakeBackend } from './helpers/fake-backend';
 
 import tinymce from 'vue-tinymce-editor'
+Vue.use(Vuelidate)
 Vue.component('tinymce', tinymce)
 
 
@@ -43,9 +45,9 @@ if (process.env.VUE_APP_DEFAULT_AUTH === "firebase") {
 }
 Vue.use(VueRouter)
 Vue.use(vco)
-Vue.use(Scrollspy);
 const VueScrollTo = require('vue-scrollto')
 Vue.use(VueScrollTo)
+Vue.use(Notifications, { velocity })
 Vue.config.productionTip = false
 
 Vue.use(BootstrapVue)

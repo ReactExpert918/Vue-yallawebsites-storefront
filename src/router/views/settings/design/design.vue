@@ -6,6 +6,7 @@ import vue2Dropzone from "vue2-dropzone";
 import {authHeader} from "@/helpers/authservice/auth-header";
 import {handleAxiosError} from "@/helpers/authservice/user.service";
 import {roleService} from "@/helpers/authservice/roles";
+import alertBox from "@/helpers/Alert";
 
 import axios from "axios";
 
@@ -24,6 +25,7 @@ export default {
     return {
       pageIdentity: "designs",
       backendURL: process.env.VUE_APP_BACKEND_URL,
+      data: "",
       configuration: {
           id:"",
           site_logo:"",
@@ -97,7 +99,7 @@ export default {
   methods:{
     saveDesignConfiguration(){
       if (!roleService.hasEditPermission(this.pageIdentity)){
-          alert("You do no have the permission to perform this action!")
+          alertBox("You do no have the permission to perform this action!", false)
           return;
       }
       var payload = {
@@ -113,7 +115,8 @@ export default {
     axios
     .post(`${this.backendURL}/api/v1/design/configurations` ,payload, authHeader())
     .then(response => {
-      alert(`${response.data.data.id} Design saved!`);
+      this.data = response.data,
+      alertBox("Design saved Successfully!", true)
       var confID = response.data.data.id;
       this.$refs.siteLogoDropzone.setOption("url" , `${this.backendURL}/api/v1/design/configurations/${confID}/upload`);
       this.$refs.faviconDropzone.setOption("url" , `${this.backendURL}/api/v1/design/configurations/${confID}/upload`);
@@ -133,7 +136,8 @@ export default {
           axios
           .post(`${this.backendURL}/api/v1/design/configurations/${confID}/upload` , formData , header)
           .then(response => {
-            alert(`${response.data.data.id} Uploaded Design Configuration Font Files!`);
+            this.data = response.data,
+            alertBox("Uploaded Design Configuration Font Files!", true)
             })
           .catch(handleAxiosError);
       }

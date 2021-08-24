@@ -6,8 +6,10 @@ import appConfig from "@/app.config";
 import {
   authHeader,
 } from "@/helpers/authservice/auth-header";
-import {handleAxiosError} from "@/helpers/authservice/user.service"
 import convert from "@/helpers/convertObject";
+import {roleService} from "@/helpers/authservice/roles";
+import {handleAxiosError} from "@/helpers/authservice/user.service";
+import alertBox from "@/helpers/Alert";
 
 /**
  * Pages component
@@ -21,7 +23,9 @@ export default {
   data() {
     return {
       backendURL: process.env.VUE_APP_BACKEND_URL,
+      pageIdentity: "orders",
       selectedAll: false,
+      data: "",
       ordersData: [],
       ordersDataLength: [],
       title: "Orders",
@@ -109,9 +113,28 @@ export default {
       /**
         * Search the table data with search input
         */
-       uncheckSelectAll(){
-         this.selectedAll = false
-       },
+      cancelOrder() {
+        this.$bvModal.hide("modal-cancel-order");
+        if (!roleService.hasEditPermission(this.pageIdentity)){
+          alertBox("You do no have the permission to perform this action!", false);
+          return;
+        }
+        axios
+        .delete(`${this.backendURL}/api/v1/orders/${this.order.id}/cancel` , authHeader())
+        .then(response => (
+          this.data = response.data.data.id,
+          axios
+          .get(`${this.backendURL}/api/v1/orders?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
+          .then(response => (this.ordersData = convert(response.data.data),
+                            this.ordersDataLength = response.data.pagination.total))
+          .catch(handleAxiosError),
+          alertBox(`Order Deleted Succesfully!`, true)
+          ))
+        .catch(handleAxiosError);
+      },
+      uncheckSelectAll(){
+        this.selectedAll = false
+      },
       onFiltered(filteredItems) {
           // Trigger pagination to update the number of buttons/pages due to filtering
           this.totalRows = filteredItems.length;
@@ -231,7 +254,7 @@ export default {
                             <i class="fas fa-pencil-alt text-success mr-1"></i> Edit
                           </b-dropdown-item>
 
-                          <b-dropdown-item v-b-modal.modal-cancel-order>
+                          <b-dropdown-item v-b-modal.modal-cancel-order @click="order = data.item">
                             <i class="fas fa-trash-alt text-danger mr-1"></i> Cancel
                           </b-dropdown-item>
                         </b-dropdown>
@@ -261,16 +284,10 @@ export default {
       </div>
     </div>
     <!-- end row -->
-    <b-modal id="modal-cancel-orders" centered title="Cancel Orders" title-class="font-18" hide-footer>
-      <p>Are you sure? Pressing Cancel will remove this orders permenantly.</p>
-      <div class="text-right">
-        <b-button variant="danger">Cancel</b-button>
-      </div>
-    </b-modal>
     <b-modal id="modal-cancel-order" centered title="Cancel Order" title-class="font-18" hide-footer>
       <p>Are you sure? Pressing Cancel will remove this order permenantly.</p>
       <div class="text-right">
-        <b-button variant="danger">Cancel</b-button>
+        <b-button variant="danger" @click="cancelOrder()">Cancel</b-button>
       </div>
     </b-modal>
   </Layout>

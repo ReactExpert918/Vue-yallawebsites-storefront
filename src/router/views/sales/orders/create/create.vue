@@ -6,9 +6,9 @@ import { viewData } from "./create-data";
 import {
   authHeader,
 } from "@/helpers/authservice/auth-header";
-import {handleAxiosError} from "@/helpers/authservice/user.service";
 import {roleService} from "@/helpers/authservice/roles";
-
+import alertBox from "@/helpers/Alert";
+import {handleAxiosError} from "@/helpers/authservice/user.service";
 import axios from "axios";
 import appConfig from "@/app.config";
 
@@ -125,6 +125,14 @@ export default {
       /**
         * Total no. of records
         */
+        isdisable() {
+          window.console.log(this.selectedCustomer.name);
+          if(this.selectedProducts.length <= 0 || this.selectedCustomer.name == undefined) {
+            return true;
+          } else {
+            return false;
+          }
+        },
       rows() {
           return this.products.length;
       },
@@ -190,6 +198,9 @@ export default {
       /**
         * Search the table data with search input 
         */
+       addProduct() {
+         this.$bvModal.hide("modal-scrollable");
+       },
       handlePageChange(value) {
         this.currentPage = value;
         axios
@@ -230,7 +241,7 @@ export default {
       },
       createOrder(){
         if (!roleService.hasCreatePermission(this.pageIdentity)){
-          alert("You do no have the permission to perform this action!")
+          alertBox('You do no have the permission to perform this action!', false)
           return;
         }
         var billingAddress = {}
@@ -256,8 +267,10 @@ export default {
         axios
         .post(`${this.backendURL}/api/v1/orders` , payload , authHeader())
         .then(response => {
-            alert(`${response.data.data.id} Order Created!`);
-            this.purchase(response.data.data.id);
+          this.$router.push('/sales/orders'),   
+          this.data = response.data,
+            alertBox("Order Created Successfully!", true)
+            // this.purchase(response.data.data.id);
          })
         .catch(handleAxiosError);
       },
@@ -294,7 +307,7 @@ export default {
           this.stripe.createToken(this.card)
           .then(result => {
             if(result.error){
-              alert("Failed to create stripe card token because: " + result.error.message);
+              alertBox("Failed to create stripe card token because: " + result.error.message, false);
               return;
             }
 
@@ -308,7 +321,10 @@ export default {
             }
             axios
             .post(`${this.backendURL}/api/v1/payments/${this.currentPayment.id}/pay` , payload , authHeader())
-            .then(response => (alert(`${response.data.data.id} Got Paid!`)))
+            .then(response => (
+              this.data = response.data,
+              alertBox("Got paid Successfully", true)
+              ))
             .catch(handleAxiosError);
           })
       },
@@ -325,7 +341,10 @@ export default {
             }
         axios
             .post(`${this.backendURL}/api/v1/payments/${this.currentPayment.id}/pay` , payload , authHeader())
-            .then(response => (alert(`${response.data.data.id} Got Paid!`)))
+            .then(response => (
+              this.data = response.data,
+              alertBox(`Got Paid Successfully!`, true)
+              ))
             .catch(handleAxiosError);
       },
       setCurrentPaymentType(checked , type){
@@ -412,7 +431,7 @@ export default {
                         <span class="d-inline-block d-sm-none">
                           <i class="far fa-envelope"></i>
                         </span>
-                        <span class="d-none d-sm-inline-block">Existing Customer</span>
+                        <span class="d-none d-sm-inline-block">Existing Customer <span class="red"> *</span></span>
                       </template>
                       <div class="card-body">
                           <div class="row mt-4">
@@ -491,21 +510,23 @@ export default {
               </div>
               <div class="col-sm-3">
                 <h5>Billing Address</h5>
-                <div>
-                  <p class="billing-fullname"> </p>
-                  <p class="billing-street_address"> </p>
-                  <p class="billing-city"> </p>
-                  <p class="billing-postzip"> </p>
-                  <p class="billing-phonenumber"> </p>
-                </div>
+                <p>
+                  {{order.billingAddressCustomerName}}<br>
+                  {{order.billingAddressStreetAddress}}<br>
+                  {{order.billingAddressCity}}<br>
+                  {{order.billingAddressPostCodeZip}}<br>
+                  {{order.billingAddressCountry}}
+                  {{order.billingAddressTelephoneNumber}}
+                </p>
                 <h5>Shipping Address</h5>
-                <div>
-                  <p class="shipping-fullname"> </p>
-                  <p class="shipping-street_address"> </p>
-                  <p class="shipping-city"> </p>
-                  <p class="shipping-postzip"> </p>
-                  <p class="shipping-phonenumber"> </p>
-                </div>
+                <p>
+                  {{order.shippingAddressCustomerName}}<br>
+                  {{order.shippingAddressStreetAddress}}<br>
+                  {{order.shippingAddressCity}}<br>
+                  {{order.shippingAddressPostCodeZip}}<br>
+                  {{order.shippingAddressCountry}}
+                  {{order.shippingAddressTelephoneNumber}}
+                </p>
               </div>
             </div>
             <div class="row card-body">
@@ -516,10 +537,10 @@ export default {
                     <thead>
                       <tr>
                         <th>Thumbnail</th>
-                        <th>Product Name</th>
+                        <th>Product Name <span class="red"> *</span></th>
                         <th>SKU</th>
                         <th>Unit Price</th>
-                        <th>Qty</th>
+                        <th>Qty <span class="red"> *</span></th>
                         <th>Total Price</th>
                       </tr>
                     </thead>
@@ -631,7 +652,7 @@ export default {
             </div>
             <div class="row card-body">
               <div class="col-sm-12 text-sm-right">
-                <b-button variant="primary" @click="createOrder">
+                <b-button variant="primary" :disabled="isdisable" @click="createOrder">
                     <i class="bx bx-check-double font-size-16 align-middle mr-2"></i>
                     Submit Order
                 </b-button>
@@ -711,7 +732,10 @@ export default {
           </div>
         </div>
       <div class="text-sm-right">
-        <b-button variant="primary">
+        <b-button 
+          variant="primary"
+          @click="addProduct()"
+        >
               <i class="bx bx-check-double font-size-16 align-middle mr-2"></i>
               Add
           </b-button>

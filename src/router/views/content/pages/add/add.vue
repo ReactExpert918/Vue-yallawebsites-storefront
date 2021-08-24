@@ -9,8 +9,9 @@ import appConfig from "@/app.config";
 import {
   authHeader,
 } from "@/helpers/authservice/auth-header";
-import {handleAxiosError} from "@/helpers/authservice/user.service";
 import {roleService} from "@/helpers/authservice/roles";
+import {handleAxiosError} from "@/helpers/authservice/user.service";
+import alertBox from "@/helpers/Alert";
 
 /**
  * Pages component
@@ -26,11 +27,12 @@ export default {
       pageIdentity: "pages",
       title: "Add Page",
       backendURL: process.env.VUE_APP_BACKEND_URL,
+      data: "",
       pageData: {
         title: "",
         content: "",
         layout_id: "",
-        visibility: "",
+        visibility: "public",
         meta_title: "",
         meta_keywords: [],
         meta_keywords_str: "",
@@ -38,6 +40,7 @@ export default {
         enabled: false
       },
       layouts: [],
+      selected: "",
       items: [
         {
           text: "Content",
@@ -76,17 +79,27 @@ export default {
       lgchecked: false,
     };
   },
+  computed: {
+    isdisable() {
+      if(this.pageData.title == "" || this.pageData.content == "" || this.pageData.layout_id == "" || this.pageData.visibility == "") {
+        return true;
+      } else {
+        return false;
+      }
+    }
+  },
  mounted() {
       axios
       .get(`${this.backendURL}/api/v1/pages/layouts` , authHeader())
-      .then(response => (this.layouts = response.data.data))
+      .then(response => (this.layouts = response.data.data,
+                        this.pageData.layout_id = this.layouts[0].id))
       .catch(handleAxiosError);
   },
   methods:{
     addPage(){
       if (!roleService.hasCreatePermission(this.pageIdentity)){
-          alert("You do no have the permission to perform this action!")
-          return;
+        alertBox("You do no have the permission to perform this action!", false)
+        return;
       }
       this.pageData.meta_keywords = this.pageData.meta_keywords_str.split(" ");
       if (this.pageData.meta_keywords[0] == ""){
@@ -94,7 +107,11 @@ export default {
       } 
       axios
       .post(`${this.backendURL}/api/v1/pages` , this.pageData , authHeader())
-      .then(response => (alert(`${response.data.data.id} Created!`)))
+      .then(response => (
+        this.$router.push('/content/pages'),   
+        this.data = response.data.data.id,
+        alertBox(`Page Created succesfully!`, true) 
+      ))
       .catch(handleAxiosError);
     }
   }
@@ -110,7 +127,9 @@ export default {
         <div class="card">
           <div class="card-body">
             <div class="pageEditor">
+                <span class="red"> *</span>
                <b-form-input for="text" class="mb-3" v-model="pageData.title"></b-form-input>
+                <span class="red"> *</span>
                <ckeditor :editor="editor" v-model="pageData.content"></ckeditor>
             </div>
           </div>
@@ -159,22 +178,22 @@ export default {
                 <div class="col-12">
                   <form class="form-horizontal pagesSidebar" role="form">
                     <div class="form-group row">
-                      <label class="col-md-6 col-form-label">Enabled</label>
+                      <label class="col-md-6 col-form-label">Enabled </label> 
                       <div class="col-md-6 align-right">
                         <b-form-checkbox switch size="lg" v-model="pageData.enabled" class="text-right"></b-form-checkbox>
                       </div>
                     </div>
                     <div class="form-group row">
-                      <label class="col-md-6 col-form-label">Visibility</label>
+                      <label class="col-md-6 col-form-label">Visibility <span class="red"> *</span></label>
                       <div class="col-md-6 align-right pl-0">
                         <select class="custom-select" v-model="pageData.visibility">
-                          <option value="public" selected>Public</option>
+                          <option value="public" >Public</option>
                           <option value="private">Private</option>
                         </select>
                       </div>
                     </div>
                     <div class="form-group row">
-                      <label class="col-md-6 col-form-label">Layout</label>
+                      <label class="col-md-6 col-form-label">Layout <span class="red"> *</span></label>
                       <div class="col-md-6 align-right pl-0">
                         <select class="custom-select" v-model="pageData.layout_id">
                           <option v-for="layout in layouts" v-bind:value="layout.id" :key="layout.id">{{layout.name}}</option>
@@ -194,7 +213,7 @@ export default {
                           </b-button>
                         </div>
                         <div class="col-md-6">
-                         <b-button variant="primary" @click="addPage()">
+                         <b-button variant="primary" :disabled="isdisable" @click="addPage()">
                               <i class="bx bx-check-double font-size-16 align-middle mr-2"></i>
                               Publish
                           </b-button>

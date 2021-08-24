@@ -12,9 +12,10 @@ import appConfig from "@/app.config";
 import {
   authHeader,
 } from "@/helpers/authservice/auth-header";
-import {handleAxiosError} from "@/helpers/authservice/user.service";
 import {roleService} from "@/helpers/authservice/roles";
+import {handleAxiosError} from "@/helpers/authservice/user.service";
 import {copyArrayOfObjects} from "@/helpers/common";
+import alertBox from "@/helpers/Alert";
 
 /**
  * Pages component
@@ -30,6 +31,7 @@ export default {
     return {
       pageIdentity: "products",
       backendURL: process.env.VUE_APP_BACKEND_URL,
+      data: "",
       productData: {
         layout:{} , 
         meta_keywords_str:"" ,
@@ -158,6 +160,14 @@ export default {
     };
   },
   computed: {
+    isdisable() {
+      if(this.productData.name == "" || this.productData.short_description == "" || this.productData.long_description == "" || this.productData.sku == "" || this.productData.ean == "" || this.productData.price <= 0 
+      || this.productData.cost_price <= 0 || this.productData.sale_price <= 0 || this.productData.quantity == "" || this.productData.visibility == "" || this.productData.layout_id == "") {
+        return true;
+      } else {
+        return false;
+      }
+    },
       rows() {
           return this.allProductsDataLength;
       },
@@ -355,7 +365,7 @@ export default {
       },
       updateProduct(){
         if (!roleService.hasEditPermission(this.pageIdentity)){
-          alert("You do no have the permission to perform this action!")
+          alertBox("You do no have the permission to perform this action!", false)
           return;
         }
         this.productData.meta_keywords = this.productData.meta_keywords_str.split(" ");
@@ -449,7 +459,9 @@ export default {
         axios
         .put(`${this.backendURL}/api/v1/products/${this.$route.params.id}` , productReq , authHeader())
         .then(response => {
-          alert(`${response.data.data.id} Product Updated!`);
+          this.$router.push('/catalog/products'),
+          this.data = response.data;
+          alertBox("Product Updated successfully!", true)
           this.$refs.myVueDropzone.processQueue();
         })
         .catch(handleAxiosError);
@@ -457,12 +469,16 @@ export default {
 
       deleteProduct(){
         if (!roleService.hasDeletePermission(this.pageIdentity)){
-          alert("You do no have the permission to perform this action!")
+          alertBox("You do no have the permission to perform this action!", false)
           return;
         }
         axios
         .delete(`${this.backendURL}/api/v1/products/${this.productData.id}` , authHeader())
-        .then(response => (alert(`${response.data.data.id} Product deleted!`)))
+        .then(
+          response => (
+            this.$router.push('/catalog/products'),
+            this.data = response.data,
+            alertBox("Product Deleted successfully!", true)))
         .catch(handleAxiosError);
       },
 
@@ -647,7 +663,7 @@ export default {
           <h4 class="card-title mt-3">General</h4>
             <div class="row">
               <div class="col-9">
-                <label class="mt-3">Product Name</label>
+                <label class="mt-3">Product Name <span class="red"> *</span></label>
                 <b-form-input for="text" v-model="productData.name"></b-form-input>
               </div>
               <div class="col-3">
@@ -660,27 +676,27 @@ export default {
                 </select>
               </div>
               <div class="col-4">
-                <label class="mt-3">Product Price</label>
-                <b-form-input for="text" v-model="productData.price"></b-form-input>
+                <label class="mt-3">Product Price <span class="red"> *</span></label>
+                <b-form-input for="text" type="number" v-model="productData.price"></b-form-input>
               </div>
               <div class="col-4">
-                <label class="mt-3">Product Cost Price</label>
-                <b-form-input for="text" v-model="productData.cost_price"></b-form-input>
+                <label class="mt-3">Product Cost Price <span class="red"> *</span></label>
+                <b-form-input for="text" type="number" v-model="productData.cost_price"></b-form-input>
               </div>
               <div class="col-4">
-                <label class="mt-3">Product Sale Price</label>
-                <b-form-input for="text" v-model="productData.sale_price"></b-form-input>
+                <label class="mt-3">Product Sale Price <span class="red"> *</span></label>
+                <b-form-input for="text" type="number" v-model="productData.sale_price"></b-form-input>
               </div>
               <div class="col-4">
-                <label class="mt-3">Qty</label>
-                <b-form-input for="text" v-model="productData.quantity"></b-form-input>
+                <label class="mt-3">Qty <span class="red"> *</span></label>
+                <b-form-input for="text" type="number" v-model="productData.quantity"></b-form-input>
               </div>
               <div class="col-4">
-                <label class="mt-3">SKU</label>
+                <label class="mt-3">SKU <span class="red"> *</span></label>
                 <b-form-input for="text" v-model="productData.sku"></b-form-input>
               </div>
               <div class="col-4">
-                <label class="mt-3">EAN</label>
+                <label class="mt-3">EAN <span class="red"> *</span></label>
                 <b-form-input for="text" v-model="productData.ean"></b-form-input>
               </div>
             </div>
@@ -689,7 +705,7 @@ export default {
 
         <div class="card">
           <div class="card-body">
-          <h4 class="card-title mt-3">Short Description</h4>
+          <h4 class="card-title mt-3">Short Description <span class="red"> *</span></h4>
           <div class="row">
             <div class="col-12">
               <ckeditor :editor="editor" v-model="productData.short_description"></ckeditor>
@@ -700,7 +716,7 @@ export default {
 
         <div class="card">
           <div class="card-body">
-            <h4 class="card-title mt-3">Full Product Description</h4>
+            <h4 class="card-title mt-3">Full Product Description <span class="red"> *</span></h4>
             <div class="row">
               <div class="col-12">
                 <ckeditor :editor="editor" v-model="productData.long_description"></ckeditor>
@@ -841,11 +857,11 @@ export default {
                             <div class="col-8 row">
                               <div class="col-4">
                                 <label class="mt-3">Price</label>
-                                <b-form-input for="text" v-model="variation.subitem.price"></b-form-input>
+                                <b-form-input for="text" type="number" v-model="variation.subitem.price"></b-form-input>
                               </div>
                               <div class="col-4">
                                 <label class="mt-3">Qty</label>
-                                <b-form-input for="text" v-model="variation.subitem.qty"></b-form-input>
+                                <b-form-input for="text" type="number" v-model="variation.subitem.qty"></b-form-input>
                               </div>
                               <div class="col-4">
                                 <label class="mt-3">SKU</label>
@@ -1033,7 +1049,7 @@ export default {
                       </div>
                     </div>
                     <div class="form-group row">
-                      <label class="col-md-6 col-form-label">Visibility</label>
+                      <label class="col-md-6 col-form-label">Visibility <span class="red"> *</span></label>
                       <div class="col-md-6 align-right pl-0">
                         <select class="custom-select" v-model="productData.visibility">
                           <option selected value="public">Public</option>
@@ -1042,7 +1058,7 @@ export default {
                       </div>
                     </div>
                     <div class="form-group row">
-                      <label class="col-md-6 col-form-label">Layout</label>
+                      <label class="col-md-6 col-form-label">Layout <span class="red"> *</span></label>
                       <div class="col-md-6 align-right pl-0">
                         <select class="custom-select" v-model="productData.layout.id">
                          <option v-for="layout in layouts" v-bind:value="layout.id" :key="layout.id">{{layout.name}}</option>
@@ -1069,7 +1085,7 @@ export default {
                           </b-button>
                         </div>
                         <div class="col-md-12">
-                         <b-button variant="primary" class="btn-block" @click="updateProduct()">
+                         <b-button variant="primary" class="btn-block" :disabled="isdisable"  @click="updateProduct()">
                               <i class="bx bx-check-double font-size-16 align-middle mr-2"></i>
                               Publish
                           </b-button>

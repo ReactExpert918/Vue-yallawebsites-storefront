@@ -6,9 +6,10 @@ import appConfig from "@/app.config";
 import {
   authHeader,
 } from "@/helpers/authservice/auth-header";
-import {handleAxiosError} from "@/helpers/authservice/user.service";
 import {roleService} from "@/helpers/authservice/roles";
+import {handleAxiosError} from "@/helpers/authservice/user.service";
 import convert from "@/helpers/convertObject";
+import alertBox from "@/helpers/Alert";
 
 /**
  * Pages component
@@ -114,9 +115,9 @@ export default {
       /**
         * Search the table data with search input
         */
-       uncheckSelectAll(){
-         this.selectedAll = false
-       },
+      uncheckSelectAll(){
+        this.selectedAll = false
+      },
       onFiltered(filteredItems) {
           // Trigger pagination to update the number of buttons/pages due to filtering
           this.totalRows = filteredItems.length;
@@ -138,13 +139,21 @@ export default {
                            this.pagesDataLength = response.data.pagination.total));
       },
       deletePage(){
+        this.$bvModal.hide("modal-delete-page");
+        window.console.log(this.pageIdentity);
         if (!roleService.hasDeletePermission(this.pageIdentity)){
-          alert("You do no have the permission to perform this action!")
           return;
         }
         axios
         .delete(`${this.backendURL}/api/v1/pages/${this.page.id}` , authHeader())
-        .then(response => (alert(`${response.data.data.id} Page deleted!`)))
+        .then(response => (
+          this.data = response.data.data.id,
+          axios
+          .get(`${this.backendURL}/api/v1/pages?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
+          .then(response => (this.pagesData = convert(response.data.data),
+                             this.pagesDataLength = response.data.pagination.total)),
+          alertBox(`Page deleted succesfully!`, true)
+          ))
         .catch(handleAxiosError);
       }
   },

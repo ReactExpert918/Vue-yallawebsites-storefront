@@ -5,8 +5,9 @@ import axios from "axios";
 import {
   authHeader,
 } from "@/helpers/authservice/auth-header";
-import {handleAxiosError} from "@/helpers/authservice/user.service";
 import {roleService} from "@/helpers/authservice/roles";
+import {handleAxiosError} from "@/helpers/authservice/user.service";
+import alertBox from "@/helpers/Alert";
 
 import appConfig from "@/app.config";
 
@@ -27,8 +28,10 @@ export default {
       backendURL: process.env.VUE_APP_BACKEND_URL,
       primarycheck: null, 
       lgchecked: null,
-
+      show: false,
+      showid: "",
       id: 1,
+      data: "",
       currentAttribute:  {
             id: "",
             name: "",
@@ -54,7 +57,7 @@ export default {
       attrTypes: [],
       newOption: {},
       newAttr: { options: []},
-      newGroup: {},
+      newGroup: {name: ""},
       title: "Attributes",
       items: [
         {
@@ -115,10 +118,25 @@ export default {
       /**
         * Total no. of records
         */
-      rows() {
-          return this.attributesDataLength;
-      },
-      console: () => console
+    groupDisable() {
+      if(this.newGroup.name == "") {
+        return true;
+      } else {
+        return false;
+      }
+    },
+    isdisable() {
+      if(this.newAttr.name == undefined || this.newAttr.name == "" || this.newAttr.code == "" || this.newAttr.code == undefined
+      || this.newAttr.option_name == "" || this.newAttr.option_name == undefined|| this.newAttr.option_label == "" || this.newAttr.option_label == undefined) {
+        return true;
+      } else {
+        return false;
+      }
+    },
+    rows() {
+        return this.attributesDataLength;
+    },
+    console: () => console
   },
   watch: {
     selectedAll: function() {
@@ -150,10 +168,12 @@ export default {
        .catch(handleAxiosError);
       axios
       .get(`${this.backendURL}/api/v1/products/attributes/groups` , authHeader())
-      .then(response => (this.attributeGroups = response.data.data))
+      .then(response => (this.attributeGroups = response.data.data,
+      this.currentAttribute.group = response.data.data[0]))
        axios
       .get(`${this.backendURL}/api/v1/products/attributes/types` , authHeader())
-      .then(response => (this.attrTypes = response.data.data))
+      .then(response => (this.attrTypes = response.data.data,
+      this.currentAttribute.type.id = response.data.data[0].id))
       .catch(handleAxiosError);
   },
   methods: {
@@ -217,7 +237,6 @@ export default {
         return false;
       },
       handleOptionAdd(){
-
         for(var i = 0; i < this.newAttr.options.length; i++){
           if(this.newAttr.options[i].name == this.newAttr.option_name){
             return;
@@ -234,23 +253,38 @@ export default {
         this.newAttr.option_label = "";
         this.newAttr.option_text_label = "";
       },
+      showDeleteConfirm(id) {
+        
+        this.show = true;
+        this.showid = id;
+        
+      },
       addAttribute(){
+        this.$bvModal.hide("modal-scrollable-add");
         if (!roleService.hasCreatePermission(this.pageIdentity)){
-          alert("You do no have the permission to perform this action!")
+          alertBox("You do no have the permission to perform this action!", false)
           return;
         }
           this.newAttr.sort_order = parseInt(this.newAttr.sort_order);
           axios
          .post(`${this.backendURL}/api/v1/products/attributes` , this.newAttr , authHeader())
          .then(response => {
-             alert(`${response.data.data.id} attribute Created!`);
-             this.newAttr = {options: []};
+            axios
+            .get(`${this.backendURL}/api/v1/products/attributes?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
+            .then(response => {
+                this.attributesData = response.data.data,
+                this.attributesDataLength = response.data.pagination.total;
+            }),
+           this.data = response.data,
+            alertBox("Attribute Created Successfully!", true)
+          this.newAttr = {options: []};
          })
          .catch(handleAxiosError);
       },
       updateAttribute(){
+        this.$bvModal.hide("modal-scrollable-edit");
         if (!roleService.hasEditPermission(this.pageIdentity)){
-          alert("You do no have the permission to perform this action!")
+          alertBox("You do no have the permission to perform this action!", false)
           return;
         }
         this.newAttr = {
@@ -270,24 +304,35 @@ export default {
         axios
          .put(`${this.backendURL}/api/v1/products/attributes/${this.currentAttribute.id}` , this.newAttr , authHeader())
          .then(response => {
-             alert(`${response.data.data.id} attribute Updated!`);
-             this.newAttr = {options: []};
+            this.data = response.data,
+            alertBox("Attribute Updated Successfully!", true)
+            this.newAttr = {options: []};
          })
          .catch(handleAxiosError);
       },
       deleteAttribute(){
+        this.$bvModal.hide("modal-delete-page");
         if (!roleService.hasDeletePermission(this.pageIdentity)){
-          alert("You do no have the permission to perform this action!")
+          alertBox("You do no have the permission to perform this action!", false)
           return;
         }
         axios
         .delete(`${this.backendURL}/api/v1/products/attributes/${this.currentAttribute.id}` , authHeader())
-        .then(response => (alert(`${response.data.data.id} attribute deleted!`)))
+        .then(response => (
+          axios
+          .get(`${this.backendURL}/api/v1/products/attributes?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
+          .then(response => {
+              this.attributesData = response.data.data,
+              this.attributesDataLength = response.data.pagination.total;
+          }),
+          this.data = response.data,
+          alertBox("Attribute Deleted Successfully!", true)
+        ))
         .catch(handleAxiosError);
       },
       addOption(){
         if (!roleService.hasCreatePermission(this.pageIdentity)){
-          alert("You do no have the permission to perform this action!")
+          alertBox("You do no have the permission to perform this action!", false)
           return;
         }
         axios
@@ -303,6 +348,9 @@ export default {
         })
         .catch(handleAxiosError);
       },
+      cancle() {
+        this.showid = "";
+      },
       handleProductOptionDelete(name , arr){
             for( var i = 0; i < arr.length; i++){ 
         
@@ -314,40 +362,52 @@ export default {
             }
       },
       deleteProductOption(opt){
+        this.$bvModal.hide("modal-attribute-groups");
         if (!roleService.hasDeletePermission(this.pageIdentity)){
-          alert("You do no have the permission to perform this action!")
+          alertBox("You do no have the permission to perform this action!", false)
           return;
         }
          axios
         .delete(`${this.backendURL}/api/v1/products/attributes/options/${opt.id}` , authHeader())
         .then(response => {
-           alert(`${response.data.data.id} option deleted!`);
-           this.handleProductOptionDelete(opt.name , this.currentAttribute.options)
+          this.data = response.data,
+          alertBox("Option Deleted Successfully!", true)
+          this.handleProductOptionDelete(opt.name , this.currentAttribute.options)
         })
         .catch(handleAxiosError);
       },
       addAttributeGroup(){
+        this.$bvModal.hide("modal-attribute-groups");
         if (!roleService.hasCreatePermission(this.pageIdentity)){
-          alert("You do no have the permission to perform this action!")
+          alertBox("You do no have the permission to perform this action!", false)
           return;
         }
         axios
         .post(`${this.backendURL}/api/v1/products/attributes/groups` , this.newGroup , authHeader())
         .then(response => {
-            alert(`${response.data.data.id} attribute group Created!`);
-            this.newGroup = {};
+          this.data = response.data,
+          axios
+          .get(`${this.backendURL}/api/v1/products/attributes/groups` , authHeader())
+          .then(response => (this.attributeGroups = response.data.data))
+          alertBox("Attribute Group Created Successfully!", true)
+          this.newGroup = {name: ""};
         })
         .catch(handleAxiosError);
       },
       deleteAttributeGroup(group){
+        this.$bvModal.hide("modal-attribute-groups");
         if (!roleService.hasDeletePermission(this.pageIdentity)){
-          alert("You do no have the permission to perform this action!")
+          alertBox("You do no have the permission to perform this action!", false)
           return;
         }
         axios
         .delete(`${this.backendURL}/api/v1/products/attributes/groups/${group.id}` , authHeader())
         .then(response => {
-           alert(`${response.data.data.id} attribute group deleted!`);
+          this.data = response.data,
+          alertBox("Attribute Group Deleted Successfully!", true),
+          axios
+          .get(`${this.backendURL}/api/v1/products/attributes/groups` , authHeader())
+          .then(response => (this.attributeGroups = response.data.data))
         })
         .catch(handleAxiosError);
       }
@@ -505,7 +565,7 @@ export default {
                   </template>
                   <div class="row">
                     <div class="col-sm-6">
-                      <label class="mt-3">Attribute Name</label>
+                      <label class="mt-3">Attribute Name <span class="red"> *</span></label>
                       <b-form-input 
                         for="text"  
                         v-model="currentAttribute.name"
@@ -515,7 +575,7 @@ export default {
                           switch size="lg"       
                           v-model="currentAttribute.required"
                         ></b-form-checkbox>
-                      <label class="mt-3">Option Type</label>
+                      <label class="mt-3">Option Type <span class="red"> *</span></label>
                       <select 
                         class="custom-select" 
                         v-model="currentAttribute.type.id"
@@ -528,14 +588,14 @@ export default {
                           {{attrType.name}}
                         </option>
                       </select>
-                      <label class="mt-3">Attribute Code</label>
+                      <label class="mt-3">Attribute Code <span class="red"> *</span></label>
                       <b-form-input 
                         for="text" 
                         v-model="currentAttribute.code"
                       ></b-form-input>
                     </div>
                     <div class="col-sm-6">
-                      <label class="mt-3">Attribute Group</label>
+                      <label class="mt-3">Attribute Group <span class="red"> *</span></label>
                       <select class="custom-select" v-model="currentAttribute.group.id">
                         <option 
                           v-for="group in attributeGroups" 
@@ -563,6 +623,7 @@ export default {
                   <div class="dropdownOptions">
                     <div class="row mb-3">
                       <div class="col-sm-12 mb-3">
+                        <span class="red"> *</span>
                         <b-form-input 
                           for="text" 
                           placeholder="Option Label" 
@@ -570,6 +631,7 @@ export default {
                         ></b-form-input>
                       </div>
                       <div class="col-sm-9">
+                        <span class="red"> *</span>
                         <b-form-input 
                           for="text" 
                           placeholder="Option Name" 
@@ -712,7 +774,7 @@ export default {
                   </template>
                   <div class="row">
                     <div class="col-sm-6">
-                      <label class="mt-3">Attribute Name</label>
+                      <label class="mt-3">Attribute Name <span class="red"> *</span></label>
                       <b-form-input 
                         for="text" 
                         v-model="newAttr.name"
@@ -722,7 +784,7 @@ export default {
                         switch size="lg"
                         v-model="newAttr.required"
                       ></b-form-checkbox>
-                      <label class="mt-3">Option Type</label>
+                      <label class="mt-3">Option Type <span class="red"> *</span></label>
                       <select class="custom-select" v-model="newAttr.type_id">
                          <option 
                           v-for="attrType in attrTypes" 
@@ -732,14 +794,14 @@ export default {
                           {{attrType.name}}
                         </option>
                       </select>
-                      <label class="mt-3">Attribute Code</label>
+                      <label class="mt-3">Attribute Code <span class="red"> *</span></label>
                       <b-form-input 
                         for="text" 
                         v-model="newAttr.code"
                       ></b-form-input>
                     </div>
                     <div class="col-sm-6">
-                      <label class="mt-3">Attribute Group</label>
+                      <label class="mt-3">Attribute Group <span class="red"> *</span></label>
                       <select class="custom-select" v-model="newAttr.group_id">
                         <option 
                           v-for="group in attributeGroups" 
@@ -767,6 +829,7 @@ export default {
                   <div class="dropdown-options">
                     <div class="row mb-3">
                       <div class="col-sm-12 mb-3">
+                        <span class="red"> *</span>
                         <b-form-input 
                           for="text" 
                           placeholder="Option Label" 
@@ -774,12 +837,14 @@ export default {
                         ></b-form-input>
                       </div>
                       <div class="col-sm-9">
+                        <span class="red"> *</span>
                         <b-form-input 
                           for="text" 
                           placeholder="Option Name" 
                           v-model="newAttr.option_name"
                         ></b-form-input>
                       </div>
+                      
                       <div class="col-sm-3">
                         <b-button 
                           variant="primary" 
@@ -892,7 +957,7 @@ export default {
                 </b-tab>
               </b-tabs>
               <div class="text-sm-right">
-                <b-button variant="primary" @click="addAttribute()">
+                <b-button variant="primary" :disabled="isdisable" @click="addAttribute()">
                   <i class="bx bx-check-double font-size-16 align-middle mr-2"></i>
                   Publish
                 </b-button>
@@ -923,13 +988,17 @@ export default {
                   <div class="slim-tab mb-2" v-for="group in attributeGroups" :key="group.id">
                     <span class="p-3">{{group.name}}</span>
                     <span class="actions-right cursor-ponter">
-                      <b-button 
-                        class="mr-1 w-s m-2" 
-                        variant="danger"
-                      >
-                        <i class="mdi mdi-trash-can d-block"></i>
-                      </b-button>
-                      <span class="delete-confirmation">
+                      <span v-if="group.id !== showid" class="show-delete-confirmation">
+                        <b-button 
+                          class="mr-1 w-s m-2" 
+                          variant="danger"
+                          @click="showDeleteConfirm(group.id)"
+                        >
+                          <i class="mdi mdi-trash-can d-block"></i>
+                        </b-button>
+                      </span>
+                      <div v-else-if="show && group.id == showid" class="delete-confirmation-active">
+                        <!-- <transition name="slide-fade"> -->
                         Are you sure? 
                         <b-button 
                           class="mr-1 w-s m-2" 
@@ -941,14 +1010,17 @@ export default {
                         <b-button 
                           class="mr-1 w-s m-2" 
                           variant="secondary"
+                          @click="cancle()"
                         >
                           <i class="bx bx-x d-block"></i>
                         </b-button>
-                      </span>
+                        <!-- </transition> -->
+                      </div>
                     </span>
                   </div>
                 </div>
                 <div class="col-sm-9">
+                  <span class="red"> *</span>
                   <b-form-input 
                     for="text" 
                     placeholder="Attribute Group Name" 
@@ -959,6 +1031,7 @@ export default {
                   <b-button 
                     variant="primary" 
                     class="btn-block" 
+                    :disabled="groupDisable"
                     @click="addAttributeGroup()"
                   >
                     <i class="bx bx-check-double font-size-16 align-middle mr-2"></i>

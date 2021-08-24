@@ -9,8 +9,9 @@ import appConfig from "@/app.config";
 import {
   authHeader,
 } from "@/helpers/authservice/auth-header";
-import {handleAxiosError} from "@/helpers/authservice/user.service";
 import {roleService} from "@/helpers/authservice/roles";
+import {handleAxiosError} from "@/helpers/authservice/user.service";
+import alertBox from "@/helpers/Alert";
 
 /**
  * Pages component
@@ -26,6 +27,8 @@ export default {
       pageIdentity: "blocks",
       title: "Add Block",
       backendURL: process.env.VUE_APP_BACKEND_URL,
+      data: "",
+      disable: false,
       blockData: {
         title: "",
         shortcode: "",
@@ -69,15 +72,28 @@ export default {
       lgchecked: false,
     };
   },
-  methods:{
-    addBlock(){
+  computed: {
+    isdisable() {
+      if(this.blockData.title == "" || this.blockData.shortcode == "" || this.blockData.paragraph == "") {
+        return true;
+      } else {
+        return false;
+      }
+    }
+  },
+  methods: {
+    addBlock() {
       if (!roleService.hasCreatePermission(this.pageIdentity)){
-          alert("You do no have the permission to perform this action!")
+          alertBox("You do no have the permission to perform this action!", false)
           return;
       }
       axios
       .post(`${this.backendURL}/api/v1/blocks` , this.blockData , authHeader())
-      .then(response => (alert(`${response.data.data.id} Created!`)))
+      .then(response => (
+        this.$router.push('/content/blocks'),
+        this.data = response.data,
+        alertBox("Blocks Created successfully", true) 
+      ))
       .catch(handleAxiosError);
     }
   }
@@ -93,7 +109,9 @@ export default {
         <div class="card">
           <div class="card-body">
             <div class="pageEditor">
+              <span class="red"> *</span>
                <b-form-input for="text" class="mb-3" v-model="blockData.title"></b-form-input>
+               <span class="red"> *</span>
                <ckeditor :editor="editor" v-model="blockData.paragraph"></ckeditor>
             </div>
           </div>
@@ -112,14 +130,14 @@ export default {
                       </div>
                     </div>
                     <div class="form-group row">
-                      <label class="col-md-6 col-form-label">Block ID</label>
+                      <label class="col-md-6 col-form-label">Block ID <span class="red"> *</span></label>
                       <div class="col-md-6 align-right pl-0">
                         <b-form-input for="text" v-model="blockData.shortcode"></b-form-input>
                       </div>
                     </div>
                     <div class="form-group row">
                         <div class="col-md-12">
-                         <b-button variant="primary" @click="addBlock()">
+                         <b-button variant="primary" :disabled="isdisable" @click="addBlock()">
                               <i class="bx bx-check-double font-size-16 align-middle mr-2"></i>
                               Publish
                           </b-button>

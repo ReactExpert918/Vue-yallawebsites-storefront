@@ -6,9 +6,10 @@ import {
 } from "@/helpers/authservice/auth-header";
 import axios from "axios";
 import appConfig from "@/app.config";
-import {handleAxiosError} from "@/helpers/authservice/user.service";
 import {roleService} from "@/helpers/authservice/roles";
+import {handleAxiosError} from "@/helpers/authservice/user.service";
 import convert from "@/helpers/convertObject";
+import alertBox from "@/helpers/Alert";
 
 /**
  * Pages component
@@ -128,15 +129,18 @@ export default {
       },
 
       deleteCustomer(id){
-
+        this.$bvModal.hide("modal-delete-customer");
         if (!roleService.hasDeletePermission(this.pageIdentity)){
-          alert("You do no have the permission to perform this action!")
+          alertBox("You do no have the permission to perform this action!", false)
           return;
         }
 
         axios
         .delete(`${this.backendURL}/api/v1/customers/${id}` , authHeader())
-        .then(alert("Deleted!"))
+        .then(
+          this.handlePageChange(1),
+          alertBox("Customer Deleted Successfully!", true)
+          )
         .catch(handleAxiosError);
       },
       handlePageChange(value) {

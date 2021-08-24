@@ -12,6 +12,7 @@ export default {
       return title ? `${title} | ${appConfig.title}` : appConfig.title;
     }
   },
+  
   mounted() {},
   watch: {
     /**
@@ -31,6 +32,44 @@ export default {
 
 <template>
   <div id="app">
+    <div id="alert"></div>
+    <div id="warnalert"></div>
+    <notifications />
     <RouterView />
   </div>
 </template>
+<style scoped>
+  #alert {
+    position: absolute;
+    opacity: 0;
+    right: -100%;
+    background-color: rgb(12, 179, 76);
+    float: right;
+  }
+
+  #alert.active {
+    animation-name: example;
+    animation-duration: 4s;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+    width: 320px;
+    height: 80px;
+    padding: 10px;
+    font-family: "Arial";
+    font-size: 15px;
+    font-weight: bold;
+    color: white;
+    border-radius: 20px;
+    z-index: 1005;
+  }
+  @keyframes example {
+    0%   {opacity: 0; right: -100%; top:0px;}
+    25%  {opacity: 1; right: 0; top:0px;}
+    50%  {opacity: 1; right: 0; top:0px;}
+    70%  {opacity: 1; right: 0; top:0px;}
+    90%  {opacity: 1; right: 0; top:0px;}
+    100% {visibility: hidden; right: -100%; top:0px;}
+  }
+</style>

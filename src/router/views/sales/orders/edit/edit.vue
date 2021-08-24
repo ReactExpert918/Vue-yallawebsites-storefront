@@ -7,8 +7,9 @@ import appConfig from "@/app.config";
 import {
   authHeader,
 } from "@/helpers/authservice/auth-header";
-import {handleAxiosError} from "@/helpers/authservice/user.service";
 import {roleService} from "@/helpers/authservice/roles";
+import {handleAxiosError} from "@/helpers/authservice/user.service";
+import alertBox from "@/helpers/Alert";
 
 /**
  * Pages component
@@ -23,6 +24,7 @@ export default {
     return {
       pageIdentity: "orders",
       backendURL: process.env.VUE_APP_BACKEND_URL,
+      data: "",
       order: {
         total: {},
         status: {} , 
@@ -218,7 +220,7 @@ export default {
       },
       getSubTotal(){
         var subTotal = 0.0;
-        for(var i = 0; i < this.selectedProducts.length; i++){
+        for(let i = 0; i < this.selectedProducts.length; i++){
           subTotal += (this.selectedProducts[i].price * this.selectedProducts[i].order_quantity);
         }
         return subTotal;
@@ -228,11 +230,11 @@ export default {
       },
       updateOrder(){
         if (!roleService.hasEditPermission(this.pageIdentity)){
-          alert("You do no have the permission to perform this action!")
+          alertBox("You do no have the permission to perform this action!", false)
           return;
         }
         if (!this.order.is_editable){
-          alert("Order cannot be edited");
+          alertBox("Order cannot be edited", false)
           return;
         }
         var payload = {
@@ -252,61 +254,73 @@ export default {
         }
         axios
         .put(`${this.backendURL}/api/v1/orders/${this.$route.params.id}` , payload , authHeader())
-        .then(response => (alert(`${response.data.data.id} Order Updated!`)))
+        .then(response => (
+          this.$router.push('/sales/orders'),
+          this.data = response.data,
+          alertBox("Order Updated Successfully!", true)
+        ))
         .catch(handleAxiosError);
       },
       cancelOrder(){
         if (!roleService.hasEditPermission(this.pageIdentity)){
-          alert("You do no have the permission to perform this action!")
+          alertBox("You do no have the permission to perform this action!", false)
           return;
         }
         if (!this.order.is_cancelable){
-          alert("Order cannot be cancelled");
+          alertBox("Order cannot be cancelled!", false)
           return;
         }
         
         axios
         .delete(`${this.backendURL}/api/v1/orders/${this.$route.params.id}/cancel` , authHeader())
-        .then(response => (alert(`${response.data.data.id} Order Cancelled!`)))
+        .then(response => (
+          this.data = response.data,
+          alertBox("Order Cancelled Successfully!", true)))
         .catch(handleAxiosError);
       },
       shipOrder(){
         if (!roleService.hasEditPermission(this.pageIdentity)){
-          alert("You do no have the permission to perform this action!")
+          alertBox("You do no have the permission to perform this action!", false)
           return;
         }
         if (!this.order.is_shippable){
-          alert("Order cannot be marked as shipped");
+          alertBox("Order cannot be markup shiped!", false)
           return;
         }
         
         axios
         .put(`${this.backendURL}/api/v1/orders/${this.$route.params.id}/ship`  ,{}, authHeader())
-        .then(response => (alert(`${response.data.data.id} Order Marked As Shipped!`)))
+        .then(response => (
+          this.data = response.data, 
+          alertBox("Order Marked As Shipped!", true)
+        ))
         .catch(handleAxiosError);
       },
       deliverOrder(){
         if (!roleService.hasEditPermission(this.pageIdentity)){
-          alert("You do no have the permission to perform this action!")
+          alertBox("You do no have the permission to perform this action!", false)
           return;
         }
         if (!this.order.is_deliverable){
-          alert("Order cannot be marked as delivered");
+           alertBox("Order cannot be markup delivered!", false)
           return;
         }
         
         axios
         .put(`${this.backendURL}/api/v1/orders/${this.$route.params.id}/deliver` ,{}, authHeader())
-        .then(response => (alert(`${response.data.data.id} Order Marked As Delivered!`)))
+        .then(response => (
+          this.data = response.data,
+           alertBox("Order be mark as delivered!", true)
+        ))
         .catch(handleAxiosError);
       },
       refundOrder(){
         if (!roleService.hasEditPermission(this.pageIdentity)){
-          alert("You do no have the permission to perform this action!")
+           alertBox("You do no have the permission to perform this action!", false)
           return;
         }
         if (!this.order.is_refundable){
-          alert("Order cannot be marked as refunded");
+          alertBox("Order cannot be mark as refund!", false)
           return;
         }
 
@@ -316,12 +330,15 @@ export default {
         
         axios
         .put(`${this.backendURL}/api/v1/orders/${this.$route.params.id}/refund` ,payload, authHeader())
-        .then(response => (alert(`${response.data.data.id} Order Refunded!`)))
+        .then(response => (
+          this.data=response.data,
+          alertBox("Order refund successfully!", true)
+        ))
         .catch(handleAxiosError);
       },
       reOrder(){
         if (!roleService.hasCreatePermission(this.pageIdentity)){
-          alert("You do no have the permission to perform this action!")
+           alertBox("You do no have the permission to perform this action!", false)
           return;
         }
         var payload = {
@@ -342,7 +359,10 @@ export default {
         }
         axios
         .post(`${this.backendURL}/api/v1/orders` , payload , authHeader())
-        .then(response => (alert(`${response.data.data.id} Order Re-Created!`)))
+        .then(response => (
+          this.data = response.data,
+          alertBox("Order re-created!", true)
+        ))
         .catch(handleAxiosError);
       },
       // Invluce stripe dynamically
@@ -382,14 +402,17 @@ export default {
             }
         axios
             .post(`${this.backendURL}/api/v1/payments/${this.currentPayment.id}/pay` , payload , authHeader())
-            .then(response => (alert(`${response.data.data.id} Got Paid!`)))
+            .then(response => (
+              this.data = response.data,
+              alertBox("Order get paid!", true)
+            ))
             .catch(handleAxiosError);
       },
       purchaseWithStripeCard(orderID){
           this.stripe.createToken(this.card)
           .then(result => {
             if(result.error){
-              alert("Failed to create stripe card token because: " + result.error.message);
+              alertBox("Failed to create stripe card token because: " + result.error.message, false)
               return;
             }
 
@@ -403,7 +426,10 @@ export default {
             }
             axios
             .post(`${this.backendURL}/api/v1/payments/${this.currentPayment.id}/pay` , payload , authHeader())
-            .then(response => (alert(`${response.data.data.id} Got Paid!`)))
+            .then(response => (
+              this.data = response.data,
+              alertBox("Order got paid!", true)
+            ))
             .catch(handleAxiosError);
           })
       },

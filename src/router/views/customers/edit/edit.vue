@@ -1,7 +1,6 @@
 <script>
 import Layout from "../../../layouts/main";
 import PageHeader from "@/components/page-header";
-
 import axios from "axios";
 import appConfig from "@/app.config";
 import {
@@ -9,7 +8,6 @@ import {
 } from "@/helpers/authservice/auth-header";
 import {handleAxiosError} from "@/helpers/authservice/user.service";
 import {roleService} from "@/helpers/authservice/roles";
-
 /**
  * Pages component
  */
@@ -125,15 +123,15 @@ export default {
                 <h4>General Information</h4>
                 <div class="row">
                   <div class="col-sm-3">
-                    <label class="mt-3">First Name</label>
+                    <label class="mt-3">First Name <span class="red"> *</span></label>
                     <b-form-input for="text" v-model="customer.first_name"></b-form-input>
                   </div>
                   <div class="col-sm-3">
-                    <label class="mt-3">Last Name</label>
+                    <label class="mt-3">Last Name <span class="red"> *</span></label>
                     <b-form-input for="text" v-model="customer.last_name"></b-form-input>
                   </div>
                   <div class="col-sm-3">
-                    <label class="mt-3">Email</label>
+                    <label class="mt-3">Email <span class="red"> *</span></label>
                     <b-form-input for="text" v-model="customer.email"></b-form-input>
                   </div>
                   <div class="col-sm-3">
@@ -143,11 +141,11 @@ export default {
                     </select>
                   </div>
                   <div class="col-sm-3">
-                    <label class="mt-3">New Password</label>
+                    <label class="mt-3">New Password <span class="red"> *</span></label>
                     <b-form-input for="text"></b-form-input>
                   </div>
                   <div class="col-sm-3">
-                    <label class="mt-3">Confirm Password</label>
+                    <label class="mt-3">Confirm Password <span class="red"> *</span></label>
                     <b-form-input for="text"></b-form-input>
                   </div>
                   <div class="col-sm-2">
@@ -159,7 +157,7 @@ export default {
             </div>
             <div class="row card-body">
               <div class="col-sm-12">
-                <h4>Addresses</h4>
+                <h4>Addresses <span class="red"> *</span></h4>
                 <div class="row">
                   <div class="col-sm-6">
                     <h5>Billing Address - <b-button v-b-modal.modal-scrollable-billing variant="primary">Edit</b-button></h5>

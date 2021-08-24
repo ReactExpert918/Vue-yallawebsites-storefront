@@ -6,6 +6,22 @@
 .cursor-pointer{
     cursor: pointer;
 }
+.delete-confirmation-active {
+    animation-name: example;
+    animation-duration: 0.5s;
+    position: relative;
+    width: 205px;
+}
+
+.modal-body {
+    overflow: hidden;
+}
+
+@keyframes example {
+    0%   {right: -200px;}
+    100%  {right: 0px;}
+}
+
 .category-tabs {
     .move {
         margin-right: 10px;

@@ -8,6 +8,7 @@ import {
 import {handleAxiosError} from "@/helpers/authservice/user.service";
 import appConfig from "@/app.config";
 import {roleService} from "@/helpers/authservice/roles";
+import alertBox from "@/helpers/Alert";
 
 /**
  * Domains component
@@ -22,6 +23,7 @@ export default {
     return {
       pageIdentity: "domains",
       selectedAll: false,
+      data: "",
       backendURL: process.env.VUE_APP_BACKEND_URL,
       domainsData: [],
       domainsDataLength: 1,
@@ -69,6 +71,14 @@ export default {
       /**
         * Total no. of records
         */
+      isDisable() {
+        if(this.newDomainData.domain == undefined) {
+          return true
+        }
+        else {
+          return false
+        }
+      },
       rows() {
           return this.domainsDataLength;
       }
@@ -105,40 +115,66 @@ export default {
           this.currentPage = 1;
       },
       verifyDomain(){
+        this.$bvModal.hide("modal-scrollable-verify-domain")
         if (!roleService.hasEditPermission(this.pageIdentity)){
-          alert("You do no have the permission to perform this action!")
+          alertBox("You do no have the permission to perform this action!", false)
           return;
         }
         axios
         .get(`${this.backendURL}/api/v1/domains/${this.currentDomain.id}/verify` , authHeader())
         .then(response => {
+          axios
+          .get(`${this.backendURL}/api/v1/domains?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
+          .then(response => (this.domainsData = response.data.data,
+                            this.domainsDataLength = response.data.pagination.total));
           var resp = response.data.data
           if (resp.verified){
-            alert("Domain is verified!");
+            this.$notify({
+              group: 'foo',
+              text: "Domain is verified!",
+              duration: 5000,
+              speed: 1000
+            })
+            alertBox("Domain is verified!", true)
           }else{
-            alert("Domain is not verified!");
+            alertBox("Domain is not verified!", false)
           }
         })
         .catch(handleAxiosError);
       },
       addDomain(){
+        this.$bvModal.hide("modal-scrollable-add-domain")
         if (!roleService.hasCreatePermission(this.pageIdentity)){
-          alert("You do no have the permission to perform this action!")
+          alertBox("You do no have the permission to perform this action!", false)
           return;
         }
          axios
         .post(`${this.backendURL}/api/v1/domains` , this.newDomainData , authHeader())
-        .then(response => (alert(`${response.data.data.id} Domain created!`)))
+        .then(response => (
+          axios
+          .get(`${this.backendURL}/api/v1/domains?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
+          .then(response => (this.domainsData = response.data.data,
+                            this.domainsDataLength = response.data.pagination.total)),
+          this.data = response.data,
+          alertBox("Domain created successfully!", true)
+          ))
         .catch(handleAxiosError);
       },
       deleteDomain(){
+        this.$bvModal.hide("modal-scrollable-delete-domain")
         if (!roleService.hasDeletePermission(this.pageIdentity)){
-          alert("You do no have the permission to perform this action!")
+          alertBox("You do no have the permission to perform this action!", false)
           return;
       }
         axios
         .delete(`${this.backendURL}/api/v1/domains/${this.currentDomain.id}` , authHeader())
-        .then(response => (alert(`${response.data.data.id} Domain deleted!`)))
+        .then(response => (
+          axios
+        .get(`${this.backendURL}/api/v1/domains?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
+        .then(response => (this.domainsData = response.data.data,
+                           this.domainsDataLength = response.data.pagination.total)),
+          this.data = response.data,
+          alertBox("Domain deleted successfully!", true)))
         .catch(handleAxiosError);
       },
       handlePageChange(value) {
@@ -234,9 +270,11 @@ export default {
                       ></b-form-checkbox>
                       </template>
                        <template #cell(status)="data">
-                        <span class="badge badge-success font-size-12">
-                          <span v-if="data.item.verified">Connected</span>
-                          <span v-else>Not Connected</span>
+                        <span v-if="data.item.verified" class="badge badge-success font-size-12">
+                          <span>Connected</span>
+                        </span>
+                        <span v-else class="badge badge-danger font-size-12">
+                          <span>Not Connected</span>
                         </span>
                       </template>
                       <template #cell(actions)="data">
@@ -284,13 +322,13 @@ export default {
           <p>Add your domain here to use it for your website</p>
         </div>
         <div class="col-sm-6">
-          <label class="mt-3">Domain Name</label>
+          <label class="mt-3">Domain Name <span class="red"> *</span></label>
           <b-form-input for="text" placeholder="Your domain name" v-model="newDomainData.domain"></b-form-input>
         </div>
       </div>
       <br>
       <div class="text-sm-right">
-        <b-button variant="primary" @click="addDomain()">
+        <b-button variant="primary" :disabled="isDisable" @click="addDomain()">
             <i class="bx bx-check-double font-size-16 align-middle mr-2"></i>
             Add
         </b-button>

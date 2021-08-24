@@ -6,6 +6,9 @@ import appConfig from "@/app.config";
 import {
   authHeader,
 } from "@/helpers/authservice/auth-header";
+import {roleService} from "@/helpers/authservice/roles";
+import {handleAxiosError} from "@/helpers/authservice/user.service";
+import alertBox from "@/helpers/Alert";
 
 /**
  * Pages component
@@ -18,8 +21,10 @@ export default {
   components: { Layout, PageHeader },
   data() {
     return {
+      pageIdentity: "products",
       backendURL: process.env.VUE_APP_BACKEND_URL,
       selectedAll: false,
+      data: "",
       productsData: [],
       productsDataLength: 1,
       totalRows: 1,
@@ -95,6 +100,19 @@ export default {
       /**
         * Search the table data with search input
         */
+       deleteProduct() {
+        this.$bvModal.hide("modal-delete-page");
+        if (!roleService.hasDeletePermission(this.pageIdentity)){
+          alertBox("You do no have the permission to perform this action!", false)
+          return;
+        }
+        axios
+        .delete(`${this.backendURL}/api/v1/products/${this.currentProduct.id}` , authHeader())
+        .then(
+            this.handlePageChange(1),
+            alertBox("Product Deleted Successfully!", true))
+        .catch(handleAxiosError);
+      },
         uncheckSelectAll(){
          this.selectedAll = false
         },
@@ -221,6 +239,7 @@ export default {
                           </b-dropdown-item>
                           <b-dropdown-item 
                             v-b-modal.modal-delete-page
+                            @click="currentProduct = data.item"
                           >
                             <i class="fas fa-trash-alt text-danger mr-1"></i> 
                             Delete
@@ -255,7 +274,7 @@ export default {
     <b-modal id="modal-delete-page" centered title="Delete Product" title-class="font-18" hide-footer>
       <p>Are you sure? Pressing Delete will remove this product permenantly.</p>
       <div class="text-right">
-        <b-button variant="danger">Delete</b-button>
+        <b-button variant="danger" @click="deleteProduct()">Delete</b-button>
       </div>
     </b-modal>
   </Layout>

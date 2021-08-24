@@ -14,6 +14,7 @@ import {
 import {handleAxiosError} from "@/helpers/authservice/user.service";
 import {roleService} from "@/helpers/authservice/roles";
 import {copyArrayOfObjects} from "@/helpers/common";
+import alertBox from "@/helpers/Alert";
 
 /**
  * Pages component
@@ -30,6 +31,7 @@ export default {
       backendURL: process.env.VUE_APP_BACKEND_URL,
       allProductsData: [],
       allProductsDataLength: 1,
+      data: "",
       attrs: [],
       attrGroups: [],
       preVariation: [],
@@ -47,7 +49,7 @@ export default {
            layout_id: "",
            ean: "",
            sku: "",
-           visibility: "",
+           visibility: "public",
            url_key: "",
            quantity: "",
            enabled: false,
@@ -174,6 +176,14 @@ export default {
       /**
         * Total no. of records
         */
+      isdisable() {
+        if(this.newProduct.name == "" || this.newProduct.short_description == "" || this.newProduct.long_description == "" || this.newProduct.sku == "" || this.newProduct.ean == "" || this.newProduct.price <= 0 
+        || this.newProduct.cost_price <= 0 || this.newProduct.sale_price <= 0 || this.newProduct.quantity == "" || this.newProduct.visibility == "" || this.newProduct.layout_id == "") {
+          return true;
+        } else {
+          return false;
+        }
+      },
       rows() {
           return this.allProductsDataLength;
       },
@@ -189,13 +199,14 @@ export default {
             this.variations[i].subitem.specs = [];
             this.variations[i].custom_specs = copyArrayOfObjects(this.custom_specs);
           }
-        }
+        }       
       }
   },
   mounted() {
       axios
       .get(`${this.backendURL}/api/v1/pages/layouts` , authHeader())
-      .then(response => (this.layouts = response.data.data))
+      .then(response => (this.layouts = response.data.data,
+      this.newProduct.layout_id = this.layouts[0].id))
       .catch(handleAxiosError);
       axios
       .get(`${this.backendURL}/api/v1/categories` , authHeader())
@@ -274,14 +285,13 @@ export default {
       },
       createProduct(){
         if (!roleService.hasCreatePermission(this.pageIdentity)){
-          alert("You do no have the permission to perform this action!")
+          alertBox("You do no have the permission to perform this action!", false)
           return;
         }
         this.newProduct.meta_keywords = this.newProduct.meta_keywords_str.split(" ");
         if (this.newProduct.meta_keywords[0] == ""){
           this.newProduct.meta_keywords = [];
         } 
-
         for(var i = 0; i < this.selectedCategories.length; i++){ 
            this.newProduct.category_ids.push(this.selectedCategories[i].id);
         }
@@ -291,19 +301,6 @@ export default {
         this.newProduct.quantity = parseInt(this.newProduct.quantity);
         
         this.newProduct.attribute_group_id = this.currentAttrGroup.id;
-        for(var j = 0; j < this.currentAttrGroup.attributes.length; j++){
-            var attr = this.currentAttrGroup.attributes[j];
-            if (attr){
-              if (attr.option_id == ""){
-                continue;
-              }
-              this.newProduct.attributes.push({
-              id: attr.id,
-              value: attr.value,
-              option_id: attr.option_id,
-            });
-          }
-        }
 
         this.variationsData.forEach((v) => {
           var spec = {
@@ -315,7 +312,6 @@ export default {
           })
           this.newProduct.specifications.push(spec);
         })
-
         this.variations.forEach((v) => {
           var varReq = {
             labels: v.labels,
@@ -331,7 +327,6 @@ export default {
             varReq.image_name = v.image_name;
             varReq.image_content = v.image_content;
           }
-
           v.subitem.specs.forEach((spec) => {
             varReq.custom_specs.push({
               attribute_id: spec.id,
@@ -341,10 +336,11 @@ export default {
   
           this.newProduct.variations.push(varReq);
         })
-
-        axios.post(`${this.backendURL}/api/v1/products` , this.newProduct , authHeader())
+        axios
+        .post(`${this.backendURL}/api/v1/products` , this.newProduct , authHeader())
         .then(response => {
-          alert(`${response.data.data.id} Product Created!`);
+          this.$router.push('/catalog/products'), 
+          alertBox(`Product Created Successfully!`, true);
           this.$refs.myVueDropzone.setOption("url" , `${this.backendURL}/api/v1/products/${response.data.data.id}/upload`);
           this.$refs.myVueDropzone.processQueue();
          })
@@ -505,7 +501,7 @@ export default {
           <h4 class="card-title mt-3">General</h4>
             <div class="row">
               <div class="col-9">
-                <label class="mt-3">Product Name</label>
+                <label class="mt-3">Product Name <span class="red"> *</span></label>
                 <b-form-input for="text" v-model="newProduct.name"></b-form-input>
               </div>
               <div class="col-3">
@@ -518,27 +514,27 @@ export default {
                 </select>
               </div>
               <div class="col-4">
-                <label class="mt-3">Product Price</label>
-                <b-form-input for="text" v-model="newProduct.price"></b-form-input>
+                <label class="mt-3">Product Price <span class="red"> *</span></label>
+                <b-form-input for="text" type="number" v-model="newProduct.price"></b-form-input>
               </div>
               <div class="col-4">
-                <label class="mt-3">Product Cost Price</label>
-                <b-form-input for="text" v-model="newProduct.cost_price"></b-form-input>
+                <label class="mt-3">Product Cost Price <span class="red"> *</span></label>
+                <b-form-input for="text" type="number" v-model="newProduct.cost_price"></b-form-input>
               </div>
               <div class="col-4">
-                <label class="mt-3">Product Sale Price</label>
-                <b-form-input for="text" v-model="newProduct.sale_price"></b-form-input>
+                <label class="mt-3">Product Sale Price <span class="red"> *</span></label>
+                <b-form-input for="text" type="number" v-model="newProduct.sale_price"></b-form-input>
               </div>
               <div class="col-4">
-                <label class="mt-3">Qty</label>
-                <b-form-input for="text" v-model="newProduct.quantity"></b-form-input>
+                <label class="mt-3">Qty <span class="red"> *</span></label>
+                <b-form-input for="text" type="number" v-model="newProduct.quantity"></b-form-input>
               </div>
               <div class="col-4">
-                <label class="mt-3">SKU</label>
+                <label class="mt-3">SKU <span class="red"> *</span></label>
                 <b-form-input for="text" v-model="newProduct.sku"></b-form-input>
               </div>
               <div class="col-4">
-                <label class="mt-3">EAN</label>
+                <label class="mt-3">EAN <span class="red"> *</span></label>
                 <b-form-input for="text" v-model="newProduct.ean"></b-form-input>
               </div>
             </div>
@@ -547,7 +543,7 @@ export default {
 
         <div class="card">
           <div class="card-body">
-          <h4 class="card-title mt-3">Short Description</h4>
+          <h4 class="card-title mt-3">Short Description <span class="red"> *</span></h4>
           <div class="row">
             <div class="col-12">
               <ckeditor :editor="editor" v-model="newProduct.short_description"></ckeditor>
@@ -558,7 +554,7 @@ export default {
 
         <div class="card">
           <div class="card-body">
-            <h4 class="card-title mt-3">Full Product Description</h4>
+            <h4 class="card-title mt-3">Full Product Description <span class="red"> *</span></h4>
             <div class="row">
               <div class="col-12">
                 <ckeditor :editor="editor" v-model="newProduct.long_description"></ckeditor>
@@ -916,16 +912,16 @@ export default {
                       </div>
                     </div>
                     <div class="form-group row">
-                      <label class="col-md-6 col-form-label">Visibility</label>
+                      <label class="col-md-6 col-form-label">Visibility <span class="red"> *</span></label>
                       <div class="col-md-6 align-right pl-0">
                         <select class="custom-select" v-model="newProduct.visibility">
-                          <option value="public" selected>Public</option>
+                          <option value="public">Public</option>
                           <option value="private">Private</option>
                         </select>
                       </div>
                     </div>
                     <div class="form-group row">
-                      <label class="col-md-6 col-form-label">Layout</label>
+                      <label class="col-md-6 col-form-label">Layout <span class="red"> *</span></label>
                       <div class="col-md-6 align-right pl-0">
                         <select class="custom-select" v-model="newProduct.layout_id">
                          <option v-for="layout in layouts" v-bind:value="layout.id" :key="layout.id">{{layout.name}}</option>
@@ -949,7 +945,7 @@ export default {
                           </b-button>
                         </div>
                         <div class="col-md-6 pl-0">
-                         <b-button variant="primary" class="btn-block" @click="createProduct()">
+                         <b-button variant="primary" class="btn-block" :disabled="isdisable" @click="createProduct()">
                               <i class="bx bx-check-double font-size-16 align-middle mr-2"></i>
                               Publish
                           </b-button>

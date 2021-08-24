@@ -6,8 +6,9 @@ import appConfig from "@/app.config";
 import {
   authHeader,
 } from "@/helpers/authservice/auth-header";
-import {handleAxiosError} from "@/helpers/authservice/user.service";
 import {roleService} from "@/helpers/authservice/roles";
+import {handleAxiosError} from "@/helpers/authservice/user.service";
+import alertBox from "@/helpers/Alert";
 
 /**
  * Pages component
@@ -22,6 +23,7 @@ export default {
     return {
       pageIdentity: "customer_groups",
       selectedAll: false,
+      data: "",
       backendURL: process.env.VUE_APP_BACKEND_URL,
       customerGroupsData: [],
       customerGroupsDataLength: [],
@@ -86,6 +88,15 @@ export default {
       /**
         * Total no. of records
         */
+      isdisable() {
+        if(this.createGroupPayload.name == "" || this.createGroupPayload.rule.tax_class == "" 
+        || this.createGroupPayload.rule.calculation <= 0 || this.createGroupPayload.rule.metric == "" || this.createGroupPayload.rule.value < 0) {
+          return true;
+        }
+        else {
+          return false;
+        }
+      },
       rows() {
           return this.customerGroupsDataLength;
       },
@@ -104,7 +115,7 @@ export default {
   mounted() {
       // Set the initial number of items
       this.totalRows = this.items.length;
-     axios
+      axios
       .get(`${this.backendURL}/api/v1/customers/groups?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
       .then(response => (this.customerGroupsData = response.data.data,
                         this.customerGroupsDataLength = response.data.pagination.total))
@@ -125,41 +136,69 @@ export default {
       fetchTaxClasses(){
         axios
       .get(`${this.backendURL}/api/v1/tax/classes` , authHeader())
-      .then(response => (this.taxClasses = response.data.data))
+      .then(response => (this.taxClasses = response.data.data,
+                        this.createGroupPayload.rule.tax_class = this.taxClasses[0].country_code,
+                        this.createGroupPayload.rule.metric = "percentage",
+                        this.createGroupPayload.rule.calculation = "+"))
       .catch(handleAxiosError);
       },
-      deleteCustomerGroup(id){
+      deleteCustomerGroup(id) {
+        this.$bvModal.hide("modal-delete-customer-group");
         if(!roleService.hasDeletePermission(this.pageIdentity)){
-          alert("You do no have the permission to perform this action!")
+          alertBox("You do no have the permission to perform this action!", false)
           return;
        }
         axios
         .delete(`${this.backendURL}/api/v1/customers/groups/${id}` , authHeader())
-        .then(alert("Deleted!"))
+        .then(
+          axios
+          .get(`${this.backendURL}/api/v1/customers/groups?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
+          .then(response => (this.customerGroupsData = response.data.data,
+                            this.customerGroupsDataLength = response.data.pagination.total))
+          .catch(handleAxiosError),
+          alertBox("Customer Group Deleted Successfully!", true)
+          )
         .catch(handleAxiosError);
       },
       createCustomerGroup(e){
+        this.$bvModal.hide("modal-add-group")
         if(!roleService.hasCreatePermission(this.pageIdentity)){
-          alert("You do no have the permission to perform this action!")
+          alertBox("You do no have the permission to perform this action!", false)
           return;
        }
         e.preventDefault();
         this.createGroupPayload.rule.value = parseFloat(this.createGroupPayload.rule.value);
         axios
         .post(`${this.backendURL}/api/v1/customers/groups` , this.createGroupPayload , authHeader())
-        .then(response => (alert(`${response.data.data.id} Created!`)))
+        .then(response => (
+          axios
+          .get(`${this.backendURL}/api/v1/customers/groups?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
+          .then(response => (this.customerGroupsData = response.data.data,
+                            this.customerGroupsDataLength = response.data.pagination.total))
+          .catch(handleAxiosError),
+          this.data = response.data,
+          alertBox("Customer Group Created Successfully!", true)
+          ))
         .catch(handleAxiosError);
       },
       updateCustomerGroup(e){
+        this.$bvModal.hide("modal-edit-group")
         if(!roleService.hasEditPermission(this.pageIdentity)){
-          alert("You do no have the permission to perform this action!")
+          alertBox("You do no have the permission to perform this action!", false)
           return;
        }
         e.preventDefault();
         this.currentGroup.rule.value = parseFloat(this.currentGroup.rule.value);
         axios
         .put(`${this.backendURL}/api/v1/customers/groups/${this.currentGroup.id}` , this.currentGroup , authHeader())
-        .then(response => (alert(`${response.data.data.id} Updated!`)))
+        .then(response => (
+          axios
+          .get(`${this.backendURL}/api/v1/customers/groups?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
+          .then(response => (this.customerGroupsData = response.data.data,
+                            this.customerGroupsDataLength = response.data.pagination.total))
+          .catch(handleAxiosError),
+          this.data = response.data,
+          alertBox("Customer Group Updated Successfully!", true)))
         .catch(handleAxiosError);
       },
       handlePageChange(value) {
@@ -301,31 +340,31 @@ export default {
       <form @submit="createCustomerGroup">
       <div class="row">
         <div class="col-sm-6">
-          <label class="mt-3">Customer Group Name</label>
+          <label class="mt-3">Customer Group Name <span class="red"> *</span></label>
           <b-form-input for="text" v-model="createGroupPayload.name"></b-form-input>
-          <label class="mt-3">Tax Class</label>
+          <label class="mt-3">Tax Class <span class="red"> *</span></label>
           <select class="custom-select" v-model="createGroupPayload.rule.tax_class">
             <option v-for="taxClass in taxClasses" v-bind:value="taxClass.country_code" :key="taxClass.country_code">{{taxClass.country_name}}- {{taxClass.country_code}}</option>
           </select>
         </div>
         <div class="col-sm-6">
-          <label class="mt-3">Price Rule</label>
+          <label class="mt-3">Price Rule <span class="red"> *</span></label>
           <select class="custom-select" v-model="createGroupPayload.rule.calculation">
             <option value="+">+</option>
             <option value="-">-</option>
           </select>
-          <label class="mt-3">Price Amount</label>
+          <label class="mt-3">Price Amount <span class="red"> *</span></label>
           <b-form-input type="number" for="number" step="0.01" v-model="createGroupPayload.rule.value"></b-form-input>
-          <label class="mt-3">Price Metric</label>
+          <label class="mt-3">Price Metric <span class="red"> *</span></label>
           <select class="custom-select" v-model="createGroupPayload.rule.metric">
-            <option value="%">Percentage</option>
-            <option value="$">Fixed</option>
+            <option value="percentage">Percentage</option>
+            <option value="flat">Fixed</option>
           </select>
         </div>
       </div>
       <br>
       <div class="text-sm-right">
-        <b-button variant="primary" type="submit">
+        <b-button variant="primary" :disabled="isdisable" type="submit">
             <i class="bx bx-check-double font-size-16 align-middle mr-2"></i>
             Add Group
         </b-button>
@@ -353,8 +392,8 @@ export default {
           <b-form-input type="number" step="0.01" for="number" v-model="currentGroup.rule.value"></b-form-input>
           <label class="mt-3">Price Metric</label>
           <select class="custom-select" v-model="currentGroup.rule.metric">
-            <option value="%" :selected="currentGroup.rule.metric == '%'">Percentage</option>
-            <option value="$" :selected="currentGroup.rule.metric == '$'">Fixed</option>
+            <option value="percentage" :selected="currentGroup.rule.metric == 'percentage'">Percentage</option>
+            <option value="flat" :selected="currentGroup.rule.metric == 'flat'">Flat</option>
           </select>
         </div>
       </div>
