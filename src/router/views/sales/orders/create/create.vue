@@ -270,7 +270,7 @@ export default {
           this.$router.push('/sales/orders'),   
           this.data = response.data,
             alertBox("Order Created Successfully!", true)
-            // this.purchase(response.data.data.id);
+            this.purchase(response.data.data.id);
          })
         .catch(handleAxiosError);
       },

@@ -90,7 +90,7 @@ export default {
         */
       isdisable() {
         if(this.createGroupPayload.name == "" || this.createGroupPayload.rule.tax_class == "" 
-        || this.createGroupPayload.rule.calculation <= 0 || this.createGroupPayload.rule.metric == "" || this.createGroupPayload.rule.value <= 0) {
+        || this.createGroupPayload.rule.calculation <= 0 || this.createGroupPayload.rule.metric == "" || this.createGroupPayload.rule.value < 0) {
           return true;
         }
         else {
