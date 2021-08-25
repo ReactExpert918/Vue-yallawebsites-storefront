@@ -10,6 +10,7 @@ import router from './router/index'
 import VueSweetalert2 from 'vue-sweetalert2';
 import Notifications from 'vue-notification';
 import velocity      from 'velocity-animate'
+import { BSpinner } from 'bootstrap-vue'
 
 import "@/design/index.scss";
 
@@ -25,6 +26,7 @@ import { configureFakeBackend } from './helpers/fake-backend';
 import tinymce from 'vue-tinymce-editor'
 Vue.use(Vuelidate)
 Vue.component('tinymce', tinymce)
+Vue.component('b-spinner', BSpinner)
 
 
 const firebaseConfig = {
