@@ -34,6 +34,7 @@ export default {
         invoice: {},
         shipment: {},
       },
+      loading: false,
       title: "View Order",
       items: [
         {
@@ -50,6 +51,7 @@ export default {
     };
   },
   mounted(){
+    this.loading = true;
     axios
     .get(`${this.backendURL}/api/v1/orders/${this.$route.params.id}`, authHeader())
     .then(response => {
@@ -83,7 +85,10 @@ export default {
         if (this.order.shipment == null){
           this.order.shipment = {};
         }
-    }).catch(handleAxiosError);
+    }).catch(handleAxiosError)
+    .finally(() => {
+      this.loading = false
+    });
 
   }
 };
@@ -91,6 +96,11 @@ export default {
 
 <template>
   <Layout>
+    <div class="spinner"  v-if="this.loading">
+      <div class="text-center loader">
+       <b-spinner  style="width: 6rem; height: 6rem;" variant="primary" type="grow" label="Spinning"></b-spinner>
+      </div>
+    </div>
     <PageHeader :title="title" :items="items" />
 
     <div class="row">
@@ -213,3 +223,20 @@ export default {
     <!-- end row -->
   </Layout>
 </template>
+
+<style scoped>
+.spinner {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+    height: 100%;
+    width: 100%;
+    z-index: 20000;
+  }
+  .loader {
+    position: absolute;
+    top: 30%;
+    left: 50%;
+  }
+</style>

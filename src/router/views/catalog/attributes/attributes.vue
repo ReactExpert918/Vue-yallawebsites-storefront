@@ -31,6 +31,7 @@ export default {
       show: false,
       showid: "",
       id: 1,
+      loading: false,
       data: "",
       currentAttribute:  {
             id: "",
@@ -126,7 +127,7 @@ export default {
       }
     },
     isdisable() {
-      if(this.newAttr.name == undefined || this.newAttr.name == "" || this.newAttr.code == "" || this.newAttr.code == undefined
+      if(this.newAttr.name == undefined || this.newAttr.name == "" 
       || this.newAttr.option_name == "" || this.newAttr.option_name == undefined|| this.newAttr.option_label == "" || this.newAttr.option_label == undefined) {
         return true;
       } else {
@@ -150,6 +151,7 @@ export default {
     }
   },
   mounted() {
+    this.loading = true
       axios
       .get(`${this.backendURL}/api/v1/products/attributes?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
       .then(response => {
@@ -174,7 +176,10 @@ export default {
       .get(`${this.backendURL}/api/v1/products/attributes/types` , authHeader())
       .then(response => (this.attrTypes = response.data.data,
       this.currentAttribute.type.id = response.data.data[0].id))
-      .catch(handleAxiosError);
+      .catch(handleAxiosError)
+      .finally(() => {
+        this.loading = false
+      });
   },
   methods: {
       /**
@@ -260,6 +265,7 @@ export default {
         
       },
       addAttribute(){
+        this.loading = true
         this.$bvModal.hide("modal-scrollable-add");
         if (!roleService.hasCreatePermission(this.pageIdentity)){
           alertBox("You do no have the permission to perform this action!", false)
@@ -279,9 +285,13 @@ export default {
             alertBox("Attribute Created Successfully!", true)
           this.newAttr = {options: []};
          })
-         .catch(handleAxiosError);
+         .catch(handleAxiosError)
+         .finally(() => {
+        this.loading = false
+         });
       },
       updateAttribute(){
+        this.loading = true
         this.$bvModal.hide("modal-scrollable-edit");
         if (!roleService.hasEditPermission(this.pageIdentity)){
           alertBox("You do no have the permission to perform this action!", false)
@@ -308,9 +318,13 @@ export default {
             alertBox("Attribute Updated Successfully!", true)
             this.newAttr = {options: []};
          })
-         .catch(handleAxiosError);
+         .catch(handleAxiosError)
+         .finally(() => {
+           this.loading = false
+         });
       },
       deleteAttribute(){
+        this.loading = true
         this.$bvModal.hide("modal-delete-page");
         if (!roleService.hasDeletePermission(this.pageIdentity)){
           alertBox("You do no have the permission to perform this action!", false)
@@ -328,7 +342,10 @@ export default {
           this.data = response.data,
           alertBox("Attribute Deleted Successfully!", true)
         ))
-        .catch(handleAxiosError);
+        .catch(handleAxiosError)
+        .finally(() => {
+          this.loading = false
+        });
       },
       addOption(){
         if (!roleService.hasCreatePermission(this.pageIdentity)){
@@ -377,6 +394,7 @@ export default {
         .catch(handleAxiosError);
       },
       addAttributeGroup(){
+        this.loading = true
         this.$bvModal.hide("modal-attribute-groups");
         if (!roleService.hasCreatePermission(this.pageIdentity)){
           alertBox("You do no have the permission to perform this action!", false)
@@ -392,9 +410,13 @@ export default {
           alertBox("Attribute Group Created Successfully!", true)
           this.newGroup = {name: ""};
         })
-        .catch(handleAxiosError);
+        .catch(handleAxiosError)
+        .finally(() => {
+          this.loading = false
+        });
       },
       deleteAttributeGroup(group){
+        this.loading = true
         this.$bvModal.hide("modal-attribute-groups");
         if (!roleService.hasDeletePermission(this.pageIdentity)){
           alertBox("You do no have the permission to perform this action!", false)
@@ -409,7 +431,10 @@ export default {
           .get(`${this.backendURL}/api/v1/products/attributes/groups` , authHeader())
           .then(response => (this.attributeGroups = response.data.data))
         })
-        .catch(handleAxiosError);
+        .catch(handleAxiosError)
+        .finally(() => {
+          this.loading = false
+        });
       }
   },
 };
@@ -417,6 +442,11 @@ export default {
 
 <template>
   <Layout>
+    <div class="spinner"  v-if="this.loading">
+      <div class="text-center loader">
+       <b-spinner  style="width: 6rem; height: 6rem;" variant="primary" type="grow" label="Spinning"></b-spinner>
+      </div>
+    </div>
     <PageHeader :title="title" :items="items" />
 
     <div class="row">
@@ -1050,3 +1080,20 @@ export default {
     <!-- end row -->
   </Layout>
 </template>
+
+<style scoped>
+.spinner {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+    height: 100%;
+    width: 100%;
+    z-index: 20000;
+  }
+  .loader {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+  }
+</style>

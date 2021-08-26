@@ -27,6 +27,7 @@ export default {
       backendURL: process.env.VUE_APP_BACKEND_URL,
       customersData: [],
       customersDataLength: 1,
+      loading: false,
       authConfig: {
         headers:{
           authorization: ""
@@ -108,12 +109,16 @@ export default {
   },
   mounted() {
       // Set the initial number of items
+      this.loading = true
       this.totalRows = this.items.length;
       axios
       .get(`${this.backendURL}/api/v1/customers?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
       .then(response => (this.customersData = convert(response.data.data),
                          this.customersDataLength = response.data.pagination.total))
-      .catch(handleAxiosError);
+      .catch(handleAxiosError)
+      .finally(() => {
+        this.loading = false
+      });
   },
   methods: {
       /**
@@ -129,6 +134,7 @@ export default {
       },
 
       deleteCustomer(id){
+        this.loading = true
         this.$bvModal.hide("modal-delete-customer");
         if (!roleService.hasDeletePermission(this.pageIdentity)){
           alertBox("You do no have the permission to perform this action!", false)
@@ -141,7 +147,10 @@ export default {
           this.handlePageChange(1),
           alertBox("Customer Deleted Successfully!", true)
           )
-        .catch(handleAxiosError);
+        .catch(handleAxiosError)
+        .finally(() => {
+          this.loading = false
+        });
       },
       handlePageChange(value) {
           this.currentPage = value;
@@ -164,6 +173,11 @@ export default {
 
 <template>
   <Layout>
+    <div class="spinner"  v-if="this.loading">
+      <div class="text-center loader">
+       <b-spinner  style="width: 6rem; height: 6rem;" variant="primary" type="grow" label="Spinning"></b-spinner>
+      </div>
+    </div>
     <PageHeader :title="title" :items="items" />
 
     <div class="row">
@@ -288,3 +302,19 @@ export default {
     </b-modal>
   </Layout>
 </template>
+<style scoped>
+.spinner {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+    height: 100%;
+    width: 100%;
+    z-index: 20000;
+  }
+  .loader {
+    position: absolute;
+    top: 40%;
+    left: 50%;
+  }
+</style>

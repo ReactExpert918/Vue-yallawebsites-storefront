@@ -52,6 +52,7 @@ export default {
       filter: null,
       filterOn: [],
       selected: [],
+      loading: false,
       isCheckAll: false,
       sortBy: "age",
       sortDesc: false,
@@ -114,12 +115,16 @@ export default {
   },
   mounted() {
       // Set the initial number of items
+      this.loading = true
       this.totalRows = this.items.length;
       axios
       .get(`${this.backendURL}/api/v1/customers/groups?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
       .then(response => (this.customerGroupsData = response.data.data,
                         this.customerGroupsDataLength = response.data.pagination.total))
-      .catch(handleAxiosError);
+      .catch(handleAxiosError)
+      .finally(() => {
+        this.loading = false
+      });
   },
   methods: {
       /**
@@ -143,6 +148,7 @@ export default {
       .catch(handleAxiosError);
       },
       deleteCustomerGroup(id) {
+        this.loading = true
         this.$bvModal.hide("modal-delete-customer-group");
         if(!roleService.hasDeletePermission(this.pageIdentity)){
           alertBox("You do no have the permission to perform this action!", false)
@@ -158,9 +164,13 @@ export default {
           .catch(handleAxiosError),
           alertBox("Customer Group Deleted Successfully!", true)
           )
-        .catch(handleAxiosError);
+        .catch(handleAxiosError)
+        .finally(() => {
+          this.loading = false
+        });
       },
       createCustomerGroup(e){
+        this.loading = true
         this.$bvModal.hide("modal-add-group")
         if(!roleService.hasCreatePermission(this.pageIdentity)){
           alertBox("You do no have the permission to perform this action!", false)
@@ -179,9 +189,13 @@ export default {
           this.data = response.data,
           alertBox("Customer Group Created Successfully!", true)
           ))
-        .catch(handleAxiosError);
+        .catch(handleAxiosError)
+        .finally(() => {
+          this.loading = false
+        });
       },
       updateCustomerGroup(e){
+        this.loading = true;
         this.$bvModal.hide("modal-edit-group")
         if(!roleService.hasEditPermission(this.pageIdentity)){
           alertBox("You do no have the permission to perform this action!", false)
@@ -199,7 +213,10 @@ export default {
           .catch(handleAxiosError),
           this.data = response.data,
           alertBox("Customer Group Updated Successfully!", true)))
-        .catch(handleAxiosError);
+        .catch(handleAxiosError)
+        .finally(() => {
+          this.loading = false
+        });
       },
       handlePageChange(value) {
         this.currentPage = value;
@@ -222,6 +239,11 @@ export default {
 
 <template>
   <Layout>
+    <div class="spinner"  v-if="this.loading">
+      <div class="text-center loader">
+       <b-spinner  style="width: 6rem; height: 6rem;" variant="primary" type="grow" label="Spinning"></b-spinner>
+      </div>
+    </div>
     <PageHeader :title="title" :items="items" />
 
     <div class="row">
@@ -414,3 +436,20 @@ export default {
     </b-modal>
   </Layout>
 </template>
+
+<style scoped>
+.spinner {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+    height: 100%;
+    width: 100%;
+    z-index: 20000;
+  }
+  .loader {
+    position: absolute;
+    top: 30%;
+    left: 50%;
+  }
+</style>

@@ -32,6 +32,7 @@ export default {
       pageIdentity: "products",
       backendURL: process.env.VUE_APP_BACKEND_URL,
       data: "",
+      loading: false,
       productData: {
         layout:{} , 
         meta_keywords_str:"" ,
@@ -173,6 +174,7 @@ export default {
       },
   },
   mounted() {
+    this.loading = true;
       axios
       .get(`${this.backendURL}/api/v1/pages/layouts` , authHeader())
       .then(response => (this.layouts = response.data.data))
@@ -343,7 +345,10 @@ export default {
           .catch(handleAxiosError);
 
       })
-      .catch(handleAxiosError);
+      .catch(handleAxiosError)
+      .finally(() => {
+        this.loading = false
+      });
   },
   methods: {
       handlePageChange(value) {
@@ -655,6 +660,11 @@ export default {
 
 <template>
   <Layout>
+    <div class="spinner"  v-if="this.loading">
+      <div class="text-center loader">
+       <b-spinner  style="width: 6rem; height: 6rem;" variant="primary" type="grow" label="Spinning"></b-spinner>
+      </div>
+    </div>
     <PageHeader :title="title" :items="items" />
     <div class="row">
       <div class="col-9">
@@ -1107,3 +1117,19 @@ export default {
     </b-modal>
   </Layout>
 </template>
+<style scoped>
+.spinner {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+    height: 100%;
+    width: 100%;
+    z-index: 20000;
+  }
+  .loader {
+    position: absolute;
+    top: 30%;
+    left: 50%;
+  }
+</style>

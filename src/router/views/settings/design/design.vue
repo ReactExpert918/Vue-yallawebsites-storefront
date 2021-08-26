@@ -26,6 +26,7 @@ export default {
       pageIdentity: "designs",
       backendURL: process.env.VUE_APP_BACKEND_URL,
       data: "",
+      loading: false,
       configuration: {
           id:"",
           site_logo:"",
@@ -74,6 +75,7 @@ export default {
     };
   },
   mounted(){
+    this.loading = true
     axios
     .get(`${this.backendURL}/api/v1/design/configurations` , authHeader())
     .then(response => {
@@ -94,6 +96,9 @@ export default {
     .get(`${this.backendURL}/api/v1/design/themes` , authHeader())
     .then(response => (this.themesData = response.data.data))
     .catch(handleAxiosError)
+    .finally(() => {
+      this.loading = false
+    })
 
   },
   methods:{
@@ -157,6 +162,11 @@ export default {
 
 <template>
   <Layout>
+    <div class="spinner"  v-if="this.loading">
+      <div class="text-center loader">
+       <b-spinner  style="width: 6rem; height: 6rem;" variant="primary" type="grow" label="Spinning"></b-spinner>
+      </div>
+    </div>
     <PageHeader :title="title" :items="items" />
     <div class="row">
       <div class="col-lg-12">
@@ -365,3 +375,19 @@ export default {
     </div>
   </Layout>
 </template>
+<style scoped>
+.spinner {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+    height: 100%;
+    width: 100%;
+    z-index: 20000;
+  }
+  .loader {
+    position: absolute;
+    top: 20%;
+    left: 50%;
+  }
+</style>

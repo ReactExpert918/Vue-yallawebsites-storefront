@@ -39,6 +39,7 @@ export default {
         }
       ],
       totalRows: 1,
+      loading: false,
       currentPage: 1,
       perPage: 10,
       pageOptions: [10, 25, 50, 100],
@@ -103,17 +104,22 @@ export default {
     }
   },
   mounted() {
+    this.loading = true
       axios
       .get(`${this.backendURL}/api/v1/orders?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
       .then(response => (this.ordersData = convert(response.data.data),
                         this.ordersDataLength = response.data.pagination.total))
-      .catch(handleAxiosError);
+      .catch(handleAxiosError)
+      .finally(() => {
+        this.loading = false
+      });
   },
   methods: {
       /**
         * Search the table data with search input
         */
       cancelOrder() {
+        this.loading = true
         this.$bvModal.hide("modal-cancel-order");
         if (!roleService.hasEditPermission(this.pageIdentity)){
           alertBox("You do no have the permission to perform this action!", false);
@@ -130,7 +136,10 @@ export default {
           .catch(handleAxiosError),
           alertBox(`Order Deleted Succesfully!`, true)
           ))
-        .catch(handleAxiosError);
+        .catch(handleAxiosError)
+        .finally(() => {
+          this.loading = false
+        });
       },
       uncheckSelectAll(){
         this.selectedAll = false
@@ -161,6 +170,11 @@ export default {
 
 <template>
   <Layout>
+    <div class="spinner"  v-if="this.loading">
+      <div class="text-center loader">
+       <b-spinner  style="width: 6rem; height: 6rem;" variant="primary" type="grow" label="Spinning"></b-spinner>
+      </div>
+    </div>
     <PageHeader :title="title" :items="items" />
 
     <div class="row">
@@ -292,3 +306,20 @@ export default {
     </b-modal>
   </Layout>
 </template>
+
+<style scoped>
+.spinner {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+    height: 100%;
+    width: 100%;
+    z-index: 20000;
+  }
+  .loader {
+    position: absolute;
+    top: 30%;
+    left: 50%;
+  }
+</style>

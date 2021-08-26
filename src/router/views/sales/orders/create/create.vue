@@ -119,6 +119,7 @@ export default {
               sortable: true,
           }
       ],
+      loading: false,
     };
   },
   computed: {
@@ -152,12 +153,7 @@ export default {
      },
   },
   mounted() {
-      axios
-      .get(`${this.backendURL}/api/v1/customers?per_page=${this.perPage}&page=${this.currentPage}&address=true` , authHeader())
-      .then(response => (this.customers = response.data.data,
-      this.customersLength = response.data.pagination.total))
-      .catch(handleAxiosError);
-
+    this.loading = true
       axios
       .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}&quantity_greater_than=${this.productQuantityGreaterThan}&with_disabled=false` , authHeader())
       .then(response => {
@@ -191,13 +187,30 @@ export default {
       axios
       .get(`${this.backendURL}/api/v1/shipping/methods` , authHeader())
       .then(response => (this.shippingData = response.data.data))
-      .catch(handleAxiosError);
+      .catch(handleAxiosError)
+      .finally(() => {
+        this.loading = false
+      });
       
   },
   methods: {
       /**
         * Search the table data with search input 
         */
+       change() {
+        //  alert(this.customers.length)
+        if(this.customers.length == 0) {
+          this.loading = true 
+          axios
+          .get(`${this.backendURL}/api/v1/customers?per_page=${this.perPage}&page=${this.currentPage}&address=true` , authHeader())
+          .then(response => (this.customers = response.data.data,
+          this.customersLength = response.data.pagination.total))
+          .catch(handleAxiosError)
+          .finally(() => {
+            this.loading = false
+          });
+        }
+       },
        addProduct() {
          this.$bvModal.hide("modal-scrollable");
        },
@@ -360,6 +373,11 @@ export default {
 
 <template>
   <Layout>
+    <div class="spinner"  v-if="this.loading">
+      <div class="text-center loader">
+       <b-spinner  style="width: 6rem; height: 6rem;" variant="primary" type="grow" label="Spinning"></b-spinner>
+      </div>
+    </div>
     <PageHeader :title="title" :items="items" />
 
     <div class="row">
@@ -431,7 +449,7 @@ export default {
                         <span class="d-inline-block d-sm-none">
                           <i class="far fa-envelope"></i>
                         </span>
-                        <span class="d-none d-sm-inline-block">Existing Customer <span class="red"> *</span></span>
+                        <span class="d-none d-sm-inline-block" @click="change()">Existing Customer <span class="red"> *</span></span>
                       </template>
                       <div class="card-body">
                           <div class="row mt-4">
@@ -476,7 +494,6 @@ export default {
                                     @change="uncheckSelectAll"
                                     v-model="selectedCustomer"
                                     :value="data.item"
-                                    
                                     class="custom-checkbox custom-checkbox-primary"
                                     
                                   ></b-form-checkbox>
@@ -743,3 +760,19 @@ export default {
     </b-modal>
   </Layout>
 </template>
+<style scoped>
+.spinner {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+    height: 100%;
+    width: 100%;
+    z-index: 20000;
+  }
+  .loader {
+    position: absolute;
+    top: 15%;
+    left: 50%;
+  }
+</style>

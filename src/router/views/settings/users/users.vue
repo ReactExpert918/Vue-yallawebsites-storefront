@@ -26,6 +26,7 @@ export default {
       pageIdentity: "user_management",
       selectedAll: false,
       data: "",
+      loader: false,
       backendURL: process.env.VUE_APP_BACKEND_URL,
       usersData: [],
       usersDataLength: 1,
@@ -111,7 +112,6 @@ export default {
         * Total no. of records
         */
       isDisible() {
-        window.console.log(this.createUserPayload.first_name)
         if(this.createUserPayload.first_name == "" || this.createUserPayload.last_name == "" || this.createUserPayload.billing_addresses == ""
         || this.createUserPayload.password_confirmation == "" || this.createUserPayload.password != this.createUserPayload.password_confirmation
         || !mailValidate(this.createUserPayload.email || !passValidate(this.createUserPayload.password, this.createUserPayload.password_confirmation))) {
@@ -137,6 +137,7 @@ export default {
   },
   mounted() {
       // Set the initial number of items
+      this.loader = true
       this.totalRows = this.items.length;
       axios
       .get(`${this.backendURL}/api/v1/users?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
@@ -165,7 +166,10 @@ export default {
       axios
       .get(`${this.backendURL}/api/v1/users/roles/contents` , authHeader())
       .then(response => (this.roleContents = response.data.data))
-      .catch(handleAxiosError);
+      .catch(handleAxiosError)
+      .finally(() => {
+        this.loader = false
+      });
   },
   methods: {
       /**
@@ -179,16 +183,17 @@ export default {
           this.totalRows = filteredItems.length;
           this.currentPage = 1;
       },
-      deleteUser(id){
+      deleteUser(){
+        this.loader = true
         this.$bvModal.hide("modal-delete-user")
         if (!roleService.hasDeletePermission(this.pageIdentity)){
           alertBox("You do no have the permission to perform this action!", false)
           return;
         }
         axios
-        .delete(`${this.backendURL}/api/v1/users/${id}` , authHeader())
+        .delete(`${this.backendURL}/api/v1/users/${this.currentUser.id}` , authHeader())
         .then(
-          axios
+         axios
           .get(`${this.backendURL}/api/v1/users?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
           .then(response => {
             this.usersData = response.data.data,
@@ -196,9 +201,13 @@ export default {
           }),
           alertBox("User deleted successfully!", true)
           )
-        .catch(handleAxiosError);
+        .catch(handleAxiosError)
+        .finally(() => {
+          this.loader = false
+        });
       },
       createUser(e){
+        this.loader = true
         this.$bvModal.hide("modal-scrollable-add-user")
         if (!roleService.hasCreatePermission(this.pageIdentity)){
           alertBox("You do no have the permission to perform this action!", false)
@@ -208,24 +217,6 @@ export default {
         this.createUserPayload.role_id = this.currentRoleID
         axios
         .post(`${this.backendURL}/api/v1/users` , this.createUserPayload , authHeader())
-        .then(response => {
-          this.handlePageChange(10),
-          alertBox("User Created successfully!", true)
-            this.$refs.vueCreateDropzone.setOption("url" , `${this.backendURL}/api/v1/users/${response.data.data.id}/upload`);
-            this.$refs.vueCreateDropzone.processQueue();
-         })
-        .catch(handleAxiosError);
-      },
-      updateUser(e){
-        this.$bvModal.hide("modal-scrollable-edit-user")
-        if (!roleService.hasEditPermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!", false)
-          return;
-        }
-        e.preventDefault();
-        this.currentUser.role_id = this.currentUser.role.id;
-        axios
-        .put(`${this.backendURL}/api/v1/users/${this.currentUser.id}` , this.currentUser , authHeader())
         .then(response => {
           axios
           .get(`${this.backendURL}/api/v1/users?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
@@ -245,12 +236,51 @@ export default {
                 }
               }
             }
+          })
+          .catch(handleAxiosError),
+          axios
+          .get(`${this.backendURL}/api/v1/users/roles` , authHeader())
+          .then(response => (this.rolesData = response.data.data))
+          .catch(handleAxiosError),
+          axios
+          .get(`${this.backendURL}/api/v1/users/roles/contents` , authHeader())
+          .then(response => (this.roleContents = response.data.data))
+          .catch(handleAxiosError),
+          alertBox("User Created successfully!", true)
+            this.$refs.vueCreateDropzone.setOption("url" , `${this.backendURL}/api/v1/users/${response.data.data.id}/upload`);
+            this.$refs.vueCreateDropzone.processQueue();
+         })
+        .catch(handleAxiosError)
+        .finally(() => {
+          this.loader = false
+        });
+      },
+      updateUser(e){
+        this.loader = true
+        this.$bvModal.hide("modal-scrollable-edit-user")
+        if (!roleService.hasEditPermission(this.pageIdentity)){
+          alertBox("You do no have the permission to perform this action!", false)
+          return;
+        }
+        e.preventDefault();
+        this.currentUser.role_id = this.currentUser.role.id;
+        axios
+        .put(`${this.backendURL}/api/v1/users/${this.currentUser.id}` , this.currentUser , authHeader())
+        .then(response => {
+          axios
+          .get(`${this.backendURL}/api/v1/users?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
+          .then(response => {
+            this.usersData = response.data.data,
+            this.usersDataLength = response.data.pagination.total;
           }),
           this.data = response.data,
           alertBox("User Updated Successfully!", true)
           this.$refs.myVueDropzone.processQueue();
          })
-        .catch(handleAxiosError);
+        .catch(handleAxiosError)
+        .finally(() =>{
+          this.loader = false
+        });
       },
       isUserRole(role) {
         if (role.id == this.currentUser.role.id){
@@ -298,6 +328,11 @@ export default {
 
 <template>
   <Layout>
+    <div class="spinner"  v-if="this.loader">
+      <div class="text-center loader">
+       <b-spinner  style="width: 6rem; height: 6rem;" variant="primary" type="grow" label="Spinning"></b-spinner>
+      </div>
+    </div>
     <PageHeader :title="title" :items="items" />
 
     <div class="row">
@@ -636,8 +671,25 @@ export default {
     <b-modal id="modal-delete-user" centered title="Delete User" title-class="font-18" hide-footer>
       <p>Are you sure? Pressing Delete will remove this user permenantly.</p>
       <div class="text-right">
-        <b-button variant="danger" @click="deleteUser(currentUser.id)">Delete</b-button>
+        <b-button variant="danger" @click="deleteUser()">Delete</b-button>
       </div>
     </b-modal>
   </Layout>
 </template>
+
+<style scoped>
+.spinner {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+    height: 100%;
+    width: 100%;
+    z-index: 20000;
+  }
+  .loader {
+    position: absolute;
+    top: 30%;
+    left: 50%;
+  }
+</style>
