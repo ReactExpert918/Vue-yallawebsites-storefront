@@ -983,7 +983,7 @@ export default {
   }
   .loader {
     position: absolute;
-    top: 30%;
+    top: 300px;
     left: 50%;
   }
 </style>
