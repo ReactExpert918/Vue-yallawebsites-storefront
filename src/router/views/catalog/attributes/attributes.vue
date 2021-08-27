@@ -24,6 +24,7 @@ export default {
   components: { Layout, PageHeader, draggable, },
   data() {
     return {
+      optionType: false,
       pageIdentity: "attributes",
       backendURL: process.env.VUE_APP_BACKEND_URL,
       primarycheck: null, 
@@ -127,11 +128,20 @@ export default {
       }
     },
     isdisable() {
-      if(this.newAttr.name == undefined || this.newAttr.name == "" 
-      || this.newAttr.option_name == "" || this.newAttr.option_name == undefined|| this.newAttr.option_label == "" || this.newAttr.option_label == undefined) {
-        return true;
-      } else {
-        return false;
+      if(!this.optionType) {
+        if(this.newAttr.name == undefined || this.newAttr.code == undefined || this.newAttr.code == "") {
+          return true;
+        } else {
+          return false;
+        }
+      }
+      else {
+        if(this.newAttr.name == undefined || this.newAttr.code == undefined || this.newAttr.code == ""
+        || this.newAttr.option_name == "" || this.newAttr.option_name == undefined|| this.newAttr.option_label == "" || this.newAttr.option_label == undefined) {
+          return true;
+        } else {
+          return false;
+        }
       }
     },
     rows() {
@@ -171,11 +181,12 @@ export default {
       axios
       .get(`${this.backendURL}/api/v1/products/attributes/groups` , authHeader())
       .then(response => (this.attributeGroups = response.data.data,
-      this.currentAttribute.group = response.data.data[0]))
-       axios
+      this.currentAttribute.group = response.data.data[0],
+      this.newAttr.group_id = response.data.data[0].id))
+      axios
       .get(`${this.backendURL}/api/v1/products/attributes/types` , authHeader())
       .then(response => (this.attrTypes = response.data.data,
-      this.currentAttribute.type.id = response.data.data[0].id))
+      this.newAttr.type_id = response.data.data[0].id))
       .catch(handleAxiosError)
       .finally(() => {
         this.loading = false
@@ -415,6 +426,14 @@ export default {
           this.loading = false
         });
       },
+      changeOptionType() {
+        if(this.newAttr.type_id !== "8877d113-3791-4b8d-90f8-662fa63b7d1a") {
+          this.optionType = true
+        }
+        else {
+          this.optionType = false
+        }
+      },
       deleteAttributeGroup(group){
         this.loading = true
         this.$bvModal.hide("modal-attribute-groups");
@@ -653,7 +672,7 @@ export default {
                   <div class="dropdownOptions">
                     <div class="row mb-3">
                       <div class="col-sm-12 mb-3">
-                        <span class="red"> *</span>
+                        <span v-if="this.optionType" class="red"> *</span>
                         <b-form-input 
                           for="text" 
                           placeholder="Option Label" 
@@ -661,7 +680,7 @@ export default {
                         ></b-form-input>
                       </div>
                       <div class="col-sm-9">
-                        <span class="red"> *</span>
+                        <span v-if="this.optionType" class="red"> *</span>
                         <b-form-input 
                           for="text" 
                           placeholder="Option Name" 
@@ -815,7 +834,7 @@ export default {
                         v-model="newAttr.required"
                       ></b-form-checkbox>
                       <label class="mt-3">Option Type <span class="red"> *</span></label>
-                      <select class="custom-select" v-model="newAttr.type_id">
+                      <select class="custom-select" @change="changeOptionType()" v-model="newAttr.type_id">
                          <option 
                           v-for="attrType in attrTypes" 
                           v-bind:value="attrType.id" 
@@ -859,7 +878,7 @@ export default {
                   <div class="dropdown-options">
                     <div class="row mb-3">
                       <div class="col-sm-12 mb-3">
-                        <span class="red"> *</span>
+                        <span v-if="this.optionType" class="red"> *</span>
                         <b-form-input 
                           for="text" 
                           placeholder="Option Label" 
@@ -867,7 +886,7 @@ export default {
                         ></b-form-input>
                       </div>
                       <div class="col-sm-9">
-                        <span class="red"> *</span>
+                        <span v-if="this.optionType" class="red"> *</span>
                         <b-form-input 
                           for="text" 
                           placeholder="Option Name" 
