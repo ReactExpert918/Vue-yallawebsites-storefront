@@ -1129,7 +1129,7 @@ export default {
   }
   .loader {
     position: absolute;
-    top: 30%;
+    top: 10%;
     left: 50%;
   }
 </style>
