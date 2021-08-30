@@ -27,6 +27,7 @@ export default {
         billing_addresses:[{} , {}],
         shipping_addresses: [{} , {}],
         orders: [],
+        group_id: ""
       },
       loading: false,
       customerGroups: [],
@@ -55,6 +56,7 @@ export default {
           .get(`${this.backendURL}/api/v1/customers/${this.$route.params.id}` , authHeader())
           .then(response => {
               this.customer = response.data.data
+              this.customer.group_id = this.customer.group.id
               if (this.customer.billing_addresses.length == 0){
                 this.customer.billing_addresses = [{} , {}];
               }
@@ -68,7 +70,7 @@ export default {
                 this.customer.shipping_addresses.push({});
               }
               if(this.customer.group == null){
-                this.customer.group = this.currentGroupId;
+                this.customer.group_id = this.currentGroupId.id;
               }
             })
             .catch(handleAxiosError)
@@ -148,7 +150,7 @@ export default {
                   </div>
                   <div class="col-sm-3">
                     <label class="mt-3">Customer Group</label>
-                    <select class="custom-select" v-model="customer.group.id">
+                    <select class="custom-select" v-model="customer.group_id">
                       <option v-for="group in customerGroups" v-bind:value="group.id" :key="group.id" :selected="group.id == customer.group.id">{{group.name}}</option>
                     </select>
                   </div>
