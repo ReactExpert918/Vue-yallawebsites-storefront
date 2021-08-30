@@ -45,35 +45,38 @@ export default {
   },
   mounted() {
       this.loading = true
-      axios
-      .get(`${this.backendURL}/api/v1/customers/${this.$route.params.id}` , authHeader())
-      .then(response => {
-          this.customer = response.data.data
-          if (this.customer.billing_addresses.length == 0){
-            this.customer.billing_addresses = [{} , {}];
-          }
-          if (this.customer.shipping_addresses.length == 0){
-            this.customer.shipping_addresses = [{} , {}];
-          }
-          if (this.customer.billing_addresses.length == 1){
-            this.customer.billing_addresses.push({});
-          }
-          if (this.customer.shipping_addresses.length == 1){
-            this.customer.shipping_addresses.push({});
-          }
-          if(this.customer.group == null){
-            this.customer.group = {};
-          }
-        })
-        .catch(handleAxiosError);
-      axios
-      .get(`${this.backendURL}/api/v1/customers/groups?per_page=-1` , authHeader())
-      .then(response => (this.customerGroups = response.data.data,
-                        this.currentGroupId = response.data.data[0].id))
-      .catch(handleAxiosError)
-      .finally(() => {
-        this.loading = false
-      });
+        axios
+        .get(`${this.backendURL}/api/v1/customers/groups?per_page=-1` , authHeader())
+        .then(response => (this.customerGroups = response.data.data,
+                          this.currentGroupId = response.data.data[0]))
+        .catch(handleAxiosError)
+        .finally(() => {
+          axios
+          .get(`${this.backendURL}/api/v1/customers/${this.$route.params.id}` , authHeader())
+          .then(response => {
+              this.customer = response.data.data
+              if (this.customer.billing_addresses.length == 0){
+                this.customer.billing_addresses = [{} , {}];
+              }
+              if (this.customer.shipping_addresses.length == 0){
+                this.customer.shipping_addresses = [{} , {}];
+              }
+              if (this.customer.billing_addresses.length == 1){
+                this.customer.billing_addresses.push({});
+              }
+              if (this.customer.shipping_addresses.length == 1){
+                this.customer.shipping_addresses.push({});
+              }
+              if(this.customer.group == null){
+                this.customer.group = this.currentGroupId;
+              }
+            })
+            .catch(handleAxiosError)
+            .finally(() => {
+              this.loading = false
+            });
+        
+        });
   },
   methods:{
      updateCustomer(){
