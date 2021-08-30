@@ -120,6 +120,7 @@ export default {
       axios
       .get(`${this.backendURL}/api/v1/customers/groups?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
       .then(response => (this.customerGroupsData = response.data.data,
+      window.console.log(this.customerGroupsData),
                         this.customerGroupsDataLength = response.data.pagination.total))
       .catch(handleAxiosError)
       .finally(() => {
@@ -316,7 +317,8 @@ export default {
                       <template #cell(rule)="data">
                           {{data.item.rule.calculation}}
                           {{data.item.rule.value}}
-                          {{data.item.rule.metric}}
+                          <span v-if="data.item.rule.metric == 'flat'">$</span>
+                          <span v-else>%</span>
                       </template>
                       <template #cell(actions)="data">
                         <b-dropdown class="card-drop" variant="white" right toggle-class="p-0">
@@ -414,8 +416,8 @@ export default {
           <b-form-input type="number" step="0.01" for="number" v-model="currentGroup.rule.value"></b-form-input>
           <label class="mt-3">Price Metric</label>
           <select class="custom-select" v-model="currentGroup.rule.metric">
-            <option value="percentage" :selected="currentGroup.rule.metric == 'percentage'">Percentage</option>
-            <option value="flat" :selected="currentGroup.rule.metric == 'flat'">Flat</option>
+            <option value="percentage" :selected="currentGroup.rule.metric == 'percentage'">%</option>
+            <option value="flat" :selected="currentGroup.rule.metric == 'flat'">$</option>
           </select>
         </div>
       </div>

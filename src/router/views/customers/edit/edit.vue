@@ -30,6 +30,7 @@ export default {
       },
       loading: false,
       customerGroups: [],
+      currentGroupId: "",
       title: "Edit Customer",
       items: [
         {
@@ -67,7 +68,8 @@ export default {
         .catch(handleAxiosError);
       axios
       .get(`${this.backendURL}/api/v1/customers/groups?per_page=-1` , authHeader())
-      .then(response => (this.customerGroups = response.data.data))
+      .then(response => (this.customerGroups = response.data.data,
+                        this.currentGroupId = response.data.data[0].id))
       .catch(handleAxiosError)
       .finally(() => {
         this.loading = false
@@ -79,9 +81,8 @@ export default {
           alert("You do no have the permission to perform this action!")
           return;
        }
-       window.console.log(this.customer.billing_addresses);
        // Using hardcoded country code for now as there is no option in front-end for selecting country from a list now, Need to add that and remove the following loops
-     
+      window.console.log(this.customer);
         axios
         .put(`${this.backendURL}/api/v1/customers/${this.$route.params.id}` , this.customer , authHeader())
         .then(response => (
@@ -144,8 +145,8 @@ export default {
                   </div>
                   <div class="col-sm-3">
                     <label class="mt-3">Customer Group</label>
-                    <select class="custom-select" v-model="customer.group_id">
-                      <option v-for="group in customerGroups" v-bind:value="group.id" :key="group.id" :selected="customer.group != null && group.id == customer.group.id">{{group.name}}</option>
+                    <select class="custom-select" v-model="customer.group.id">
+                      <option v-for="group in customerGroups" v-bind:value="group.id" :key="group.id" :selected="group.id == customer.group.id">{{group.name}}</option>
                     </select>
                   </div>
                   <div class="col-sm-3">
