@@ -248,21 +248,21 @@ export default {
 
         }
 
-        axios
-        .get(`${this.backendURL}/api/v1/products/attributes/groups` , authHeader())
-        .then(response => {
-          this.attrGroups = response.data.data;
-          if (this.attrGroups.length > 0){
-            this.currentAttrGroup = this.attrGroups[0];
-          }
-          for(var i = 0; i < this.attrGroups.length; i++){
-            if(this.attrGroups[i].id in this.attrGrpMap){
-              this.attrGroups[i].attributes = this.attrGrpMap[this.attrGroups[i].id];
+          axios
+          .get(`${this.backendURL}/api/v1/products/attributes/groups` , authHeader())
+          .then(response => {
+            this.attrGroups = response.data.data;
+            if (this.attrGroups.length > 0){
+              this.currentAttrGroup = this.attrGroups[0];
             }
-         }
-        this.custom_specs = this.currentAttrGroup.attributes;
-      })
-      .catch(handleAxiosError);
+            for(var i = 0; i < this.attrGroups.length; i++){
+              if(this.attrGroups[i].id in this.attrGrpMap){
+                this.attrGroups[i].attributes = this.attrGrpMap[this.attrGroups[i].id];
+              }
+          }
+          this.custom_specs = this.currentAttrGroup.attributes;
+        })
+        .catch(handleAxiosError);
 
       })
       .catch(handleAxiosError)
