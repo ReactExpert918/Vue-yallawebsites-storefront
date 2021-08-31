@@ -24,6 +24,7 @@ export default {
       pageIdentity: "domains",
       selectedAll: false,
       data: "",
+      loader: true,
       backendURL: process.env.VUE_APP_BACKEND_URL,
       domainsData: [],
       domainsDataLength: 1,
@@ -97,10 +98,14 @@ export default {
   mounted() {
       // Set the initial number of items
       this.totalRows = this.items.length;
+      this.loader = true
       axios
       .get(`${this.backendURL}/api/v1/domains?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
       .then(response => (this.domainsData = response.data.data))
-      .catch(handleAxiosError);
+      .catch(handleAxiosError)
+      .finally(() => {
+        this.loader = false
+      });
   },
   methods: {
       /**
@@ -115,6 +120,7 @@ export default {
           this.currentPage = 1;
       },
       verifyDomain(){
+        this.loader = true
         this.$bvModal.hide("modal-scrollable-verify-domain")
         if (!roleService.hasEditPermission(this.pageIdentity)){
           alertBox("You do no have the permission to perform this action!", false)
@@ -140,9 +146,13 @@ export default {
             alertBox("Domain is not verified!", false)
           }
         })
-        .catch(handleAxiosError);
+        .catch(handleAxiosError)
+        .finally(() => {
+          this.loader = false
+        });
       },
       addDomain(){
+        this.loader = true
         this.$bvModal.hide("modal-scrollable-add-domain")
         if (!roleService.hasCreatePermission(this.pageIdentity)){
           alertBox("You do no have the permission to perform this action!", false)
@@ -158,9 +168,13 @@ export default {
           this.data = response.data,
           alertBox("Domain created successfully!", true)
           ))
-        .catch(handleAxiosError);
+        .catch(handleAxiosError)
+        .finally(() => {
+          this.loader = false
+        });
       },
       deleteDomain(){
+        this.loader = true
         this.$bvModal.hide("modal-scrollable-delete-domain")
         if (!roleService.hasDeletePermission(this.pageIdentity)){
           alertBox("You do no have the permission to perform this action!", false)
@@ -175,7 +189,10 @@ export default {
                            this.domainsDataLength = response.data.pagination.total)),
           this.data = response.data,
           alertBox("Domain deleted successfully!", true)))
-        .catch(handleAxiosError);
+        .catch(handleAxiosError)
+        .finally(() => {
+          this.loader = false
+        });
       },
       handlePageChange(value) {
         this.currentPage = value;
@@ -198,6 +215,11 @@ export default {
 
 <template>
   <Layout>
+    <div class="spinner"  v-if="this.loader">
+      <div class="text-center loader">
+       <b-spinner  style="width: 6rem; height: 6rem;" variant="primary" type="grow" label="Spinning"></b-spinner>
+      </div>
+    </div>
     <PageHeader :title="title" :items="items" />
 
     <div class="row">
@@ -360,3 +382,20 @@ export default {
 
   </Layout>
 </template>
+
+<style scoped>
+.spinner {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+    height: 100%;
+    width: 100%;
+    z-index: 20000;
+  }
+  .loader {
+    position: absolute;
+    top: 40%;
+    left: 50%;
+  }
+</style>

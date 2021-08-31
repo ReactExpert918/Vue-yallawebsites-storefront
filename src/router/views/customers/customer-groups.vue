@@ -52,6 +52,7 @@ export default {
       filter: null,
       filterOn: [],
       selected: [],
+      loading: false,
       isCheckAll: false,
       sortBy: "age",
       sortDesc: false,
@@ -114,12 +115,17 @@ export default {
   },
   mounted() {
       // Set the initial number of items
+      this.loading = true
       this.totalRows = this.items.length;
       axios
       .get(`${this.backendURL}/api/v1/customers/groups?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
       .then(response => (this.customerGroupsData = response.data.data,
+      window.console.log(this.customerGroupsData),
                         this.customerGroupsDataLength = response.data.pagination.total))
-      .catch(handleAxiosError);
+      .catch(handleAxiosError)
+      .finally(() => {
+        this.loading = false
+      });
   },
   methods: {
       /**
@@ -143,6 +149,7 @@ export default {
       .catch(handleAxiosError);
       },
       deleteCustomerGroup(id) {
+        this.loading = true
         this.$bvModal.hide("modal-delete-customer-group");
         if(!roleService.hasDeletePermission(this.pageIdentity)){
           alertBox("You do no have the permission to perform this action!", false)
@@ -158,9 +165,13 @@ export default {
           .catch(handleAxiosError),
           alertBox("Customer Group Deleted Successfully!", true)
           )
-        .catch(handleAxiosError);
+        .catch(handleAxiosError)
+        .finally(() => {
+          this.loading = false
+        });
       },
       createCustomerGroup(e){
+        this.loading = true
         this.$bvModal.hide("modal-add-group")
         if(!roleService.hasCreatePermission(this.pageIdentity)){
           alertBox("You do no have the permission to perform this action!", false)
@@ -179,9 +190,13 @@ export default {
           this.data = response.data,
           alertBox("Customer Group Created Successfully!", true)
           ))
-        .catch(handleAxiosError);
+        .catch(handleAxiosError)
+        .finally(() => {
+          this.loading = false
+        });
       },
       updateCustomerGroup(e){
+        this.loading = true;
         this.$bvModal.hide("modal-edit-group")
         if(!roleService.hasEditPermission(this.pageIdentity)){
           alertBox("You do no have the permission to perform this action!", false)
@@ -199,7 +214,10 @@ export default {
           .catch(handleAxiosError),
           this.data = response.data,
           alertBox("Customer Group Updated Successfully!", true)))
-        .catch(handleAxiosError);
+        .catch(handleAxiosError)
+        .finally(() => {
+          this.loading = false
+        });
       },
       handlePageChange(value) {
         this.currentPage = value;
@@ -222,6 +240,11 @@ export default {
 
 <template>
   <Layout>
+    <div class="spinner"  v-if="this.loading">
+      <div class="text-center loader">
+       <b-spinner  style="width: 6rem; height: 6rem;" variant="primary" type="grow" label="Spinning"></b-spinner>
+      </div>
+    </div>
     <PageHeader :title="title" :items="items" />
 
     <div class="row">
@@ -294,7 +317,8 @@ export default {
                       <template #cell(rule)="data">
                           {{data.item.rule.calculation}}
                           {{data.item.rule.value}}
-                          {{data.item.rule.metric}}
+                          <span v-if="data.item.rule.metric == 'flat'">$</span>
+                          <span v-else>%</span>
                       </template>
                       <template #cell(actions)="data">
                         <b-dropdown class="card-drop" variant="white" right toggle-class="p-0">
@@ -392,8 +416,8 @@ export default {
           <b-form-input type="number" step="0.01" for="number" v-model="currentGroup.rule.value"></b-form-input>
           <label class="mt-3">Price Metric</label>
           <select class="custom-select" v-model="currentGroup.rule.metric">
-            <option value="percentage" :selected="currentGroup.rule.metric == 'percentage'">Percentage</option>
-            <option value="flat" :selected="currentGroup.rule.metric == 'flat'">Flat</option>
+            <option value="percentage" :selected="currentGroup.rule.metric == 'percentage'">%</option>
+            <option value="flat" :selected="currentGroup.rule.metric == 'flat'">$</option>
           </select>
         </div>
       </div>
@@ -414,3 +438,20 @@ export default {
     </b-modal>
   </Layout>
 </template>
+
+<style scoped>
+.spinner {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+    height: 100%;
+    width: 100%;
+    z-index: 20000;
+  }
+  .loader {
+    position: absolute;
+    top: 30%;
+    left: 50%;
+  }
+</style>

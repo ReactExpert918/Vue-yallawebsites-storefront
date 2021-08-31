@@ -8,6 +8,7 @@ import {
 } from "@/helpers/authservice/auth-header";
 import {handleAxiosError} from "@/helpers/authservice/user.service";
 import {roleService} from "@/helpers/authservice/roles";
+import alertBox from "@/helpers/Alert";
 /**
  * Pages component
  */
@@ -26,8 +27,11 @@ export default {
         billing_addresses:[{} , {}],
         shipping_addresses: [{} , {}],
         orders: [],
+        group_id: ""
       },
+      loading: false,
       customerGroups: [],
+      currentGroupId: "",
       title: "Edit Customer",
       items: [
         {
@@ -41,31 +45,40 @@ export default {
     };
   },
   mounted() {
-      axios
-      .get(`${this.backendURL}/api/v1/customers/${this.$route.params.id}` , authHeader())
-      .then(response => {
-          this.customer = response.data.data
-          if (this.customer.billing_addresses.length == 0){
-            this.customer.billing_addresses = [{} , {}];
-          }
-          if (this.customer.shipping_addresses.length == 0){
-            this.customer.shipping_addresses = [{} , {}];
-          }
-          if (this.customer.billing_addresses.length == 1){
-            this.customer.billing_addresses.push({});
-          }
-          if (this.customer.shipping_addresses.length == 1){
-            this.customer.shipping_addresses.push({});
-          }
-          if(this.customer.group == null){
-            this.customer.group = {};
-          }
-        })
-        .catch(handleAxiosError);
-      axios
-      .get(`${this.backendURL}/api/v1/customers/groups?per_page=-1` , authHeader())
-      .then(response => (this.customerGroups = response.data.data))
-      .catch(handleAxiosError);
+      this.loading = true
+        axios
+        .get(`${this.backendURL}/api/v1/customers/groups?per_page=-1` , authHeader())
+        .then(response => (this.customerGroups = response.data.data,
+                          this.currentGroupId = response.data.data[0]))
+        .catch(handleAxiosError)
+        .finally(() => {
+          axios
+          .get(`${this.backendURL}/api/v1/customers/${this.$route.params.id}` , authHeader())
+          .then(response => {
+              this.customer = response.data.data
+              this.customer.group_id = this.customer.group.id
+              if (this.customer.billing_addresses.length == 0){
+                this.customer.billing_addresses = [{} , {}];
+              }
+              if (this.customer.shipping_addresses.length == 0){
+                this.customer.shipping_addresses = [{} , {}];
+              }
+              if (this.customer.billing_addresses.length == 1){
+                this.customer.billing_addresses.push({});
+              }
+              if (this.customer.shipping_addresses.length == 1){
+                this.customer.shipping_addresses.push({});
+              }
+              if(this.customer.group == null){
+                this.customer.group_id = this.currentGroupId.id;
+              }
+            })
+            .catch(handleAxiosError)
+            .finally(() => {
+              this.loading = false
+            });
+        
+        });
   },
   methods:{
      updateCustomer(){
@@ -74,17 +87,13 @@ export default {
           return;
        }
        // Using hardcoded country code for now as there is no option in front-end for selecting country from a list now, Need to add that and remove the following loops
-      for(var i = 0; i < this.customer.billing_addresses.length; i++){
-        var bi = this.createCustomerPayload.billing_addresses[i];
-        bi.country_code = "UK";
-      }
-      for(var j = 0; j < this.customer.shipping_addresses.length; j++){
-        var si = this.createCustomerPayload.shipping_addresses[j];
-        si.country_code = "UK";
-      }
+      window.console.log(this.customer);
         axios
         .put(`${this.backendURL}/api/v1/customers/${this.$route.params.id}` , this.customer , authHeader())
-        .then(response => (alert(`${response.data.data.id} Updated!`)))
+        .then(response => (
+          this.$router.push('/customers'),
+          this.data = response.data,
+          alertBox("Customers Updated Successfully!", true)))
         .catch(handleAxiosError);
       },
   }
@@ -93,6 +102,11 @@ export default {
 
 <template>
   <Layout>
+    <div class="spinner"  v-if="this.loading">
+      <div class="text-center loader">
+       <b-spinner  style="width: 6rem; height: 6rem;" variant="primary" type="grow" label="Spinning"></b-spinner>
+      </div>
+    </div>
     <PageHeader :title="title" :items="items" />
 
     <div class="row">
@@ -137,7 +151,7 @@ export default {
                   <div class="col-sm-3">
                     <label class="mt-3">Customer Group</label>
                     <select class="custom-select" v-model="customer.group_id">
-                      <option v-for="group in customerGroups" v-bind:value="group.id" :key="group.id" :selected="customer.group != null && group.id == customer.group.id">{{group.name}}</option>
+                      <option v-for="group in customerGroups" v-bind:value="group.id" :key="group.id" :selected="group.id == customer.group.id">{{group.name}}</option>
                     </select>
                   </div>
                   <div class="col-sm-3">
@@ -378,3 +392,19 @@ export default {
 
   </Layout>
 </template>
+<style scoped>
+.spinner {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+    height: 100%;
+    width: 100%;
+    z-index: 20000;
+  }
+  .loader {
+    position: absolute;
+    top: 30%;
+    left: 50%;
+  }
+</style>

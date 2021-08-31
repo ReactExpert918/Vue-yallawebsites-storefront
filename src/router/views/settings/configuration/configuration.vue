@@ -27,6 +27,7 @@ export default {
       backendURL: process.env.VUE_APP_BACKEND_URL,
       configData: {},
       data: "",
+      loading: false,
       general_config: {
         id: "",
         domain:{},
@@ -199,6 +200,7 @@ export default {
     }
   },
   mounted() {
+    this.loading = true
     axios
     .get(`${this.backendURL}/api/v1/stores/general` , authHeader())
     .then(response => {
@@ -223,22 +225,6 @@ export default {
       }
      })
      .catch(handleAxiosError);
-     axios
-    .get(`${this.backendURL}/api/v1/stores/catalog` ,authHeader())
-    .then(response => {
-        this.catalog_config = response.data.data
-        if (this.catalog_config.layout == null){
-          this.catalog_config.layout = {};
-        }
-        if (this.catalog_config.default_sort_option == null){
-          this.catalog_config.default_sort_option = {};
-        }
-        if (this.catalog_config.tax_display_option == null){
-          this.catalog_config.tax_display_option = {};
-        }
-
-    })
-    .catch(handleAxiosError);
      axios
     .get(`${this.backendURL}/api/v1/stores/sales` , authHeader())
     .then(response => {
@@ -348,9 +334,34 @@ export default {
     axios
     .get(`${this.backendURL}/api/v1/shipping/services` , authHeader())
     .then(response => (this.shippingServiceData = response.data.data))
-    .catch(handleAxiosError);
+    .catch(handleAxiosError)
+    .finally(() => {
+       this.loading = false
+     });
   },
   methods:{
+    selectCatalog() {
+      this.loading = true
+      axios
+      .get(`${this.backendURL}/api/v1/stores/catalog` ,authHeader())
+      .then(response => {
+          this.catalog_config = response.data.data
+          if (this.catalog_config.layout == null){
+            this.catalog_config.layout = {};
+          }
+          if (this.catalog_config.default_sort_option == null){
+            this.catalog_config.default_sort_option = {};
+          }
+          if (this.catalog_config.tax_display_option == null){
+            this.catalog_config.tax_display_option = {};
+          }
+
+      })
+      .catch(handleAxiosError)
+      .finally(() => {
+        // this.loading = false
+      });
+    },
     isCountryAllowed(id){
       var i;
       for (i in this.general_config.allowed_countries){
@@ -580,6 +591,11 @@ export default {
 
 <template>
   <Layout>
+    <div class="spinner"  v-if="this.loading">
+      <div class="text-center loader">
+       <b-spinner  style="width: 6rem; height: 6rem;" variant="primary" type="grow" label="Spinning"></b-spinner>
+      </div>
+    </div>
     <PageHeader :title="title" :items="items" />
     <div class="row">
       <div class="col-lg-12">
@@ -696,7 +712,7 @@ export default {
               </b-tab>
               <b-tab>
                 <template v-slot:title>
-                  <span class="d-inline-block d-sm-none">
+                  <span class="d-inline-block d-sm-none" @click="selectCatalog()">
                     <i class="far fa-user"></i>
                   </span>
                   <span class="d-none d-sm-inline-block">Catalog</span>
@@ -1766,3 +1782,19 @@ export default {
     </div>
   </Layout>
 </template>
+<style scoped>
+.spinner {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+    height: 100%;
+    width: 100%;
+    z-index: 20000;
+  }
+  .loader {
+    position: absolute;
+    top: 20%;
+    left: 50%;
+  }
+</style>

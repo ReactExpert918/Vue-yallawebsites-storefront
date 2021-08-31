@@ -27,6 +27,7 @@ export default {
     return {
       pageIdentity: "categories",
       data: "",
+      loading: false,
       backendURL: process.env.VUE_APP_BACKEND_URL,
       categoriesData: [],
       currentCategory: {product_sorts: []},
@@ -81,11 +82,15 @@ export default {
     }
   },
   mounted(){
+    this.loading = true
     axios
     .get(`${this.backendURL}/api/v1/categories?tree=true` , authHeader())
     .then(response => (this.categoriesData = response.data.data, this.catPayload.parent_id = response.data.data[0].id)
                       )
-    .catch(handleAxiosError);
+    .catch(handleAxiosError)
+    .finally(() => {
+      this.loading = false
+    });
   },
   methods: {
     currentCategoryData(category){
@@ -107,6 +112,7 @@ export default {
      
     },
     createCategory(){
+      this.loading = true
       this.$bvModal.hide("modal-add-category");
       if (!roleService.hasCreatePermission(this.pageIdentity)){
           alertBox("You do no have the permission to perform this action!", false)
@@ -128,9 +134,13 @@ export default {
           this.$refs.vueCreateDropzone.setOption("url" , `${this.backendURL}/api/v1/categories/${response.data.data.id}/upload`);
           this.$refs.vueCreateDropzone.processQueue();
        })
-      .catch(handleAxiosError);
+      .catch(handleAxiosError)
+      .finally(() => {
+        this.loading = false
+      });
     },
     updateCategory(){
+      this.loading = true
       if (!roleService.hasEditPermission(this.pageIdentity)){
           alertBox("You do no have the permission to perform this action!", false)
           return;
@@ -159,12 +169,16 @@ export default {
           alertBox("Category Updated succesfully!", true)
           this.$refs.myVueDropzone.processQueue();
        })
-      .catch(handleAxiosError);
+      .catch(handleAxiosError)
+      .finally(() => {
+        this.loading = false
+      });
     },
     handleImageUpload(){
       this.$refs.myVueDropzone.setOption("url" , `${this.backendURL}/api/v1/categories/${this.currentCategory.id}/upload`);
     },
     deleteCategory(){
+      this.loading = true
       this.$bvModal.hide("modal-delete-category");
       if (!roleService.hasDeletePermission(this.pageIdentity)){
           alertBox("You do no have the permission to perform this action!", false)
@@ -181,7 +195,10 @@ export default {
         this.data = response.data,
         alertBox("Category Deleted successfully", true)
       ))
-      .catch(handleAxiosError);
+      .catch(handleAxiosError)
+      .finally(() => {
+        this.loading = false
+      });
     },
     productSortChange(product){
         this.productSortMap[product.id] = product.sort_order;
@@ -192,6 +209,11 @@ export default {
 
 <template>
   <Layout>
+    <div class="spinner"  v-if="this.loading">
+      <div class="text-center loader">
+       <b-spinner  style="width: 6rem; height: 6rem;" variant="primary" type="grow" label="Spinning"></b-spinner>
+      </div>
+    </div>
     <PageHeader :title="pageTitle" :items="items" />
     <div class="row">
       <div class="col-xl-8">
@@ -558,3 +580,20 @@ export default {
     </b-modal>
   </Layout>
 </template>
+
+<style scoped>
+.spinner {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+    height: 100%;
+    width: 100%;
+    z-index: 20000;
+  }
+  .loader {
+    position: absolute;
+    top: 30%;
+    left: 50%;
+  }
+</style>

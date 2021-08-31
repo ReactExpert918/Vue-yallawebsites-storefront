@@ -22,6 +22,7 @@ export default {
   components: { Layout, PageHeader },
   data() {
     return {
+      loading: false,
       pageIdentity: "pages",
       selectedAll: false,
       backendURL: process.env.VUE_APP_BACKEND_URL,
@@ -105,11 +106,15 @@ export default {
     }
   },
   mounted() {
+    this.loading = true
       axios
       .get(`${this.backendURL}/api/v1/pages?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
       .then(response => (this.pagesData = convert(response.data.data),
                         this.pagesDataLength = response.data.pagination.total))
-      .catch(handleAxiosError);
+      .catch(handleAxiosError)
+      .finally(() => {
+                        this.loading =  false
+                    });
   },
   methods: {
       /**
@@ -139,6 +144,7 @@ export default {
                            this.pagesDataLength = response.data.pagination.total));
       },
       deletePage(){
+        this.loading = true
         this.$bvModal.hide("modal-delete-page");
         window.console.log(this.pageIdentity);
         if (!roleService.hasDeletePermission(this.pageIdentity)){
@@ -154,16 +160,24 @@ export default {
                              this.pagesDataLength = response.data.pagination.total)),
           alertBox(`Page deleted succesfully!`, true)
           ))
-        .catch(handleAxiosError);
+        .catch(handleAxiosError)
+        .finally(() => {
+            this.loading =  false
+        });
       }
   },
 };
 </script>
 
 <template>
-  <Layout>
-    <PageHeader :title="title" :items="items" />
 
+  <Layout>
+    <div class="spinner"  v-if="this.loading">
+      <div class="text-center loader">
+       <b-spinner  style="width: 6rem; height: 6rem;" variant="primary" type="grow" label="Spinning"></b-spinner>
+      </div>
+    </div>
+    <PageHeader :title="title" :items="items" />
     <div class="row">
       <div class="col-12">
         <div class="card">
@@ -291,3 +305,19 @@ export default {
     <!-- end row -->
   </Layout>
 </template>
+<style scoped>
+.spinner {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+    height: 100%;
+    width: 100%;
+    z-index: 20000;
+  }
+  .loader {
+    position: absolute;
+    top: 40%;
+    left: 50%;
+  }
+</style>

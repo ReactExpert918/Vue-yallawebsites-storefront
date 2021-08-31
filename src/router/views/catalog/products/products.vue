@@ -28,6 +28,7 @@ export default {
       productsData: [],
       productsDataLength: 1,
       totalRows: 1,
+      loading: false,
       title: "Products",
       currentPage: 1,
       perPage: 10,
@@ -91,16 +92,21 @@ export default {
   },
   mounted() {
       // Set the initial number of items
+      this.loading = true
       axios
       .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
       .then(response => (this.productsData = response.data.data,
-                         this.productsDataLength = response.data.pagination.total));
+                         this.productsDataLength = response.data.pagination.total))
+      .finally(() => {
+      this.loading = false
+      });
   },
   methods: {
       /**
         * Search the table data with search input
         */
        deleteProduct() {
+        this.loading = true;
         this.$bvModal.hide("modal-delete-page");
         if (!roleService.hasDeletePermission(this.pageIdentity)){
           alertBox("You do no have the permission to perform this action!", false)
@@ -111,7 +117,10 @@ export default {
         .then(
             this.handlePageChange(1),
             alertBox("Product Deleted Successfully!", true))
-        .catch(handleAxiosError);
+        .catch(handleAxiosError)
+        .finally(() => {
+          this.loading = false
+        });
       },
         uncheckSelectAll(){
          this.selectedAll = false
@@ -143,6 +152,11 @@ export default {
 
 <template>
   <Layout>
+    <div class="spinner"  v-if="this.loading">
+      <div class="text-center loader">
+       <b-spinner  style="width: 6rem; height: 6rem;" variant="primary" type="grow" label="Spinning"></b-spinner>
+      </div>
+    </div>
     <PageHeader :title="title" />
 
     <div class="row">
@@ -279,3 +293,20 @@ export default {
     </b-modal>
   </Layout>
 </template>
+
+<style scoped>
+.spinner {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+    height: 100%;
+    width: 100%;
+    z-index: 20000;
+  }
+  .loader {
+    position: absolute;
+    top: 32%;
+    left: 50%;
+  }
+</style>

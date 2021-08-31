@@ -45,6 +45,7 @@ export default {
     right: -100%;
     background-color: rgb(12, 179, 76);
     float: right;
+    display: none;
   }
 
   #alert.active {
@@ -70,6 +71,8 @@ export default {
     50%  {opacity: 1; right: 0; top:0px;}
     70%  {opacity: 1; right: 0; top:0px;}
     90%  {opacity: 1; right: 0; top:0px;}
-    100% {visibility: hidden; right: -100%; top:0px;}
+    100% {opacity: 0; right: -100%; top:0px;}
   }
+  
+  
 </style>

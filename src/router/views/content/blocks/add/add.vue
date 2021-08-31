@@ -29,6 +29,7 @@ export default {
       backendURL: process.env.VUE_APP_BACKEND_URL,
       data: "",
       disable: false,
+      loading: false,
       blockData: {
         title: "",
         shortcode: "",
@@ -83,6 +84,7 @@ export default {
   },
   methods: {
     addBlock() {
+      this.loading = true;
       if (!roleService.hasCreatePermission(this.pageIdentity)){
           alertBox("You do no have the permission to perform this action!", false)
           return;
@@ -94,7 +96,10 @@ export default {
         this.data = response.data,
         alertBox("Blocks Created successfully", true) 
       ))
-      .catch(handleAxiosError);
+      .catch(handleAxiosError)
+      .finally(() => {
+        this.loading = false
+      });
     }
   }
 };
@@ -153,3 +158,20 @@ export default {
     <!-- end row -->
   </Layout>
 </template>
+
+<style scoped>
+.spinner {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+    height: 100%;
+    width: 100%;
+    z-index: 20000;
+  }
+  .loader {
+    position: absolute;
+    top: 30%;
+    left: 50%;
+  }
+</style>
