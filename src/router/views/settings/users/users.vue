@@ -205,15 +205,16 @@ export default {
           this.loader = false
         });
       },
-      createUser(){
+      createUser(e){
         this.loader = true
         if (this.$refs.vueCreateDropzone.getAcceptedFiles().length < 1){ // if there are files added to the dropzone for uploading, then do not hide the modal
-          this.$bvModal.hide("modal-scrollable-edit-user");
+          this.$bvModal.hide("modal-scrollable-add-user");
         }
         if (!roleService.hasCreatePermission(this.pageIdentity)){
           alertBox("You do no have the permission to perform this action!", false)
           return;
         }
+        e.preventDefault();
         this.createUserPayload.role_id = this.currentRoleID
         axios
         .post(`${this.backendURL}/api/v1/users` , this.createUserPayload , authHeader())
@@ -246,8 +247,8 @@ export default {
           .get(`${this.backendURL}/api/v1/users/roles/contents` , authHeader())
           .then(response => (this.roleContents = response.data.data))
           .catch(handleAxiosError),
-          this.data = response.data,
           alertBox("User Created successfully!", true)
+            this.$refs.vueCreateDropzone.setOption("url" , `${this.backendURL}/api/v1/users/${response.data.data.id}/upload`);
             this.$refs.vueCreateDropzone.processQueue();
          })
         .catch(handleAxiosError)
@@ -310,9 +311,6 @@ export default {
       },
       handleImageUpload(){
         this.$refs.myVueDropzone.setOption("url" , `${this.backendURL}/api/v1/users/${this.currentUser.id}/upload`);
-      },
-      handleAddImageUpload(){
-        this.$refs.vueCreateDropzone.setOption("url" , `${this.backendURL}/api/v1/users/${this.currentUser.id}/upload`);
       },
       handlePageChange(value) {
         this.currentPage = value;
@@ -466,6 +464,7 @@ export default {
     </div>
     <!-- end row -->
     <b-modal id="modal-scrollable-add-user" scrollable title="Add User" title-class="font-18" hide-footer>
+      <form @submit="createUser">
       <b-tabs justified nav-class="nav-tabs-custom" content-class="p-3 text-muted">
         <b-tab active>
           <template v-slot:title>
@@ -498,7 +497,6 @@ export default {
                     ref="vueCreateDropzone"
                     :use-custom-slot="true"
                     :options="dropzoneOptions"
-                    @vdropzone-file-added="handleAddImageUpload"
                     @vdropzone-complete="hideAddModal"
                   >
                       <div class="dropzone-custom-content">
@@ -566,10 +564,11 @@ export default {
       </b-tabs>
       <br>
       <div class="text-sm-right">
-        <b-button variant="primary" :disable="isDisible" @click="createUser()">
+        <b-button variant="primary" :disable="isDisible" type="submit">
             Add
         </b-button>
       </div>
+      </form>
     </b-modal>
     <b-modal id="modal-scrollable-edit-user" scrollable title="Edit User" title-class="font-18" hide-footer>
       <form >

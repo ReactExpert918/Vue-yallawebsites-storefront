@@ -476,9 +476,6 @@ export default {
           }
         }
       },
-      handleImageUpload(){
-        this.$refs.myVueDropzone.setOption("url" , `${this.backendURL}/api/v1/users/${this.currentUser.id}/upload`);
-      },
       handleVariationImageUpload(file , variation){
         this.getBase64(file).
         then(data => {
