@@ -257,13 +257,17 @@ export default {
       },
       updateUser(e){
         this.loader = true
-        this.$bvModal.hide("modal-scrollable-edit-user")
+        if (this.$refs.myVueDropzone.getAcceptedFiles().length < 1){ // if there are files added to the dropzone for uploading, then do not hide the modal
+          this.$bvModal.hide("modal-scrollable-edit-user");
+        }
         if (!roleService.hasEditPermission(this.pageIdentity)){
           alertBox("You do no have the permission to perform this action!", false)
           return;
         }
         e.preventDefault();
-        this.currentUser.role_id = this.currentUser.role.id;
+        if(this.currentUser.role.id){
+           this.currentUser.role_id = this.currentUser.role.id;
+        }
         axios
         .put(`${this.backendURL}/api/v1/users/${this.currentUser.id}` , this.currentUser , authHeader())
         .then(response => {
@@ -279,7 +283,7 @@ export default {
          })
         .catch(handleAxiosError)
         .finally(() =>{
-          this.loader = false
+          this.loader = false;
         });
       },
       isUserRole(role) {
@@ -321,6 +325,9 @@ export default {
         .get(`${this.backendURL}/api/v1/users?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
         .then(response => (this.usersData = response.data.data,
                            this.usersDataLength = response.data.pagination.total));
+      },
+      hideModal(){
+        this.$bvModal.hide("modal-scrollable-edit-user");
       }
   },
 };
@@ -559,7 +566,7 @@ export default {
       </form>
     </b-modal>
     <b-modal id="modal-scrollable-edit-user" scrollable title="Edit User" title-class="font-18" hide-footer>
-      <form @submit="updateUser">
+      <form >
       <b-tabs justified nav-class="nav-tabs-custom" content-class="p-3 text-muted">
         <b-tab active>
           <template v-slot:title>
@@ -595,6 +602,7 @@ export default {
                 :use-custom-slot="true"
                 :options="dropzoneOptions"
                 @vdropzone-file-added="handleImageUpload"
+                @vdropzone-complete="hideModal"
               >
                 <div class="dropzone-custom-content">
                   <i class="display-4 text-muted bx bxs-cloud-upload"></i>
@@ -661,7 +669,7 @@ export default {
       </b-tabs>
       <br>
       <div class="text-sm-right">
-        <b-button variant="primary" type="submit">
+        <b-button variant="primary" v-on:click="updateUser">
             <i class="bx bx-check-double font-size-16 align-middle mr-2"></i>
             Save
         </b-button>
