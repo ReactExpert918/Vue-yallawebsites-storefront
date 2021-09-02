@@ -113,7 +113,6 @@ export default {
     },
     createCategory(){
       this.loading = true
-      this.$bvModal.hide("modal-add-category");
       if (!roleService.hasCreatePermission(this.pageIdentity)){
           alertBox("You do no have the permission to perform this action!", false)
           return;
@@ -156,7 +155,6 @@ export default {
           sort_order: parseInt(sortOrder)
         })
       }
-
       axios
       .put(`${this.backendURL}/api/v1/categories/${this.currentCategory.id}` , this.currentCategory , authHeader())
       .then(response => {
@@ -202,6 +200,9 @@ export default {
     },
     productSortChange(product){
         this.productSortMap[product.id] = product.sort_order;
+    },
+    backPage() {
+      this.$bvModal.hide("modal-add-category");
     }
   },
 };
@@ -502,6 +503,7 @@ export default {
             ref="vueCreateDropzone"
             :use-custom-slot="true"
             :options="dropzoneOptions"
+            @vdropzone-complete="backPage"
           >
             <div class="dropzone-custom-content">
               <i class="display-4 text-muted bx bxs-cloud-upload"></i>

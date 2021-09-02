@@ -344,7 +344,6 @@ export default {
         axios
         .post(`${this.backendURL}/api/v1/products` , this.newProduct , authHeader())
         .then(response => {
-          this.$router.push('/catalog/products'), 
           alertBox(`Product Created Successfully!`, true);
           this.$refs.myVueDropzone.setOption("url" , `${this.backendURL}/api/v1/products/${response.data.data.id}/upload`);
           this.$refs.myVueDropzone.processQueue();
@@ -477,6 +476,9 @@ export default {
           }
         }
       },
+      handleImageUpload(){
+        this.$refs.myVueDropzone.setOption("url" , `${this.backendURL}/api/v1/users/${this.currentUser.id}/upload`);
+      },
       handleVariationImageUpload(file , variation){
         this.getBase64(file).
         then(data => {
@@ -492,6 +494,9 @@ export default {
           reader.onerror = error => reject(error);
         })
       },
+      backPage(){
+        this.$router.push('/catalog/products')
+      }
   },
 };
 </script>
@@ -583,8 +588,7 @@ export default {
                   ref="myVueDropzone"
                   :use-custom-slot="true"
                   :options="dropzoneOptions"
-                  autoDiscover="false"
-                  url="/"  
+                  @vdropzone-complete="backPage"
                 >
                   <div class="dropzone-custom-content">
                     <i class="display-4 text-muted bx bxs-cloud-upload"></i>

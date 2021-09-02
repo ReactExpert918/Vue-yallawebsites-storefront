@@ -464,7 +464,6 @@ export default {
         axios
         .put(`${this.backendURL}/api/v1/products/${this.$route.params.id}` , productReq , authHeader())
         .then(response => {
-          this.$router.push('/catalog/products'),
           this.data = response.data;
           alertBox("Product Updated successfully!", true)
           this.$refs.myVueDropzone.processQueue();
@@ -653,6 +652,9 @@ export default {
           }
         }
       },
+      backPage(){
+        this.$router.push('/catalog/products')
+      }
       
   },
 };
@@ -746,6 +748,7 @@ export default {
                   :use-custom-slot="true"
                   :options="dropzoneOptions"
                   @vdropzone-file-added="handleImageUpload"
+                  @vdropzone-complete="backPage"
                 >
                   <div class="dropzone-custom-content">
                     <i class="display-4 text-muted bx bxs-cloud-upload"></i>
