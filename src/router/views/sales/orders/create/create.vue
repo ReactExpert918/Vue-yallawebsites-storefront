@@ -1,7 +1,6 @@
 <script>
 import Layout from "../../../../layouts/main";
 import PageHeader from "@/components/page-header";
-
 import { viewData } from "./create-data";
 import {
   authHeader,
@@ -11,7 +10,6 @@ import alertBox from "@/helpers/Alert";
 import {handleAxiosError} from "@/helpers/authservice/user.service";
 import axios from "axios";
 import appConfig from "@/app.config";
-
 /**
  * Pages component
  */
@@ -32,6 +30,7 @@ export default {
       currentPaymentType: {},
       shippingData: [],
       products: [],
+      productsLength: 0,
       customers: [],
       customersLength: 0,
       selectedCustomer: {
@@ -58,6 +57,8 @@ export default {
         }
       ],
       totalRows: 1,
+      currentProductPage: 1,
+      perProductPage: 10,
       currentPage: 1,
       perPage: 10,
       pageOptions: [10, 25, 50, 100],
@@ -127,7 +128,6 @@ export default {
         * Total no. of records
         */
         isdisable() {
-          window.console.log(this.selectedCustomer.name);
           if(this.selectedProducts.length <= 0 || this.selectedCustomer.name == undefined) {
             return true;
           } else {
@@ -135,7 +135,7 @@ export default {
           }
         },
       rows() {
-          return this.products.length;
+          return this.productsLength;
       },
       customerrows() {
           return this.customersLength;
@@ -158,17 +158,16 @@ export default {
       .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}&quantity_greater_than=${this.productQuantityGreaterThan}&with_disabled=false` , authHeader())
       .then(response => {
          this.products = response.data.data;
+         this.productsLength = response.data.pagination.total
          for(var i = 0; i < this.products.length; i++){
            this.products[i].order_quantity = 1;
          }
        })
        .catch(handleAxiosError);
-
        axios
       .get(`${this.backendURL}/api/v1/payments/methods` , authHeader())
       .then(response => {
           this.paymentData = response.data.data;
-
           for(var i = 0; i < this.paymentData.length; i++){
             var pd = this.paymentData[i];
             if (!(pd.display_name in this.paymentMap)){
@@ -183,7 +182,6 @@ export default {
           }          
         })
       .catch(handleAxiosError);
-
       axios
       .get(`${this.backendURL}/api/v1/shipping/methods` , authHeader())
       .then(response => (this.shippingData = response.data.data))
@@ -197,23 +195,49 @@ export default {
       /**
         * Search the table data with search input 
         */
-       change() {
-        //  alert(this.customers.length)
-        if(this.customers.length == 0) {
-          this.loading = true 
-          axios
-          .get(`${this.backendURL}/api/v1/customers?per_page=${this.perPage}&page=${this.currentPage}&address=true` , authHeader())
-          .then(response => (this.customers = response.data.data,
-          this.customersLength = response.data.pagination.total))
-          .catch(handleAxiosError)
-          .finally(() => {
-            this.loading = false
-          });
-        }
-       },
-       addProduct() {
-         this.$bvModal.hide("modal-scrollable");
-       },
+      change() {
+      if(this.customers.length == 0) {
+        this.loading = true 
+        axios
+        .get(`${this.backendURL}/api/v1/customers?per_page=${this.perPage}&page=${this.currentPage}&address=true` , authHeader())
+        .then(response => (this.customers = response.data.data,
+        this.customersLength = response.data.pagination.total))
+        .catch(handleAxiosError)
+        .finally(() => {
+          this.loading = false
+        });
+      }
+      },
+      addProduct() {
+        this.$bvModal.hide("modal-scrollable");
+      },
+      handleProductsPageChange(value) {
+        this.currentProductPage = value;
+        axios
+        .get(`${this.backendURL}/api/v1/products?per_page=${this.perProductPage}&page=${this.currentProductPage}&quantity_greater_than=${this.productQuantityGreaterThan}&with_disabled=false` , authHeader())
+        .then(response => {
+          this.products = response.data.data;
+          this.productsLength = response.data.pagination.total
+          for(var i = 0; i < this.products.length; i++){
+            this.products[i].order_quantity = 1;
+          }
+        })
+        .catch(handleAxiosError);
+      },
+      handleProductPerPageChange(value) {
+        this.currentProductPage = 1;
+        this.perProductPage = value;
+        axios
+        .get(`${this.backendURL}/api/v1/products?per_page=${this.perProductPage}&page=${this.currentProductPage}&quantity_greater_than=${this.productQuantityGreaterThan}&with_disabled=false` , authHeader())
+        .then(response => {
+          this.products = response.data.data;
+          this.productsLength = response.data.pagination.total
+          for(var i = 0; i < this.products.length; i++){
+            this.products[i].order_quantity = 1;
+          }
+        })
+        .catch(handleAxiosError);
+      },
       handlePageChange(value) {
         this.currentPage = value;
         axios
@@ -298,12 +322,10 @@ export default {
       },
       configureStripe(){
         this.stripe = window.Stripe(this.paymentMap["stripe"].api_key);
-
         this.elements = this.stripe.elements();
         this.card = this.elements.create('card' , {
           hidePostalCode : true,
         });
-
         this.card.mount('#card-element');
       },
        purchase(orderID){
@@ -323,7 +345,6 @@ export default {
               alertBox("Failed to create stripe card token because: " + result.error.message, false);
               return;
             }
-
             var payload = {
               order_id: orderID,
               method: "stripe",
@@ -563,7 +584,7 @@ export default {
                     </thead>
                     <tbody>
                       <tr v-for="product in selectedProducts" :key="product.id">
-                        <td><img :src="product.image" class="thumbnail-img"/></td>
+                        <td><img :src="product.image"/></td>
                         <td>{{ product.name }}</td>
                         <td>{{ product.sku }}</td>
                         <td>{{ product.price }}</td>
@@ -686,7 +707,12 @@ export default {
           <div id="tickets-table_length" class="dataTables_length">
               <label class="d-inline-flex align-items-center">
                   Show&nbsp;
-                  <b-form-select v-model="perPage" size="sm" :options="pageOptions"></b-form-select>&nbsp;entries
+                  <b-form-select 
+                    v-model="perPage" 
+                    size="sm" 
+                    :options="pageOptions"
+                    @change = "handleProductPerPageChange"
+                  ></b-form-select>&nbsp;entries
               </label>
           </div>
         </div>
@@ -742,7 +768,12 @@ export default {
                   <div class="dataTables_paginate paging_simple_numbers float-right">
                       <ul class="pagination pagination-rounded mb-0">
                           <!-- pagination -->
-                          <b-pagination v-model="currentPage" :total-rows="rows" :per-page="perPage"></b-pagination>
+                          <b-pagination 
+                            v-model="currentProductPage" 
+                            :total-rows="rows" 
+                            :per-page="perPage"
+                            @change = "handleProductsPageChange"
+                          ></b-pagination>
                       </ul>
                   </div>
               </div>
