@@ -597,7 +597,7 @@ export default {
                   <div class="row">
                     <div class="imagesUploaded mb-2 col-6">
                       <div class="imageFile highlight-border">
-                          <img src="placeholder.png"/>
+                          <img src="@/assets/images/product/img-1.png" class="product-img" />
                           <span class="actions-right cursor-ponter">
                             <b-button id="tooltip-set-default-1" variant="primary" class="mr-2"><i class="bx bx-image-alt"></i></b-button>
                             <b-tooltip target="tooltip-set-default-1">Set Image As Default</b-tooltip>
@@ -607,7 +607,7 @@ export default {
                     </div>
                     <div class="imagesUploaded mb-2 col-6">
                       <div class="imageFile">
-                          <img src="placeholder.png"/>
+                          <img src="@/assets/images/product/img-2.png" class="product-img" />
                           <span class="actions-right cursor-ponter">
                             <b-button id="tooltip-set-default-2" variant="primary" class="mr-2"><i class="bx bx-image-alt"></i></b-button>
                             <b-tooltip target="tooltip-set-default-2">Set Image As Default</b-tooltip>
@@ -973,6 +973,11 @@ export default {
   </Layout>
 </template>
 <style scoped>
+.product-img {
+  height: 135px;
+  width: 135px;
+}
+
 .spinner {
     position: absolute;
     top: 0;

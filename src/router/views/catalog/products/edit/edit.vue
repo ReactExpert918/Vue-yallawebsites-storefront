@@ -758,9 +758,9 @@ export default {
                 </div>
                 <div class="col-9">
                   <div class="row">
-                    <div class="imagesUploaded mb-2 col-6">
+                    <div class="imagesUploaded mb-2 col-12">
                       <div class="imageFile highlight-border" v-for="(image , index) of productData.images" :key="index">
-                          <img :src="image" />
+                          <img :src="image" class="product-img" />
                           <span class="actions-right cursor-ponter">
                             <b-button id="tooltip-set-default-1" variant="primary" class="mr-2" @click="productData.default_image_url = image"><i class="bx bx-image-alt"></i></b-button>
                             <b-tooltip target="tooltip-set-default-1">Set Image As Default</b-tooltip>
