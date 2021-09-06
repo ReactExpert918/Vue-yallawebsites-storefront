@@ -568,7 +568,7 @@ export default {
                     </thead>
                     <tbody>
                       <tr v-for="product in selectedProducts" :key="product.id">
-                        <td><img :src="product.image"/></td>
+                        <td><img src="@/assets/images/product/img-2.png" class="thumbnail-img"/></td>
                         <td>{{ product.name }}</td>
                         <td>{{ product.sku }}</td>
                         <td>{{ product.price }}</td>

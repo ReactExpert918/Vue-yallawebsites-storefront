@@ -187,7 +187,7 @@ export default {
                     </thead>
                     <tbody>
                       <tr v-for="product in order.products" :key="product.id">
-                        <td><img :src="product.product.image"/></td>
+                        <td><img :src="product.product.image" class="thumbnail-img"/></td>
                         <td>{{ product.product.name }}</td>
                         <td>{{ product.product.sku }}</td>
                         <td>{{ product.price }}</td>
