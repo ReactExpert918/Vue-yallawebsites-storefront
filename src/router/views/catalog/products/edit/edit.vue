@@ -44,6 +44,7 @@ export default {
         attributes: [],
         specifications: [],
         variations: [],
+        weight: 0
       },
       allProductsDataLength: 1,
       variationsData: [],
@@ -382,6 +383,7 @@ export default {
            price: parseFloat(this.productData.price),
            cost_price: parseFloat(this.productData.cost_price),
            sale_price: parseFloat(this.productData.sale_price),
+           weight: parseFloat(this.productData.weight),
            short_description: this.productData.short_description,
            long_description: this.productData.long_description,
            meta_title: this.productData.meta_title,
@@ -687,17 +689,21 @@ export default {
                   <option value="3">Bundled Product</option>
                 </select>
               </div>
-              <div class="col-4">
+              <div class="col-3">
                 <label class="mt-3">Product Price <span class="red"> *</span></label>
                 <b-form-input for="text" type="number" v-model="productData.price"></b-form-input>
               </div>
-              <div class="col-4">
+              <div class="col-3">
                 <label class="mt-3">Product Cost Price <span class="red"> *</span></label>
                 <b-form-input for="text" type="number" v-model="productData.cost_price"></b-form-input>
               </div>
-              <div class="col-4">
+              <div class="col-3">
                 <label class="mt-3">Product Sale Price <span class="red"> *</span></label>
                 <b-form-input for="text" type="number" v-model="productData.sale_price"></b-form-input>
+              </div>
+              <div class="col-3">
+                <label class="mt-3">Product Weight <span class="red"> *</span></label>
+                <b-form-input for="text" type="number" v-model="productData.weight"></b-form-input>
               </div>
               <div class="col-4">
                 <label class="mt-3">Qty <span class="red"> *</span></label>

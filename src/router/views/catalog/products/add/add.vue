@@ -41,6 +41,7 @@ export default {
            price: 0,
            cost_price: 0,
            sale_price: 0,
+           weight: 0,
            short_description: "",
            long_description: "",
            meta_title: "",
@@ -525,17 +526,21 @@ export default {
                   <option value="3">Bundled Product</option>
                 </select>
               </div>
-              <div class="col-4">
+              <div class="col-3">
                 <label class="mt-3">Product Price <span class="red"> *</span></label>
                 <b-form-input for="text" type="number" v-model="newProduct.price"></b-form-input>
               </div>
-              <div class="col-4">
+              <div class="col-3">
                 <label class="mt-3">Product Cost Price <span class="red"> *</span></label>
                 <b-form-input for="text" type="number" v-model="newProduct.cost_price"></b-form-input>
               </div>
-              <div class="col-4">
+              <div class="col-3">
                 <label class="mt-3">Product Sale Price <span class="red"> *</span></label>
                 <b-form-input for="text" type="number" v-model="newProduct.sale_price"></b-form-input>
+              </div>
+              <div class="col-3">
+                <label class="mt-3">Product Weight <span class="red"> *</span></label>
+                <b-form-input for="text" type="number" v-model="newProduct.weight"></b-form-input>
               </div>
               <div class="col-4">
                 <label class="mt-3">Qty <span class="red"> *</span></label>
