@@ -383,7 +383,7 @@ export default {
                 <div class="col-12 p-0">
                   <div class="imagesUploaded mb-4">
                     <div class="imageFile">
-                        <img :src="currentCategory.image"/>
+                        <img src="@/assets/images/product/img-2.png" class="category-img" />
                         <span>placeholder.png</span>
                         <span class="actions-right cursor-ponter">
                           <b-button 

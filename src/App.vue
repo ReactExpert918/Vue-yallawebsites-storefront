@@ -73,11 +73,4 @@ export default {
     90%  {opacity: 1; right: 0; top:0px;}
     100% {opacity: 0; right: -100%; top:0px;}
   }
-
-  .product-img {
-    height: 135px;
-    width: 135px;
-  }
-  
-  
 </style>
