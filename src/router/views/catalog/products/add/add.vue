@@ -290,6 +290,9 @@ export default {
         .catch(handleAxiosError);
       },
       createProduct(){
+        if (this.$refs.myVueDropzone.getAcceptedFiles().length < 1){ // if there are files added to the dropzone for uploading, then do not hide the modal
+          this.backPage();
+        }
         if (!roleService.hasCreatePermission(this.pageIdentity)){
           alertBox("You do no have the permission to perform this action!", false)
           return;
@@ -305,6 +308,7 @@ export default {
         this.newProduct.cost_price = parseFloat(this.newProduct.cost_price);
         this.newProduct.sale_price = parseFloat(this.newProduct.sale_price);
         this.newProduct.quantity = parseInt(this.newProduct.quantity);
+        this.newProduct.weight = parseInt(this.newProduct.weight);
         
         this.newProduct.attribute_group_id = this.currentAttrGroup.id;
 
