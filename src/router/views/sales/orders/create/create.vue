@@ -10,6 +10,7 @@ import alertBox from "@/helpers/Alert";
 import {handleAxiosError} from "@/helpers/authservice/user.service";
 import axios from "axios";
 import appConfig from "@/app.config";
+// import { StripeElementCard } from '@vue-stripe/vue-stripe';
 /**
  * Pages component
  */
@@ -152,7 +153,7 @@ export default {
        })
      },
   },
-  mounted() {
+  mounted() {    
     this.loading = true
       axios
       .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}&quantity_greater_than=${this.productQuantityGreaterThan}&with_disabled=false` , authHeader())
@@ -324,7 +325,7 @@ export default {
         this.stripe = window.Stripe(this.paymentMap["stripe"].api_key);
         this.elements = this.stripe.elements();
         this.card = this.elements.create('card' , {
-          hidePostalCode : true,
+          hidePostalCode : true
         });
         this.card.mount('#card-element');
       },
@@ -641,6 +642,7 @@ export default {
                   <b-tab v-for="payment in paymentData" :key="payment.id" :title="payment.on_screen_name" active title-item-class="mb-2" @click="currentPayment = payment">
                     <!-- <b-card-text> -->
                       <!-- <div class="row"> -->
+                        
                         <div v-for="type in payment.types" :key="type.method_slug" v-bind:value="type.method_slug">
                           <div id="card-element" v-if="checkStripeCard(payment.display_name , type.method_slug, type.enabled)">
                           </div>
@@ -805,5 +807,17 @@ export default {
     position: absolute;
     top: 15%;
     left: 50%;
+  }
+
+  #card-element {
+    box-sizing: border-box;
+    height: 40px;
+    padding: 10px 12px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    background-color: white;
+    box-shadow: 0 1px 3px 0 #606368;
+    -webkit-transition: box-shadow 150ms ease;
+    transition: box-shadow 150ms ease;
   }
 </style>

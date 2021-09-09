@@ -19,6 +19,7 @@
     "@fullcalendar/timegrid": "^5.3.1",
     "@fullcalendar/vue": "^5.3.1",
     "@voerro/vue-tagsinput": "^2.4.3",
+    "@vue-stripe/vue-stripe": "^4.2.5",
     "apexcharts": "^3.22.2",
     "bootstrap": "^4.5.3",
     "bootstrap-vue": "^2.19.0",
