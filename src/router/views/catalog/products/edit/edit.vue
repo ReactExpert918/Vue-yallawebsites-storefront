@@ -370,6 +370,9 @@ export default {
       .catch(handleAxiosError);
       },
       updateProduct(){
+        if (this.$refs.myVueDropzone.getAcceptedFiles().length < 1){ // if there are files added to the dropzone for uploading, then do not hide the modal
+          this.backPage();
+        }
         if (!roleService.hasEditPermission(this.pageIdentity)){
           alertBox("You do no have the permission to perform this action!", false)
           return;
@@ -1127,7 +1130,7 @@ export default {
   </Layout>
 </template>
 <style scoped>
-.spinner {
+  .spinner {
     position: absolute;
     top: 0;
     left: 0;
@@ -1136,6 +1139,7 @@ export default {
     width: 100%;
     z-index: 20000;
   }
+  
   .loader {
     position: absolute;
     top: 300px;
