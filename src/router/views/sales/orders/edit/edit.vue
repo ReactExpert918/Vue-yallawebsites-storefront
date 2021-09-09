@@ -595,7 +595,7 @@ export default {
                     </thead>
                     <tbody>
                       <tr v-for="product in selectedProducts" :key="product.id">
-                        <td><img :src="product.image" class="thumbnail-img"/></td>
+                        <td><img :src="product.image" class="thumbnail-img" /></td>
                         <td>{{ product.name }}</td>
                         <td>{{ product.sku }}</td>
                         <td>{{ product.price }}</td>
@@ -848,5 +848,17 @@ export default {
     position: absolute;
     top: 15%;
     left: 50%;
+  }
+
+  #card-element {
+    box-sizing: border-box;
+    height: 40px;
+    padding: 10px 12px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    background-color: white;
+    box-shadow: 0 1px 3px 0 #606368;
+    -webkit-transition: box-shadow 150ms ease;
+    transition: box-shadow 150ms ease;
   }
 </style>
