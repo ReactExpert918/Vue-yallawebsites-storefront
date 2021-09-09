@@ -412,7 +412,7 @@ export default {
                   <button type="button" class="btn btn btn-rounded mb-2 mr-2">
                     <i class="mdi mdi-trash mr-1"></i> Cancel Order
                   </button>
-                  <button type="button" class="btn btn-success btn-rounded mb-2 mr-2" @click="createOrder">
+                  <button type="button" class="btn btn-success btn-rounded mb-2 mr-2" :disabled="isdisable" @click="createOrder">
                     <i class="mdi mdi-plus mr-1"></i> Submit Order
                   </button>
                 </div>
@@ -585,7 +585,7 @@ export default {
                     </thead>
                     <tbody>
                       <tr v-for="product in selectedProducts" :key="product.id">
-                        <td><img src="@/assets/images/product/img-1.png" class="thumbnail-img" /></td>
+                        <td><img :src="product.image" class="thumbnail-img" /></td>
                         <td>{{ product.name }}</td>
                         <td>{{ product.sku }}</td>
                         <td>{{ product.price }}</td>
