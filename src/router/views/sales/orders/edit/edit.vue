@@ -705,8 +705,8 @@ export default {
                   </b-button>
                 </div>
                 <div v-else>
-                  <h3>Payment Methods</h3>
-                  <p class="align_center">Payment was made via {{this.order.payment.payment_method.display_name}} using {{this.order.payment.type}}!</p>
+                  <p v-if="this.order.payment.type" class="align_center">Payment was made via {{this.order.payment.payment_method.display_name}} using {{this.order.payment.type}}!</p>
+                  <p v-else class="align_center">Payment was made via {{this.order.payment.payment_method.display_name}}!</p>
                 </div>
               </div>
             </div>
