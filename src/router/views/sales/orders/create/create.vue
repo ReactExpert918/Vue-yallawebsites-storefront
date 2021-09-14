@@ -25,6 +25,7 @@ export default {
       pageIdentity: "orders",
       backendURL: process.env.VUE_APP_BACKEND_URL,
       viewData: viewData,
+      confirm: false,
       paymentData: [],
       paymentMap: {},
       currentPayment:{},
@@ -128,13 +129,13 @@ export default {
       /**
         * Total no. of records
         */
-        isdisable() {
-          if(this.selectedProducts.length <= 0 || this.selectedCustomer.name == undefined) {
-            return true;
-          } else {
-            return false;
-          }
-        },
+      isdisable() {
+        if(this.selectedProducts.length <= 0 || this.selectedCustomer.name == undefined || this.confirm == true) {
+          return true;
+        } else {
+          return false;
+        }
+      },
       rows() {
           return this.productsLength;
       },
@@ -256,9 +257,20 @@ export default {
         this.customersLength = response.data.pagination.total))
         .catch(handleAxiosError);
       },
-      uncheckSelectAll(){
-         this.selectedAll = false
-       },
+      uncheckSelectAll(data){
+        this.selectedAll = false
+        if(data.billing_addresses == null || data.shipping_addresses == null) {
+          this.confirm = true
+          this.$bvModal.show('modal-confirm')
+        }
+        else {
+          this.confirm = false
+        }
+        
+      },
+      uncheckSelectAllProduct(){
+        this.selectedAll = false
+      },
       onFiltered(filteredItems) {
           // Trigger pagination to update the number of buttons/pages due to filtering
           this.totalRows = filteredItems.length;
@@ -513,7 +525,7 @@ export default {
                                  
                                   <template #cell(selected)="data">
                                     <b-form-checkbox
-                                    @change="uncheckSelectAll"
+                                    @change="uncheckSelectAll(data.item)"
                                     v-model="selectedCustomer"
                                     :value="data.item"
                                     class="custom-checkbox custom-checkbox-primary"
@@ -748,7 +760,7 @@ export default {
                 </template>
                 <template #cell(selected)="data">
                   <b-form-checkbox
-                  @change="uncheckSelectAll"
+                  @change="uncheckSelectAllProduct"
                   v-model="selectedProducts"
                   :value="data.item"
                   
@@ -789,6 +801,12 @@ export default {
               <i class="bx bx-check-double font-size-16 align-middle mr-2"></i>
               Add
           </b-button>
+      </div>
+    </b-modal>
+    <b-modal id="modal-confirm" centered title="Confirm" title-class="font-18" hide-footer>
+      <p>The Customer you have selected doesn't have any shipping/billing address saved!</p>
+      <div class="text-right">
+        <b-button variant="danger" @click="$bvModal.hide('modal-confirm')" >Cancel</b-button>
       </div>
     </b-modal>
   </Layout>
