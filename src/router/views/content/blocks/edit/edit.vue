@@ -36,7 +36,7 @@ export default {
         },
         {
           text: "Blocks",
-          href: "/content/pages"
+          href: "/content/blocks"
         },
         {
           text: "Edit Block",

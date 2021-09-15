@@ -42,6 +42,7 @@ export default {
         },
         {
           text: "Orders",
+          href: "/sales/orders"
         },
         {
           text: "View Order",

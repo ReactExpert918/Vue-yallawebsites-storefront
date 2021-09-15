@@ -36,6 +36,7 @@ export default {
       items: [
         {
           text: "Customers",
+          href: "/customers"
         },
         {
           text: "Edit Customer",

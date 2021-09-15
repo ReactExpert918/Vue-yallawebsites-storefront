@@ -80,7 +80,7 @@ export default {
         },
         {
           text: "Products",
-          href: "/content/pages"
+          href: "/catalog/products"
         },
         {
           text: "Add Product",
@@ -301,6 +301,7 @@ export default {
         if (this.newProduct.meta_keywords[0] == ""){
           this.newProduct.meta_keywords = [];
         } 
+        window.console.log(this.selectedCategories);
         for(var i = 0; i < this.selectedCategories.length; i++){ 
            this.newProduct.category_ids.push(this.selectedCategories[i].id);
         }
@@ -823,62 +824,62 @@ export default {
           <div class="card-body">
             <h4 class="card-title mt-3">Product Bundles</h4>
                 <div class="row mt-4">
-                        <div class="col-sm-12 col-md-6">
-                            <div id="tickets-table_length" class="dataTables_length">
-                                <label class="d-inline-flex align-items-center">
-                                    Show&nbsp;
-                                    <b-form-select 
-                                      v-model="perPage" 
-                                      size="sm" :options="pageOptions"
-                                      change = "handlePerPageChange"
-                                    >
-                                    </b-form-select>&nbsp;entries
-                                </label>
-                            </div>
-                        </div>
-                        <!-- Search -->
-                        <div class="col-sm-12 col-md-6">
-                            <div id="tickets-table_filter" class="dataTables_filter text-md-right">
-                                <label class="d-inline-flex align-items-center">
-                                    Search:
-                                    <b-form-input v-model="filter" type="search" placeholder="Search..." class="form-control form-control-sm ml-2"></b-form-input>
-                                </label>
-                            </div>
-                        </div>
-                        <!-- End search -->
-                    </div>
-                    <!-- Table -->
-                    <div class="table-responsive mb-0">
-                        <b-table :items="allProductsData" selectable :fields="fields" responsive="sm" :per-page="perPage" :current-page="1" :sort-by.sync="sortBy" :sort-desc.sync="sortDesc" :filter="filter" :filter-included-fields="filterOn" @filtered="onFiltered">
-                      <template #cell(selected)="data">
-                        <b-form-checkbox switch size="lg"  v-on:change="addBundle(data.item.id)"></b-form-checkbox>
-                      </template>
-                       <template #cell(status)="data">
-                        <span v-if="data.item.enabled" class="badge badge-success font-size-12">
-                          <span>Enabled</span>
-                        </span>
-                        <span v-else class="badge badge-danger font-size-12">
-                          <span>Disabled</span>
-                        </span>
-                      </template>
-                        </b-table>
-                    </div>
-                    <div class="row">
-                        <div class="col">
-                            <div class="dataTables_paginate paging_simple_numbers float-right">
-                                <ul class="pagination pagination-rounded mb-0">
-                                    <!-- pagination -->
-                                    <b-pagination 
-                                      v-model="currentPage" 
-                                      :total-rows="rows" 
-                                      :per-page="perPage"
-                                      @change = "handlePageChange"
-                                    >
-                                    </b-pagination>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
+                  <div class="col-sm-12 col-md-6">
+                      <div id="tickets-table_length" class="dataTables_length">
+                          <label class="d-inline-flex align-items-center">
+                              Show&nbsp;
+                              <b-form-select 
+                                v-model="perPage" 
+                                size="sm" :options="pageOptions"
+                                change = "handlePerPageChange"
+                              >
+                              </b-form-select>&nbsp;entries
+                          </label>
+                      </div>
+                  </div>
+                  <!-- Search -->
+                  <div class="col-sm-12 col-md-6">
+                      <div id="tickets-table_filter" class="dataTables_filter text-md-right">
+                          <label class="d-inline-flex align-items-center">
+                              Search:
+                              <b-form-input v-model="filter" type="search" placeholder="Search..." class="form-control form-control-sm ml-2"></b-form-input>
+                          </label>
+                      </div>
+                  </div>
+                  <!-- End search -->
+              </div>
+              <!-- Table -->
+              <div class="table-responsive mb-0">
+                  <b-table :items="allProductsData" selectable :fields="fields" responsive="sm" :per-page="perPage" :current-page="1" :sort-by.sync="sortBy" :sort-desc.sync="sortDesc" :filter="filter" :filter-included-fields="filterOn" @filtered="onFiltered">
+                <template #cell(selected)="data">
+                  <b-form-checkbox switch size="lg"  v-on:change="addBundle(data.item.id)"></b-form-checkbox>
+                </template>
+                  <template #cell(status)="data">
+                  <span v-if="data.item.enabled" class="badge badge-success font-size-12">
+                    <span>Enabled</span>
+                  </span>
+                  <span v-else class="badge badge-danger font-size-12">
+                    <span>Disabled</span>
+                  </span>
+                </template>
+                  </b-table>
+              </div>
+              <div class="row">
+                  <div class="col">
+                      <div class="dataTables_paginate paging_simple_numbers float-right">
+                          <ul class="pagination pagination-rounded mb-0">
+                              <!-- pagination -->
+                              <b-pagination 
+                                v-model="currentPage" 
+                                :total-rows="rows" 
+                                :per-page="perPage"
+                                @change = "handlePageChange"
+                              >
+                              </b-pagination>
+                          </ul>
+                      </div>
+                  </div>
+              </div>
           </div>
         </div>
         <div class="card">

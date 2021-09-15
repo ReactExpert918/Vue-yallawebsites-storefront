@@ -43,6 +43,7 @@ export default {
       items: [
         {
           text: "Customers",
+          href: "/customers"
         },
         {
           text: "Create Customer",

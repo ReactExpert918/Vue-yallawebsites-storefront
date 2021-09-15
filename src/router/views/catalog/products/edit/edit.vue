@@ -68,7 +68,7 @@ export default {
         },
         {
           text: "Products",
-          href: "/content/pages"
+          href: "/catalog/products"
         },
         {
           text: "Edit Product",
@@ -188,6 +188,7 @@ export default {
       .get(`${this.backendURL}/api/v1/products/${this.$route.params.id}` , authHeader())
       .then(response => {
           this.productData = response.data.data;
+          // this.selectedCategories = this.productData.category_ids;
           this.productData.meta_keywords_str = "";
           if (this.productData.layout == null){
             this.productData.layout = {};
