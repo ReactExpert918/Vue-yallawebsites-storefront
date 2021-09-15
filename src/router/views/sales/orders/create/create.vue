@@ -803,10 +803,10 @@ export default {
           </b-button>
       </div>
     </b-modal>
-    <b-modal id="modal-confirm" centered title="Confirm" title-class="font-18" hide-footer>
+    <b-modal id="modal-confirm" icon="warning" centered title="Address Required" title-class="font-18" hide-footer>
       <p>The Customer you have selected doesn't have any shipping/billing address saved!</p>
       <div class="text-right">
-        <b-button variant="danger" @click="$bvModal.hide('modal-confirm')" >Cancel</b-button>
+        <b-button variant="danger" @click="$bvModal.hide('modal-confirm')" >close</b-button>
       </div>
     </b-modal>
   </Layout>

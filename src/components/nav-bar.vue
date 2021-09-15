@@ -9,7 +9,7 @@ import { getLoggedInUser , handleAxiosError} from "@/helpers/authservice/user.se
 import {
   authHeader,
 } from "@/helpers/authservice/auth-header";
-
+import convert from "@/helpers/convertObject";
 
 /**
  * Nav-bar Component
@@ -64,16 +64,11 @@ export default {
     this.value = this.languages.find((x) => x.language === i18n.locale);
     this.text = this.value.title;
     this.flag = this.value.flag;
-    this.user = getLoggedInUser();
-
-
-
-    
+    this.user = getLoggedInUser();    
     axios
     .get(`${this.backendURL}/api/v1/notifications/unseen/count` , authHeader())
     .then(response => (this.notificationCount = response.data.data.count))
     .catch(handleAxiosError);
-
 
     var ws = new WebSocket(`${this.socketURL}/api/v1/socket/notifications?token=${this.user.token}`);
 
@@ -137,7 +132,7 @@ export default {
      axios
     .get(`${this.backendURL}/api/v1/notifications?per_page=${this.notificationsPerPage}&page=${this.notificationsCurrentPage}` , authHeader())
     .then(response => {
-      this.notifications = response.data.data;
+      this.notifications = convert(response.data.data);
       var nc = 0;
       for(var i = 0; i < this.notifications.length; i++){
         var noti = this.notifications[i];

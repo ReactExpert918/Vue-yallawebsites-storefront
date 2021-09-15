@@ -36,7 +36,7 @@
     "sass": "^1.29.0",
     "sass-loader": "^10.1.0",
     "simplebar-vue": "^1.6.0",
-    "sweetalert2": "^10.10.1",
+    "sweet-modal-vue": "^2.0.0",
     "v-click-outside": "^3.1.2",
     "v-mask": "^2.2.3",
     "velocity-animate": "^1.5.2",
@@ -62,7 +62,6 @@
     "vue-slide-bar": "^1.2.0",
     "vue-socket.io": "^3.0.10",
     "vue-spinner": "^1.0.4",
-    "vue-sweetalert2": "^4.1.1",
     "vue-switches": "^2.0.1",
     "vue-tinymce-editor": "^1.6.2",
     "vue2-animate": "^2.1.4",
@@ -99,6 +98,10 @@
     "parserOptions": {
       "parser": "babel-eslint"
     }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/scarmarco/sweet-modal-vue.git"
   },
   "browserslist": [
     "> 1%",

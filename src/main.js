@@ -28,7 +28,6 @@ Vue.use(Vuelidate)
 Vue.component('tinymce', tinymce)
 Vue.component('b-spinner', BSpinner)
 
-
 const firebaseConfig = {
   apiKey: process.env.VUE_APP_APIKEY,
   authDomain: process.env.VUE_APP_AUTHDOMAIN,
