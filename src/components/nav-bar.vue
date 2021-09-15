@@ -133,6 +133,7 @@ export default {
     .get(`${this.backendURL}/api/v1/notifications?per_page=${this.notificationsPerPage}&page=${this.notificationsCurrentPage}` , authHeader())
     .then(response => {
       this.notifications = convert(response.data.data);
+      window.console.log("---------------------", this.notifications)
       var nc = 0;
       for(var i = 0; i < this.notifications.length; i++){
         var noti = this.notifications[i];
@@ -611,7 +612,7 @@ export default {
                     {{ notification.title }}
                   </h6>
                   <div class="font-size-12 text-muted">
-                    <p class="mb-1">
+                    <p class="mb-1 word_break">
                       {{ notification.body }}
                     </p>
                     <p class="mb-0">
@@ -736,3 +737,10 @@ export default {
     </div>
   </header>
 </template>
+<style scoped>
+ .word_break{
+    white-space: pre-wrap; 
+    word-wrap: break-word;
+    font-family: inherit;
+ }
+</style>

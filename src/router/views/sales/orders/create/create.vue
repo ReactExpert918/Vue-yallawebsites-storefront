@@ -803,7 +803,11 @@ export default {
           </b-button>
       </div>
     </b-modal>
-    <b-modal id="modal-confirm" icon="warning" centered title="Address Required" title-class="font-18" hide-footer>
+    <b-modal id="modal-confirm" icon="warn" hide-footer>
+      <div slot="modal-title">
+        <img class="modal_head" src="@/assets/images/warning_icon.png" />
+        <span> &nbsp;Address Required</span>
+      </div>
       <p>The Customer you have selected doesn't have any shipping/billing address saved!</p>
       <div class="text-right">
         <b-button variant="danger" @click="$bvModal.hide('modal-confirm')" >close</b-button>
@@ -837,5 +841,10 @@ export default {
     box-shadow: 0 1px 3px 0 #606368;
     -webkit-transition: box-shadow 150ms ease;
     transition: box-shadow 150ms ease;
+  }
+
+  .modal_head{
+    width: 20px;
+    height: 20px;
   }
 </style>
