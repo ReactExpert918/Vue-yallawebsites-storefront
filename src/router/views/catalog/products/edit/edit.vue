@@ -188,7 +188,9 @@ export default {
       .get(`${this.backendURL}/api/v1/products/${this.$route.params.id}` , authHeader())
       .then(response => {
           this.productData = response.data.data;
-          // this.selectedCategories = this.productData.category_ids;
+          this.selectedCategories = this.categories.filter(obj => 
+             this.productData.category_ids.includes(obj.id)
+          )
           this.productData.meta_keywords_str = "";
           if (this.productData.layout == null){
             this.productData.layout = {};
