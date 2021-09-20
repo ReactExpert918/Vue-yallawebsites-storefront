@@ -40,7 +40,7 @@ export default {
 </template>
 <style scoped>
   #alert {
-    position: absolute;
+    position: fixed;
     opacity: 0;
     right: -100%;
     background-color: rgb(12, 179, 76);
