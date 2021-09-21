@@ -15,7 +15,6 @@ import {
 import {roleService} from "@/helpers/authservice/roles";
 import {handleAxiosError} from "@/helpers/authservice/user.service";
 import {copyArrayOfObjects} from "@/helpers/common";
-import alertBox from "@/helpers/Alert";
 
 /**
  * Pages component
@@ -377,7 +376,20 @@ export default {
           this.backPage();
         }
         if (!roleService.hasEditPermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!", false)
+          this.$toast.error("You do no have the permission to perform this action!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           return;
         }
         this.productData.meta_keywords = this.productData.meta_keywords_str.split(" ");
@@ -473,7 +485,20 @@ export default {
         .put(`${this.backendURL}/api/v1/products/${this.$route.params.id}` , productReq , authHeader())
         .then(response => {
           this.data = response.data;
-          alertBox("Product Updated successfully!", true)
+          this.$toast.success("Product Updated Successfully!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           this.$refs.myVueDropzone.processQueue();
         })
         .catch(handleAxiosError);
@@ -481,7 +506,20 @@ export default {
 
       deleteProduct(){
         if (!roleService.hasDeletePermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!", false)
+          this.$toast.error("You do no have the permission to perform this action!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           return;
         }
         axios
@@ -490,7 +528,20 @@ export default {
           response => (
             this.$router.push('/catalog/products'),
             this.data = response.data,
-            alertBox("Product Deleted successfully!", true)))
+            this.$toast.success("Product Deleted Successfully!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })))
         .catch(handleAxiosError);
       },
 

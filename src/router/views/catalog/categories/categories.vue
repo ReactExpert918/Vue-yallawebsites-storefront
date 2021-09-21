@@ -12,7 +12,6 @@ import {
   authHeader,
 } from "@/helpers/authservice/auth-header";
 import {roleService} from "@/helpers/authservice/roles";
-import alertBox from "@/helpers/Alert";
 
 /**
  * Catalog component
@@ -114,7 +113,20 @@ export default {
     createCategory(){
       this.loading = true
       if (!roleService.hasCreatePermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!", false)
+          this.$toast.error("You do no have the permission to perform this action!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           return;
       }
       this.catPayload.meta_keywords = this.catPayload.meta_keywords_str.split(" ");
@@ -129,7 +141,20 @@ export default {
           .then(response => (this.categoriesData = response.data.data))
           .catch(handleAxiosError);
           this.data = response.data,
-          alertBox("Category Created succesfully!", true)
+          this.$toast.success("Category Created Successfully!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           this.$refs.vueCreateDropzone.setOption("url" , `${this.backendURL}/api/v1/categories/${response.data.data.id}/upload`);
           this.$refs.vueCreateDropzone.processQueue();
        })
@@ -141,7 +166,20 @@ export default {
     updateCategory(){
       this.loading = true
       if (!roleService.hasEditPermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!", false)
+          this.$toast.error("You do no have the permission to perform this action!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           return;
       }
       this.currentCategory.meta_keywords = this.currentCategory.meta_keywords_str.split(" ");
@@ -164,7 +202,20 @@ export default {
           .then(response => (this.currentCategory = {},this.categoriesData = response.data.data))
           .catch(handleAxiosError),
           this.currentCategory = {},
-          alertBox("Category Updated succesfully!", true)
+          this.$toast.success("Category Updated Successfully!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           this.$refs.myVueDropzone.processQueue();
        })
       .catch(handleAxiosError)
@@ -179,7 +230,20 @@ export default {
       this.loading = true
       this.$bvModal.hide("modal-delete-category");
       if (!roleService.hasDeletePermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!", false)
+          this.$toast.error("You do no have the permission to perform this action!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           return;
       }
       axios
@@ -191,7 +255,20 @@ export default {
         .catch(handleAxiosError),
         this.currentCategory = {},
         this.data = response.data,
-        alertBox("Category Deleted successfully", true)
+        this.$toast.success("Category Deleted Successfully!", {
+          position: "top-right",
+          timeout: 5000,
+          closeOnClick: true,
+          pauseOnFocusLoss: true,
+          pauseOnHover: true,
+          draggable: true,
+          draggablePercent: 0.6,
+          showCloseButtonOnHover: false,
+          hideProgressBar: true,
+          closeButton: "button",
+          icon: true,
+          rtl: false
+        })
       ))
       .catch(handleAxiosError)
       .finally(() => {

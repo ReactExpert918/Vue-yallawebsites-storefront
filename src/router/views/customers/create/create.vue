@@ -9,7 +9,6 @@ import {
 } from "@/helpers/authservice/auth-header";
 import {roleService} from "@/helpers/authservice/roles";
 import {handleAxiosError} from "@/helpers/authservice/user.service";
-import alertBox from "@/helpers/Alert";
 import {mailValidate, passValidate} from "@/helpers/validate";
 
 /**
@@ -77,7 +76,20 @@ export default {
   methods:{
     createCustomer(){
       if(!roleService.hasCreatePermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!", false)
+          this.$toast.error("You do no have the permission to perform this action!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           return;
       }
 
@@ -95,8 +107,20 @@ export default {
       .then(response => (
         this.data = response.data,
         this.$router.push('/customers'),  
-          alertBox("Customer Created Successfully!", true)
-          ))
+        this.$toast.success("Customer Created Successfully!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })))
       .catch(handleAxiosError);
     },
   }

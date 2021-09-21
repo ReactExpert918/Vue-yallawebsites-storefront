@@ -9,8 +9,6 @@ import {
 } from "@/helpers/authservice/auth-header";
 import {roleService} from "@/helpers/authservice/roles";
 import {handleAxiosError} from "@/helpers/authservice/user.service";
-import alertBox from "@/helpers/Alert";
-
 /**
  * Pages component
  */
@@ -236,11 +234,37 @@ export default {
       },
       updateOrder(){
         if (!roleService.hasEditPermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!", false)
+          this.$toast.error("You do no have the permission to perform this action!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           return;
         }
         if (!this.order.is_editable){
-          alertBox("Order cannot be edited", false)
+          this.$toast.error("Order Cannot Be Edited!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           return;
         }
         var payload = {
@@ -263,17 +287,56 @@ export default {
         .then(response => (
           this.$router.push('/sales/orders'),
           this.data = response.data,
-          alertBox("Order Updated Successfully!", true)
+          this.$toast.success("Order Updated Successfully!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
         ))
         .catch(handleAxiosError);
       },
       cancelOrder(){
         if (!roleService.hasEditPermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!", false)
+          this.$toast.error("You do no have the permission to perform this action!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           return;
         }
         if (!this.order.is_cancelable){
-          alertBox("Order cannot be cancelled!", false)
+          this.$toast.error("Order Cannot Be Cancelled!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           return;
         }
         
@@ -281,16 +344,55 @@ export default {
         .delete(`${this.backendURL}/api/v1/orders/${this.$route.params.id}/cancel` , authHeader())
         .then(response => (
           this.data = response.data,
-          alertBox("Order Cancelled Successfully!", true)))
+          this.$toast.success("Order Cancelled Successfully!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })))
         .catch(handleAxiosError);
       },
       shipOrder(){
         if (!roleService.hasEditPermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!", false)
+          this.$toast.error("You do no have the permission to perform this action!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           return;
         }
         if (!this.order.is_shippable){
-          alertBox("Order cannot be markup shiped!", false)
+          this.$toast.error("Order Cannot Be Markup Shipped!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           return;
         }
         
@@ -298,17 +400,56 @@ export default {
         .put(`${this.backendURL}/api/v1/orders/${this.$route.params.id}/ship`  ,{}, authHeader())
         .then(response => (
           this.data = response.data, 
-          alertBox("Order Marked As Shipped!", true)
+          this.$toast.success("Order Marked As Shipped!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
         ))
         .catch(handleAxiosError);
       },
       deliverOrder(){
         if (!roleService.hasEditPermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!", false)
+          this.$toast.error("You do no have the permission to perform this action!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           return;
         }
         if (!this.order.is_deliverable){
-           alertBox("Order cannot be markup delivered!", false)
+          this.$toast.error("Order Cannot Be Markup Delivered!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           return;
         }
         
@@ -316,17 +457,56 @@ export default {
         .put(`${this.backendURL}/api/v1/orders/${this.$route.params.id}/deliver` ,{}, authHeader())
         .then(response => (
           this.data = response.data,
-           alertBox("Order be mark as delivered!", true)
+          this.$toast.success("Order Be Mark As Delivered!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
         ))
         .catch(handleAxiosError);
       },
       refundOrder(){
         if (!roleService.hasEditPermission(this.pageIdentity)){
-           alertBox("You do no have the permission to perform this action!", false)
+           this.$toast.error("You do no have the permission to perform this action!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           return;
         }
         if (!this.order.is_refundable){
-          alertBox("Order cannot be mark as refund!", false)
+          this.$toast.error("Order Cannot Be Mark As Refund!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           return;
         }
 
@@ -338,13 +518,39 @@ export default {
         .put(`${this.backendURL}/api/v1/orders/${this.$route.params.id}/refund` ,payload, authHeader())
         .then(response => (
           this.data=response.data,
-          alertBox("Order refund successfully!", true)
+          this.$toast.success("Order Refund Successfully!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
         ))
         .catch(handleAxiosError);
       },
       reOrder(){
         if (!roleService.hasCreatePermission(this.pageIdentity)){
-           alertBox("You do no have the permission to perform this action!", false)
+           this.$toast.error("You do no have the permission to perform this action!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           return;
         }
         var payload = {
@@ -367,7 +573,20 @@ export default {
         .post(`${this.backendURL}/api/v1/orders` , payload , authHeader())
         .then(response => (
           this.data = response.data,
-          alertBox("Order re-created!", true)
+          this.$toast.success("Order Re-Created!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
         ))
         .catch(handleAxiosError);
       },
@@ -411,7 +630,20 @@ export default {
             .then(response => (
               this.$router.push('/sales/orders'),
               this.data = response.data,
-              alertBox("Payment is being processed!", true)
+              this.$toast.success("Payment is Being Processed!", {
+                position: "top-right",
+                timeout: 5000,
+                closeOnClick: true,
+                pauseOnFocusLoss: true,
+                pauseOnHover: true,
+                draggable: true,
+                draggablePercent: 0.6,
+                showCloseButtonOnHover: false,
+                hideProgressBar: true,
+                closeButton: "button",
+                icon: true,
+                rtl: false
+              })
             ))
             .catch(handleAxiosError);
       },
@@ -419,7 +651,20 @@ export default {
           this.stripe.createToken(this.card)
           .then(result => {
             if(result.error){
-              alertBox("Failed to create stripe card token because: " + result.error.message, false)
+              this.$toast.error("Failed to create stripe card token because: " + result.error.message, {
+                position: "top-right",
+                timeout: 5000,
+                closeOnClick: true,
+                pauseOnFocusLoss: true,
+                pauseOnHover: true,
+                draggable: true,
+                draggablePercent: 0.6,
+                showCloseButtonOnHover: false,
+                hideProgressBar: true,
+                closeButton: "button",
+                icon: true,
+                rtl: false
+              })
               return;
             }
 
@@ -436,7 +681,20 @@ export default {
             .then(response => (
               this.$router.push('/sales/orders'),
               this.data = response.data,
-              alertBox("Payment is being processed!", true)
+              this.$toast.success("Payment is Being Processed!", {
+                position: "top-right",
+                timeout: 5000,
+                closeOnClick: true,
+                pauseOnFocusLoss: true,
+                pauseOnHover: true,
+                draggable: true,
+                draggablePercent: 0.6,
+                showCloseButtonOnHover: false,
+                hideProgressBar: true,
+                closeButton: "button",
+                icon: true,
+                rtl: false
+              })
             ))
             .catch(handleAxiosError);
           })

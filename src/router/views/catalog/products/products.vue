@@ -8,7 +8,6 @@ import {
 } from "@/helpers/authservice/auth-header";
 import {roleService} from "@/helpers/authservice/roles";
 import {handleAxiosError} from "@/helpers/authservice/user.service";
-import alertBox from "@/helpers/Alert";
 
 /**
  * Pages component
@@ -109,14 +108,40 @@ export default {
         this.loading = true;
         this.$bvModal.hide("modal-delete-page");
         if (!roleService.hasDeletePermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!", false)
+          this.$toast.error("You do no have the permission to perform this action!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           return;
         }
         axios
         .delete(`${this.backendURL}/api/v1/products/${this.currentProduct.id}` , authHeader())
         .then(
             this.handlePageChange(1),
-            alertBox("Product Deleted Successfully!", true))
+            this.$toast.success("Product Deleted Successfully!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          }))
         .catch(handleAxiosError)
         .finally(() => {
           this.loading = false

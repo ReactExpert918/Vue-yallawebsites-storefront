@@ -14,7 +14,6 @@ import {
 import {handleAxiosError} from "@/helpers/authservice/user.service";
 import {roleService} from "@/helpers/authservice/roles";
 import {copyArrayOfObjects} from "@/helpers/common";
-import alertBox from "@/helpers/Alert";
 
 /**
  * Pages component
@@ -294,7 +293,20 @@ export default {
           this.backPage();
         }
         if (!roleService.hasCreatePermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!", false)
+          this.$toast.error("You do no have the permission to perform this action!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           return;
         }
         this.newProduct.meta_keywords = this.newProduct.meta_keywords_str.split(" ");
@@ -350,7 +362,20 @@ export default {
         axios
         .post(`${this.backendURL}/api/v1/products` , this.newProduct , authHeader())
         .then(response => {
-          alertBox(`Product Created Successfully!`, true);
+          this.$toast.success("Product Created Successfully!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           this.$refs.myVueDropzone.setOption("url" , `${this.backendURL}/api/v1/products/${response.data.data.id}/upload`);
           this.$refs.myVueDropzone.processQueue();
          })
