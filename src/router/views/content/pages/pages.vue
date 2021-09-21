@@ -9,7 +9,6 @@ import {
 import {roleService} from "@/helpers/authservice/roles";
 import {handleAxiosError} from "@/helpers/authservice/user.service";
 import convert from "@/helpers/convertObject";
-import alertBox from "@/helpers/Alert";
 
 /**
  * Pages component
@@ -158,7 +157,20 @@ export default {
           .get(`${this.backendURL}/api/v1/pages?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
           .then(response => (this.pagesData = convert(response.data.data),
                              this.pagesDataLength = response.data.pagination.total)),
-          alertBox(`Page deleted succesfully!`, true)
+          this.$toast.success("Page deleted succesfully!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           ))
         .catch(handleAxiosError)
         .finally(() => {

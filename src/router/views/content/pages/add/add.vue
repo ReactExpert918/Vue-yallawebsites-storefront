@@ -11,7 +11,6 @@ import {
 } from "@/helpers/authservice/auth-header";
 import {roleService} from "@/helpers/authservice/roles";
 import {handleAxiosError} from "@/helpers/authservice/user.service";
-import alertBox from "@/helpers/Alert";
 
 /**
  * Pages component
@@ -103,7 +102,20 @@ export default {
   methods:{
     addPage(){
       if (!roleService.hasCreatePermission(this.pageIdentity)){
-        alertBox("You do no have the permission to perform this action!", false)
+        this.$toast.error("You do no have the permission to perform this action!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
         return;
       }
       this.pageData.meta_keywords = this.pageData.meta_keywords_str.split(" ");
@@ -115,7 +127,20 @@ export default {
       .then(response => (
         this.$router.push('/content/pages'),   
         this.data = response.data.data.id,
-        alertBox(`Page Created succesfully!`, true),
+        this.$toast.success("Page Created succesfully!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          }),
         this.loading = false
       ))
       .catch(handleAxiosError);

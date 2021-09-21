@@ -9001,10 +9001,10 @@
   "resolved" "https://registry.npmjs.org/sweet-modal-vue/-/sweet-modal-vue-2.0.0.tgz"
   "version" "2.0.0"
 
-"sweetalert2@^10.16.9", "sweetalert2@10.x":
-  "integrity" "sha512-oNe+md5tmmS3fGfVHa7gVPlun7Td2oANSacnZCeghnrr3OHBi6UPVPU+GFrymwaDqwQspACilLRmRnM7aTjNPA=="
-  "resolved" "https://registry.npmjs.org/sweetalert2/-/sweetalert2-10.16.9.tgz"
-  "version" "10.16.9"
+"sweetalert2@^11.1.6":
+  "integrity" "sha512-hPhdzelwZ+TeFdb6Wuq3BX8MMy09YeHFkC9tXPVmZFPInJ7TWt7FSkd9k0A5MdeNigjhH8fwvT0dsy0ZyibR4A=="
+  "resolved" "https://registry.npmjs.org/sweetalert2/-/sweetalert2-11.1.6.tgz"
+  "version" "11.1.6"
 
 "table@^5.2.3":
   "integrity" "sha512-wmEc8m4fjnob4gt5riFRtTu/6+4rSe12TpAELNSqHMfF3IqnA+CH37USM6/YR3qRZv7e56kAEAtd6nKZaxe0Ug=="
@@ -9734,13 +9734,6 @@
     "hash-sum" "^1.0.2"
     "loader-utils" "^1.0.2"
 
-"vue-sweetalert2@^4.1.1":
-  "integrity" "sha512-9ytddeXkjixIGzUxgmVAVdIOrbPiWcjEPQuO3mEPq4zc8clbQbhOn192zvYUdcM0SbRPzbafyXTFx9mNMNJzQA=="
-  "resolved" "https://registry.npmjs.org/vue-sweetalert2/-/vue-sweetalert2-4.1.1.tgz"
-  "version" "4.1.1"
-  dependencies:
-    "sweetalert2" "10.x"
-
 "vue-switches@^2.0.1":
   "integrity" "sha512-rDqBtK3TKy1pEvyZeWmnSHVeXqAcn+ozch7LiNThBzr1QMjg5rhvqBY7uWeli/baDDslf6CXmBJbHPwASJLqoA=="
   "resolved" "https://registry.npmjs.org/vue-switches/-/vue-switches-2.0.1.tgz"
@@ -9769,6 +9762,11 @@
     "tinymce" "^4.7.7"
     "vue" "^2.5.13"
     "vue-template-compiler" "^2.5.13"
+
+"vue-toastification@^1.7.11":
+  "integrity" "sha512-CT/DYttb/VtWDNdhJG0BskLVfveZq5rGOgO/u3qTX+RPQQzX0WSai8VVxxUuvR8UpxfSGPS+JQleR33bo3Vadg=="
+  "resolved" "https://registry.npmjs.org/vue-toastification/-/vue-toastification-1.7.11.tgz"
+  "version" "1.7.11"
 
 "vue@*", "vue@^2 || ^3.0.0-0", "vue@^2.0.0", "vue@^2.4.0", "vue@^2.5.0", "vue@^2.5.17", "vue@^2.5.18", "vue@^2.5.22", "vue@^2.6.12", "vue@^2.6.4", "vue@2.x":
   "integrity" "sha512-uhmLFETqPPNyuLLbsKz6ioJ4q7AZHzD8ZVFNATNyICSZouqP2Sz0rotWQC8UNBF6VGSCs5abnKJoStA6JbCbfg=="

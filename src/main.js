@@ -7,7 +7,6 @@ import VueMask from 'v-mask'
 import VueRouter from 'vue-router'
 import vco from "v-click-outside"
 import router from './router/index'
-import VueSweetalert2 from 'vue-sweetalert2';
 import Notifications from 'vue-notification';
 import velocity      from 'velocity-animate'
 import { BSpinner } from 'bootstrap-vue'
@@ -55,7 +54,6 @@ Vue.use(BootstrapVue)
 Vue.use(Vuelidate)
 Vue.use(VueMask)
 Vue.use(require('vue-chartist'))
-Vue.use(VueSweetalert2);
 Vue.use(VueGoogleMaps, {
   load: {
     key: 'AIzaSyAbvyBxmMbFhrzP9Z8moyYr6dCr-pzjhBE',

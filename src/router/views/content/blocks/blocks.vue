@@ -9,7 +9,6 @@ import {
 import {roleService} from "@/helpers/authservice/roles";
 import {handleAxiosError} from "@/helpers/authservice/user.service";
 import convert from "@/helpers/convertObject";
-import alertBox from "@/helpers/Alert";
 
 /**
  * Block component
@@ -129,7 +128,20 @@ export default {
         this.loading = true;
         this.$bvModal.hide("modal-delete-page");
         if (!roleService.hasDeletePermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!", false)
+          this.$toast.error("You do no have the permission to perform this action!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           return;
         }
         axios
@@ -140,8 +152,22 @@ export default {
           .then(response => (this.blockData = convert(response.data.data),
                             this.blockDataLength = response.data.pagination.total)),
           this.data = response.data,
-          alertBox("Block Deleted succesfully", true)
-          ))
+          // alertBox("Block Deleted succesfully", true)
+          this.$toast.success("Block Deleted succesfully!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
+        ))
         .catch(handleAxiosError)
         .finally(() => {
           this.loading = false
