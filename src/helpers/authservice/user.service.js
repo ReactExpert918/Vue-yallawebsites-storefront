@@ -3,6 +3,15 @@ import { authHeader } from './auth-header';
 import { createJWTToken } from '../common';
 import { parseAndVerifyJWTToken } from '../common';
 import axios from "axios";
+import Vue from "vue";
+import Toast from "vue-toastification";
+import "vue-toastification/dist/index.css";
+
+Vue.use(Toast, {
+  transition: "Vue-Toastification__bounce",
+  maxToasts: 20,
+  newestOnTop: true
+});
 
 export const userService = {
     login,

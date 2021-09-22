@@ -6,7 +6,6 @@ import vue2Dropzone from "vue2-dropzone";
 import {authHeader} from "@/helpers/authservice/auth-header";
 import {handleAxiosError} from "@/helpers/authservice/user.service";
 import {roleService} from "@/helpers/authservice/roles";
-import alertBox from "@/helpers/Alert";
 
 import axios from "axios";
 
@@ -104,7 +103,20 @@ export default {
   methods:{
     saveDesignConfiguration(){
       if (!roleService.hasEditPermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!", false)
+            this.$toast.error("You do no have the permission to perform this action!", {
+                position: "top-right",
+                timeout: 5000,
+                closeOnClick: true,
+                pauseOnFocusLoss: true,
+                pauseOnHover: true,
+                draggable: true,
+                draggablePercent: 0.6,
+                showCloseButtonOnHover: false,
+                hideProgressBar: true,
+                closeButton: "button",
+                icon: true,
+                rtl: false
+              })
           return;
       }
       var payload = {
@@ -121,7 +133,20 @@ export default {
     .post(`${this.backendURL}/api/v1/design/configurations` ,payload, authHeader())
     .then(response => {
       this.data = response.data,
-      alertBox("Design saved Successfully!", true)
+        this.$toast.success("Design Saved Successfully!", {
+          position: "top-right",
+          timeout: 5000,
+          closeOnClick: true,
+          pauseOnFocusLoss: true,
+          pauseOnHover: true,
+          draggable: true,
+          draggablePercent: 0.6,
+          showCloseButtonOnHover: false,
+          hideProgressBar: true,
+          closeButton: "button",
+          icon: true,
+          rtl: false
+        })
       var confID = response.data.data.id;
       this.$refs.siteLogoDropzone.setOption("url" , `${this.backendURL}/api/v1/design/configurations/${confID}/upload`);
       this.$refs.faviconDropzone.setOption("url" , `${this.backendURL}/api/v1/design/configurations/${confID}/upload`);
@@ -142,7 +167,20 @@ export default {
           .post(`${this.backendURL}/api/v1/design/configurations/${confID}/upload` , formData , header)
           .then(response => {
             this.data = response.data,
-            alertBox("Uploaded Design Configuration Font Files!", true)
+              this.$toast.success("Uploaded Design Configuration Font Files!", {
+                position: "top-right",
+                timeout: 5000,
+                closeOnClick: true,
+                pauseOnFocusLoss: true,
+                pauseOnHover: true,
+                draggable: true,
+                draggablePercent: 0.6,
+                showCloseButtonOnHover: false,
+                hideProgressBar: true,
+                closeButton: "button",
+                icon: true,
+                rtl: false
+              })
             })
           .catch(handleAxiosError);
       }

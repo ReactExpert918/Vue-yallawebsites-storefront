@@ -8,7 +8,6 @@ import {
 import {handleAxiosError} from "@/helpers/authservice/user.service";
 import appConfig from "@/app.config";
 import {roleService} from "@/helpers/authservice/roles";
-import alertBox from "@/helpers/Alert";
 
 /**
  * Domains component
@@ -123,7 +122,20 @@ export default {
         this.loader = true
         this.$bvModal.hide("modal-scrollable-verify-domain")
         if (!roleService.hasEditPermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!", false)
+          this.$toast.error("You do no have the permission to perform this action!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           return;
         }
         axios
@@ -141,9 +153,35 @@ export default {
               duration: 5000,
               speed: 1000
             })
-            alertBox("Domain is verified!", true)
+            this.$toast.success("Domain is Verified!", {
+              position: "top-right",
+              timeout: 5000,
+              closeOnClick: true,
+              pauseOnFocusLoss: true,
+              pauseOnHover: true,
+              draggable: true,
+              draggablePercent: 0.6,
+              showCloseButtonOnHover: false,
+              hideProgressBar: true,
+              closeButton: "button",
+              icon: true,
+              rtl: false
+            })
           }else{
-            alertBox("Domain is not verified!", false)
+              this.$toast.error("Domain Is Not Verified!", {
+                position: "top-right",
+                timeout: 5000,
+                closeOnClick: true,
+                pauseOnFocusLoss: true,
+                pauseOnHover: true,
+                draggable: true,
+                draggablePercent: 0.6,
+                showCloseButtonOnHover: false,
+                hideProgressBar: true,
+                closeButton: "button",
+                icon: true,
+                rtl: false
+              })
           }
         })
         .catch(handleAxiosError)
@@ -155,7 +193,20 @@ export default {
         this.loader = true
         this.$bvModal.hide("modal-scrollable-add-domain")
         if (!roleService.hasCreatePermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!", false)
+          this.$toast.error("You do no have the permission to perform this action!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           return;
         }
          axios
@@ -166,7 +217,20 @@ export default {
           .then(response => (this.domainsData = response.data.data,
                             this.domainsDataLength = response.data.pagination.total)),
           this.data = response.data,
-          alertBox("Domain created successfully!", true)
+            this.$toast.success("Domain Create Successfully!", {
+              position: "top-right",
+              timeout: 5000,
+              closeOnClick: true,
+              pauseOnFocusLoss: true,
+              pauseOnHover: true,
+              draggable: true,
+              draggablePercent: 0.6,
+              showCloseButtonOnHover: false,
+              hideProgressBar: true,
+              closeButton: "button",
+              icon: true,
+              rtl: false
+            })
           ))
         .catch(handleAxiosError)
         .finally(() => {
@@ -177,7 +241,20 @@ export default {
         this.loader = true
         this.$bvModal.hide("modal-scrollable-delete-domain")
         if (!roleService.hasDeletePermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!", false)
+          this.$toast.error("You do no have the permission to perform this action!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           return;
       }
         axios
@@ -188,7 +265,20 @@ export default {
         .then(response => (this.domainsData = response.data.data,
                            this.domainsDataLength = response.data.pagination.total)),
           this.data = response.data,
-          alertBox("Domain deleted successfully!", true)))
+            this.$toast.success("Domain Deleted Successfully!", {
+              position: "top-right",
+              timeout: 5000,
+              closeOnClick: true,
+              pauseOnFocusLoss: true,
+              pauseOnHover: true,
+              draggable: true,
+              draggablePercent: 0.6,
+              showCloseButtonOnHover: false,
+              hideProgressBar: true,
+              closeButton: "button",
+              icon: true,
+              rtl: false
+            })))
         .catch(handleAxiosError)
         .finally(() => {
           this.loader = false
