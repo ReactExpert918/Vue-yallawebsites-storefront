@@ -8,7 +8,7 @@ import {
 } from "@/helpers/authservice/auth-header";
 import {roleService} from "@/helpers/authservice/roles";
 import {handleAxiosError} from "@/helpers/authservice/user.service";
-import alertBox from "@/helpers/Alert";
+
 
 /**
  * Pages component
@@ -122,7 +122,7 @@ export default {
       .then(response => (this.customerGroupsData = response.data.data,
       window.console.log(this.customerGroupsData),
                         this.customerGroupsDataLength = response.data.pagination.total))
-      .catch(handleAxiosError)
+      .catch(error => handleAxiosError(error, this))
       .finally(() => {
         this.loading = false
       });
@@ -146,13 +146,26 @@ export default {
                         this.createGroupPayload.rule.tax_class = this.taxClasses[0].country_code,
                         this.createGroupPayload.rule.metric = "percentage",
                         this.createGroupPayload.rule.calculation = "+"))
-      .catch(handleAxiosError);
+      .catch(error => handleAxiosError(error, this));
       },
       deleteCustomerGroup(id) {
         this.loading = true
         this.$bvModal.hide("modal-delete-customer-group");
         if(!roleService.hasDeletePermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!", false)
+          this.$toast.error("You do no have the permission to perform this action!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           return;
        }
         axios
@@ -162,10 +175,23 @@ export default {
           .get(`${this.backendURL}/api/v1/customers/groups?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
           .then(response => (this.customerGroupsData = response.data.data,
                             this.customerGroupsDataLength = response.data.pagination.total))
-          .catch(handleAxiosError),
-          alertBox("Customer Group Deleted Successfully!", true)
+          .catch(error => handleAxiosError(error, this)),
+          this.$toast.success("Customer Group Deleted Successfully!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           )
-        .catch(handleAxiosError)
+        .catch(error => handleAxiosError(error, this))
         .finally(() => {
           this.loading = false
         });
@@ -174,7 +200,20 @@ export default {
         this.loading = true
         this.$bvModal.hide("modal-add-group")
         if(!roleService.hasCreatePermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!", false)
+          this.$toast.error("You do no have the permission to perform this action!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           return;
        }
         e.preventDefault();
@@ -186,11 +225,24 @@ export default {
           .get(`${this.backendURL}/api/v1/customers/groups?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
           .then(response => (this.customerGroupsData = response.data.data,
                             this.customerGroupsDataLength = response.data.pagination.total))
-          .catch(handleAxiosError),
+          .catch(error => handleAxiosError(error, this)),
           this.data = response.data,
-          alertBox("Customer Group Created Successfully!", true)
+          this.$toast.success("Customer Group Created Successfully!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           ))
-        .catch(handleAxiosError)
+        .catch(error => handleAxiosError(error, this))
         .finally(() => {
           this.loading = false
         });
@@ -199,7 +251,20 @@ export default {
         this.loading = true;
         this.$bvModal.hide("modal-edit-group")
         if(!roleService.hasEditPermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!", false)
+          this.$toast.error("You do no have the permission to perform this action!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           return;
        }
         e.preventDefault();
@@ -211,10 +276,23 @@ export default {
           .get(`${this.backendURL}/api/v1/customers/groups?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
           .then(response => (this.customerGroupsData = response.data.data,
                             this.customerGroupsDataLength = response.data.pagination.total))
-          .catch(handleAxiosError),
+          .catch(error => handleAxiosError(error, this)),
           this.data = response.data,
-          alertBox("Customer Group Updated Successfully!", true)))
-        .catch(handleAxiosError)
+          this.$toast.success("Customer Group Updated Successfully!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })))
+        .catch(error => handleAxiosError(error, this))
         .finally(() => {
           this.loading = false
         });

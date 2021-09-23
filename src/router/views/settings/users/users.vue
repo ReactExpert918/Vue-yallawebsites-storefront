@@ -9,9 +9,7 @@ import {
 } from "@/helpers/authservice/auth-header";
 import { handleAxiosError } from "@/helpers/authservice/user.service"
 import {roleService} from "@/helpers/authservice/roles";
-import alertBox from "@/helpers/Alert";
 import {mailValidate, passValidate} from "@/helpers/validate";
-
 /**
  * Users component
  */
@@ -158,15 +156,15 @@ export default {
            }
          }
        })
-      .catch(handleAxiosError);
+      .catch(error => handleAxiosError(error, this));
       axios
       .get(`${this.backendURL}/api/v1/users/roles` , authHeader())
       .then(response => (this.rolesData = response.data.data))
-      .catch(handleAxiosError);
+      .catch(error => handleAxiosError(error, this));
       axios
       .get(`${this.backendURL}/api/v1/users/roles/contents` , authHeader())
       .then(response => (this.roleContents = response.data.data))
-      .catch(handleAxiosError)
+      .catch(error => handleAxiosError(error, this))
       .finally(() => {
         this.loader = false
       });
@@ -187,7 +185,20 @@ export default {
         this.loader = true
         this.$bvModal.hide("modal-delete-user")
         if (!roleService.hasDeletePermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!", false)
+          this.$toast.error("You do no have the permission to perform this action!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           return;
         }
         axios
@@ -199,18 +210,46 @@ export default {
             this.usersData = response.data.data,
             this.usersDataLength = response.data.pagination.total;
           }),
-          alertBox("User deleted successfully!", true)
+            this.$toast.success("User Deleted Successfully!", {
+              position: "top-right",
+              timeout: 5000,
+              closeOnClick: true,
+              pauseOnFocusLoss: true,
+              pauseOnHover: true,
+              draggable: true,
+              draggablePercent: 0.6,
+              showCloseButtonOnHover: false,
+              hideProgressBar: true,
+              closeButton: "button",
+              icon: true,
+              rtl: false
+            })
           )
-        .catch(handleAxiosError)
+        .catch(error => handleAxiosError(error, this))
         .finally(() => {
           this.loader = false
         });
       },
       createUser(e){
         this.loader = true
-        this.$bvModal.hide("modal-scrollable-add-user")
+        if (this.$refs.vueCreateDropzone.getAcceptedFiles().length < 1){ // if there are files added to the dropzone for uploading, then do not hide the modal
+          this.$bvModal.hide("modal-scrollable-add-user");
+        }
         if (!roleService.hasCreatePermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!", false)
+          this.$toast.error("You do no have the permission to perform this action!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           return;
         }
         e.preventDefault();
@@ -237,20 +276,33 @@ export default {
               }
             }
           })
-          .catch(handleAxiosError),
+          .catch(error => handleAxiosError(error, this)),
           axios
           .get(`${this.backendURL}/api/v1/users/roles` , authHeader())
           .then(response => (this.rolesData = response.data.data))
-          .catch(handleAxiosError),
+          .catch(error => handleAxiosError(error, this)),
           axios
           .get(`${this.backendURL}/api/v1/users/roles/contents` , authHeader())
           .then(response => (this.roleContents = response.data.data))
-          .catch(handleAxiosError),
-          alertBox("User Created successfully!", true)
+          .catch(error => handleAxiosError(error, this)),
+            this.$toast.success("User Created Successfully!", {
+              position: "top-right",
+              timeout: 5000,
+              closeOnClick: true,
+              pauseOnFocusLoss: true,
+              pauseOnHover: true,
+              draggable: true,
+              draggablePercent: 0.6,
+              showCloseButtonOnHover: false,
+              hideProgressBar: true,
+              closeButton: "button",
+              icon: true,
+              rtl: false
+            })
             this.$refs.vueCreateDropzone.setOption("url" , `${this.backendURL}/api/v1/users/${response.data.data.id}/upload`);
             this.$refs.vueCreateDropzone.processQueue();
          })
-        .catch(handleAxiosError)
+        .catch(error => handleAxiosError(error, this))
         .finally(() => {
           this.loader = false
         });
@@ -261,7 +313,20 @@ export default {
           this.$bvModal.hide("modal-scrollable-edit-user");
         }
         if (!roleService.hasEditPermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!", false)
+          this.$toast.error("You do no have the permission to perform this action!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           return;
         }
         e.preventDefault();
@@ -278,10 +343,23 @@ export default {
             this.usersDataLength = response.data.pagination.total;
           }),
           this.data = response.data,
-          alertBox("User Updated Successfully!", true)
+            this.$toast.success("User Updated Successfully!", {
+              position: "top-right",
+              timeout: 5000,
+              closeOnClick: true,
+              pauseOnFocusLoss: true,
+              pauseOnHover: true,
+              draggable: true,
+              draggablePercent: 0.6,
+              showCloseButtonOnHover: false,
+              hideProgressBar: true,
+              closeButton: "button",
+              icon: true,
+              rtl: false
+            })
           this.$refs.myVueDropzone.processQueue();
          })
-        .catch(handleAxiosError)
+        .catch(error => handleAxiosError(error, this))
         .finally(() =>{
           this.loader = false;
         });
@@ -328,6 +406,9 @@ export default {
       },
       hideModal(){
         this.$bvModal.hide("modal-scrollable-edit-user");
+      },
+      hideAddModal(){
+        this.$bvModal.hide("modal-scrollable-add-user");
       }
   },
 };
@@ -493,6 +574,7 @@ export default {
                     ref="vueCreateDropzone"
                     :use-custom-slot="true"
                     :options="dropzoneOptions"
+                    @vdropzone-complete="hideAddModal"
                   >
                       <div class="dropzone-custom-content">
                         <i class="display-4 text-muted bx bxs-cloud-upload"></i>

@@ -1,17 +1,15 @@
 <script>
 import Layout from "../../../../layouts/main";
 import PageHeader from "@/components/page-header";
-
 import { viewData } from "./create-data";
 import {
   authHeader,
 } from "@/helpers/authservice/auth-header";
 import {roleService} from "@/helpers/authservice/roles";
-import alertBox from "@/helpers/Alert";
 import {handleAxiosError} from "@/helpers/authservice/user.service";
 import axios from "axios";
 import appConfig from "@/app.config";
-
+// import { StripeElementCard } from '@vue-stripe/vue-stripe';
 /**
  * Pages component
  */
@@ -26,12 +24,14 @@ export default {
       pageIdentity: "orders",
       backendURL: process.env.VUE_APP_BACKEND_URL,
       viewData: viewData,
+      confirm: false,
       paymentData: [],
       paymentMap: {},
       currentPayment:{},
       currentPaymentType: {},
       shippingData: [],
       products: [],
+      productsLength: 0,
       customers: [],
       customersLength: 0,
       selectedCustomer: {
@@ -51,6 +51,7 @@ export default {
         },
         {
           text: "Orders",
+          href: "/sales/orders"
         },
         {
           text: "Create Order",
@@ -58,6 +59,8 @@ export default {
         }
       ],
       totalRows: 1,
+      currentProductPage: 1,
+      perProductPage: 10,
       currentPage: 1,
       perPage: 10,
       pageOptions: [10, 25, 50, 100],
@@ -126,16 +129,15 @@ export default {
       /**
         * Total no. of records
         */
-        isdisable() {
-          window.console.log(this.selectedCustomer.name);
-          if(this.selectedProducts.length <= 0 || this.selectedCustomer.name == undefined) {
-            return true;
-          } else {
-            return false;
-          }
-        },
+      isdisable() {
+        if(this.selectedProducts.length <= 0 || this.selectedCustomer.name == undefined || this.confirm == true) {
+          return true;
+        } else {
+          return false;
+        }
+      },
       rows() {
-          return this.products.length;
+          return this.productsLength;
       },
       customerrows() {
           return this.customersLength;
@@ -152,23 +154,22 @@ export default {
        })
      },
   },
-  mounted() {
+  mounted() {    
     this.loading = true
       axios
       .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}&quantity_greater_than=${this.productQuantityGreaterThan}&with_disabled=false` , authHeader())
       .then(response => {
          this.products = response.data.data;
+         this.productsLength = response.data.pagination.total
          for(var i = 0; i < this.products.length; i++){
            this.products[i].order_quantity = 1;
          }
        })
-       .catch(handleAxiosError);
-
+       .catch(error => handleAxiosError(error, this));
        axios
       .get(`${this.backendURL}/api/v1/payments/methods` , authHeader())
       .then(response => {
           this.paymentData = response.data.data;
-
           for(var i = 0; i < this.paymentData.length; i++){
             var pd = this.paymentData[i];
             if (!(pd.display_name in this.paymentMap)){
@@ -182,12 +183,11 @@ export default {
             }
           }          
         })
-      .catch(handleAxiosError);
-
+      .catch(error => handleAxiosError(error, this));
       axios
       .get(`${this.backendURL}/api/v1/shipping/methods` , authHeader())
       .then(response => (this.shippingData = response.data.data))
-      .catch(handleAxiosError)
+      .catch(error => handleAxiosError(error, this))
       .finally(() => {
         this.loading = false
       });
@@ -197,30 +197,56 @@ export default {
       /**
         * Search the table data with search input 
         */
-       change() {
-        //  alert(this.customers.length)
-        if(this.customers.length == 0) {
-          this.loading = true 
-          axios
-          .get(`${this.backendURL}/api/v1/customers?per_page=${this.perPage}&page=${this.currentPage}&address=true` , authHeader())
-          .then(response => (this.customers = response.data.data,
-          this.customersLength = response.data.pagination.total))
-          .catch(handleAxiosError)
-          .finally(() => {
-            this.loading = false
-          });
-        }
-       },
-       addProduct() {
-         this.$bvModal.hide("modal-scrollable");
-       },
+      change() {
+      if(this.customers.length == 0) {
+        this.loading = true 
+        axios
+        .get(`${this.backendURL}/api/v1/customers?per_page=${this.perPage}&page=${this.currentPage}&address=true` , authHeader())
+        .then(response => (this.customers = response.data.data,
+        this.customersLength = response.data.pagination.total))
+        .catch(error => handleAxiosError(error, this))
+        .finally(() => {
+          this.loading = false
+        });
+      }
+      },
+      addProduct() {
+        this.$bvModal.hide("modal-scrollable");
+      },
+      handleProductsPageChange(value) {
+        this.currentProductPage = value;
+        axios
+        .get(`${this.backendURL}/api/v1/products?per_page=${this.perProductPage}&page=${this.currentProductPage}&quantity_greater_than=${this.productQuantityGreaterThan}&with_disabled=false` , authHeader())
+        .then(response => {
+          this.products = response.data.data;
+          this.productsLength = response.data.pagination.total
+          for(var i = 0; i < this.products.length; i++){
+            this.products[i].order_quantity = 1;
+          }
+        })
+        .catch(error => handleAxiosError(error, this));
+      },
+      handleProductPerPageChange(value) {
+        this.currentProductPage = 1;
+        this.perProductPage = value;
+        axios
+        .get(`${this.backendURL}/api/v1/products?per_page=${this.perProductPage}&page=${this.currentProductPage}&quantity_greater_than=${this.productQuantityGreaterThan}&with_disabled=false` , authHeader())
+        .then(response => {
+          this.products = response.data.data;
+          this.productsLength = response.data.pagination.total
+          for(var i = 0; i < this.products.length; i++){
+            this.products[i].order_quantity = 1;
+          }
+        })
+        .catch(error => handleAxiosError(error, this));
+      },
       handlePageChange(value) {
         this.currentPage = value;
         axios
         .get(`${this.backendURL}/api/v1/customers?per_page=${this.perPage}&page=${this.currentPage}&address=true` , authHeader())
         .then(response => (this.customers = response.data.data,
         this.customersLength = response.data.pagination.total))
-        .catch(handleAxiosError);
+        .catch(error => handleAxiosError(error, this));
       },
       handlePerPageChange(value) {
         this.currentPage = 1;
@@ -229,11 +255,22 @@ export default {
         .get(`${this.backendURL}/api/v1/customers?per_page=${this.perPage}&page=${this.currentPage}&address=true` , authHeader())
         .then(response => (this.customers = response.data.data,
         this.customersLength = response.data.pagination.total))
-        .catch(handleAxiosError);
+        .catch(error => handleAxiosError(error, this));
       },
-      uncheckSelectAll(){
-         this.selectedAll = false
-       },
+      uncheckSelectAll(data){
+        this.selectedAll = false
+        if(data.billing_addresses == null || data.shipping_addresses == null) {
+          this.confirm = true
+          this.$bvModal.show('modal-confirm')
+        }
+        else {
+          this.confirm = false
+        }
+        
+      },
+      uncheckSelectAllProduct(){
+        this.selectedAll = false
+      },
       onFiltered(filteredItems) {
           // Trigger pagination to update the number of buttons/pages due to filtering
           this.totalRows = filteredItems.length;
@@ -254,7 +291,20 @@ export default {
       },
       createOrder(){
         if (!roleService.hasCreatePermission(this.pageIdentity)){
-          alertBox('You do no have the permission to perform this action!', false)
+          this.$toast.error("You do no have the permission to perform this action!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           return;
         }
         var billingAddress = {}
@@ -282,10 +332,23 @@ export default {
         .then(response => {
           this.$router.push('/sales/orders'),   
           this.data = response.data,
-            alertBox("Order Created Successfully!", true)
+            this.$toast.success("Order Created Successfully!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
             this.purchase(response.data.data.id);
          })
-        .catch(handleAxiosError);
+        .catch(error => handleAxiosError(error, this));
       },
       // Invluce stripe dynamically
       includeStripe( URL, callback ){
@@ -298,12 +361,10 @@ export default {
       },
       configureStripe(){
         this.stripe = window.Stripe(this.paymentMap["stripe"].api_key);
-
         this.elements = this.stripe.elements();
         this.card = this.elements.create('card' , {
-          hidePostalCode : true,
+          hidePostalCode : true
         });
-
         this.card.mount('#card-element');
       },
        purchase(orderID){
@@ -320,10 +381,22 @@ export default {
           this.stripe.createToken(this.card)
           .then(result => {
             if(result.error){
-              alertBox("Failed to create stripe card token because: " + result.error.message, false);
+              this.$toast.error("Failed to create stripe card token because: " + result.error.message, {
+                position: "top-right",
+                timeout: 5000,
+                closeOnClick: true,
+                pauseOnFocusLoss: true,
+                pauseOnHover: true,
+                draggable: true,
+                draggablePercent: 0.6,
+                showCloseButtonOnHover: false,
+                hideProgressBar: true,
+                closeButton: "button",
+                icon: true,
+                rtl: false
+              })
               return;
             }
-
             var payload = {
               order_id: orderID,
               method: "stripe",
@@ -336,9 +409,22 @@ export default {
             .post(`${this.backendURL}/api/v1/payments/${this.currentPayment.id}/pay` , payload , authHeader())
             .then(response => (
               this.data = response.data,
-              alertBox("Got paid Successfully", true)
+              this.$toast.success("Got Paid Successfully!", {
+                position: "top-right",
+                timeout: 5000,
+                closeOnClick: true,
+                pauseOnFocusLoss: true,
+                pauseOnHover: true,
+                draggable: true,
+                draggablePercent: 0.6,
+                showCloseButtonOnHover: false,
+                hideProgressBar: true,
+                closeButton: "button",
+                icon: true,
+                rtl: false
+              })
               ))
-            .catch(handleAxiosError);
+            .catch(error => handleAxiosError(error, this));
           })
       },
       checkStripeCard(name , type , enabled){
@@ -356,9 +442,22 @@ export default {
             .post(`${this.backendURL}/api/v1/payments/${this.currentPayment.id}/pay` , payload , authHeader())
             .then(response => (
               this.data = response.data,
-              alertBox(`Got Paid Successfully!`, true)
+              this.$toast.success("Got Paid Successfully!", {
+                position: "top-right",
+                timeout: 5000,
+                closeOnClick: true,
+                pauseOnFocusLoss: true,
+                pauseOnHover: true,
+                draggable: true,
+                draggablePercent: 0.6,
+                showCloseButtonOnHover: false,
+                hideProgressBar: true,
+                closeButton: "button",
+                icon: true,
+                rtl: false
+              })
               ))
-            .catch(handleAxiosError);
+            .catch(error => handleAxiosError(error, this));
       },
       setCurrentPaymentType(checked , type){
         if (checked){
@@ -390,7 +489,7 @@ export default {
                   <button type="button" class="btn btn btn-rounded mb-2 mr-2">
                     <i class="mdi mdi-trash mr-1"></i> Cancel Order
                   </button>
-                  <button type="button" class="btn btn-success btn-rounded mb-2 mr-2" @click="createOrder">
+                  <button type="button" class="btn btn-success btn-rounded mb-2 mr-2" :disabled="isdisable" @click="createOrder">
                     <i class="mdi mdi-plus mr-1"></i> Submit Order
                   </button>
                 </div>
@@ -491,7 +590,7 @@ export default {
                                  
                                   <template #cell(selected)="data">
                                     <b-form-checkbox
-                                    @change="uncheckSelectAll"
+                                    @change="uncheckSelectAll(data.item)"
                                     v-model="selectedCustomer"
                                     :value="data.item"
                                     class="custom-checkbox custom-checkbox-primary"
@@ -563,7 +662,7 @@ export default {
                     </thead>
                     <tbody>
                       <tr v-for="product in selectedProducts" :key="product.id">
-                        <td><img :src="product.image"/></td>
+                        <td><img :src="product.image" class="thumbnail-img" /></td>
                         <td>{{ product.name }}</td>
                         <td>{{ product.sku }}</td>
                         <td>{{ product.price }}</td>
@@ -620,6 +719,7 @@ export default {
                   <b-tab v-for="payment in paymentData" :key="payment.id" :title="payment.on_screen_name" active title-item-class="mb-2" @click="currentPayment = payment">
                     <!-- <b-card-text> -->
                       <!-- <div class="row"> -->
+                        
                         <div v-for="type in payment.types" :key="type.method_slug" v-bind:value="type.method_slug">
                           <div id="card-element" v-if="checkStripeCard(payment.display_name , type.method_slug, type.enabled)">
                           </div>
@@ -686,7 +786,12 @@ export default {
           <div id="tickets-table_length" class="dataTables_length">
               <label class="d-inline-flex align-items-center">
                   Show&nbsp;
-                  <b-form-select v-model="perPage" size="sm" :options="pageOptions"></b-form-select>&nbsp;entries
+                  <b-form-select 
+                    v-model="perPage" 
+                    size="sm" 
+                    :options="pageOptions"
+                    @change = "handleProductPerPageChange"
+                  ></b-form-select>&nbsp;entries
               </label>
           </div>
         </div>
@@ -720,7 +825,7 @@ export default {
                 </template>
                 <template #cell(selected)="data">
                   <b-form-checkbox
-                  @change="uncheckSelectAll"
+                  @change="uncheckSelectAllProduct"
                   v-model="selectedProducts"
                   :value="data.item"
                   
@@ -742,7 +847,12 @@ export default {
                   <div class="dataTables_paginate paging_simple_numbers float-right">
                       <ul class="pagination pagination-rounded mb-0">
                           <!-- pagination -->
-                          <b-pagination v-model="currentPage" :total-rows="rows" :per-page="perPage"></b-pagination>
+                          <b-pagination 
+                            v-model="currentProductPage" 
+                            :total-rows="rows" 
+                            :per-page="perPage"
+                            @change = "handleProductsPageChange"
+                          ></b-pagination>
                       </ul>
                   </div>
               </div>
@@ -756,6 +866,16 @@ export default {
               <i class="bx bx-check-double font-size-16 align-middle mr-2"></i>
               Add
           </b-button>
+      </div>
+    </b-modal>
+    <b-modal id="modal-confirm" icon="warn" hide-footer>
+      <div slot="modal-title">
+        <img class="modal_head" src="@/assets/images/warning_icon.png" />
+        <span> &nbsp;Address Required</span>
+      </div>
+      <p>The Customer you have selected doesn't have any shipping/billing address saved!</p>
+      <div class="text-right">
+        <b-button variant="danger" @click="$bvModal.hide('modal-confirm')" >close</b-button>
       </div>
     </b-modal>
   </Layout>
@@ -774,5 +894,22 @@ export default {
     position: absolute;
     top: 15%;
     left: 50%;
+  }
+
+  #card-element {
+    box-sizing: border-box;
+    height: 40px;
+    padding: 10px 12px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    background-color: white;
+    box-shadow: 0 1px 3px 0 #606368;
+    -webkit-transition: box-shadow 150ms ease;
+    transition: box-shadow 150ms ease;
+  }
+
+  .modal_head{
+    width: 20px;
+    height: 20px;
   }
 </style>

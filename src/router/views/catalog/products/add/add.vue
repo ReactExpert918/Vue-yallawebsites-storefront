@@ -14,7 +14,6 @@ import {
 import {handleAxiosError} from "@/helpers/authservice/user.service";
 import {roleService} from "@/helpers/authservice/roles";
 import {copyArrayOfObjects} from "@/helpers/common";
-import alertBox from "@/helpers/Alert";
 
 /**
  * Pages component
@@ -41,6 +40,7 @@ export default {
            price: 0,
            cost_price: 0,
            sale_price: 0,
+           weight: 0,
            short_description: "",
            long_description: "",
            meta_title: "",
@@ -79,7 +79,7 @@ export default {
         },
         {
           text: "Products",
-          href: "/content/pages"
+          href: "/catalog/products"
         },
         {
           text: "Add Product",
@@ -209,16 +209,16 @@ export default {
       .get(`${this.backendURL}/api/v1/pages/layouts` , authHeader())
       .then(response => (this.layouts = response.data.data,
       this.newProduct.layout_id = this.layouts[0].id))
-      .catch(handleAxiosError);
+      .catch(error => handleAxiosError(error, this));
       axios
       .get(`${this.backendURL}/api/v1/categories` , authHeader())
       .then(response => (this.categories = response.data.data))
-      .catch(handleAxiosError);
+      .catch(error => handleAxiosError(error, this));
       axios
       .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}&with_disabled=false` , authHeader())
       .then(response => (this.allProductsData = response.data.data,
       this.allProductsDataLength = response.data.pagination.total))
-      .catch(handleAxiosError);
+      .catch(error => handleAxiosError(error, this));
       
       axios
       .get(`${this.backendURL}/api/v1/products/attributes?with_disabled=false&all=true` , authHeader())
@@ -262,10 +262,10 @@ export default {
           }
           this.custom_specs = this.currentAttrGroup.attributes;
         })
-        .catch(handleAxiosError);
+        .catch(error => handleAxiosError(error, this));
 
       })
-      .catch(handleAxiosError)
+      .catch(error => handleAxiosError(error, this))
       .finally(() => {
         this.loading = false
       });
@@ -277,7 +277,7 @@ export default {
         .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}&with_disabled=false` , authHeader())
         .then(response => (this.allProductsData = response.data.data,
         this.allProductsDataLength = response.data.pagination.total))
-        .catch(handleAxiosError);
+        .catch(error => handleAxiosError(error, this));
       },
       handlePerPageChange(value) {
         this.perPage = value;
@@ -286,17 +286,34 @@ export default {
         .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}&with_disabled=false` , authHeader())
         .then(response => (this.allProductsData = response.data.data,
         this.allProductsDataLength = response.data.pagination.total))
-        .catch(handleAxiosError);
+        .catch(error => handleAxiosError(error, this));
       },
       createProduct(){
+        if (this.$refs.myVueDropzone.getAcceptedFiles().length < 1){ // if there are files added to the dropzone for uploading, then do not hide the modal
+          this.backPage();
+        }
         if (!roleService.hasCreatePermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!", false)
+          this.$toast.error("You do no have the permission to perform this action!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           return;
         }
         this.newProduct.meta_keywords = this.newProduct.meta_keywords_str.split(" ");
         if (this.newProduct.meta_keywords[0] == ""){
           this.newProduct.meta_keywords = [];
         } 
+        window.console.log(this.selectedCategories);
         for(var i = 0; i < this.selectedCategories.length; i++){ 
            this.newProduct.category_ids.push(this.selectedCategories[i].id);
         }
@@ -304,6 +321,7 @@ export default {
         this.newProduct.cost_price = parseFloat(this.newProduct.cost_price);
         this.newProduct.sale_price = parseFloat(this.newProduct.sale_price);
         this.newProduct.quantity = parseInt(this.newProduct.quantity);
+        this.newProduct.weight = parseInt(this.newProduct.weight);
         
         this.newProduct.attribute_group_id = this.currentAttrGroup.id;
 
@@ -344,12 +362,24 @@ export default {
         axios
         .post(`${this.backendURL}/api/v1/products` , this.newProduct , authHeader())
         .then(response => {
-          this.$router.push('/catalog/products'), 
-          alertBox(`Product Created Successfully!`, true);
+          this.$toast.success("Product Created Successfully!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           this.$refs.myVueDropzone.setOption("url" , `${this.backendURL}/api/v1/products/${response.data.data.id}/upload`);
           this.$refs.myVueDropzone.processQueue();
          })
-        .catch(handleAxiosError);
+        .catch(error => handleAxiosError(error, this));
       },
       isBundleID(id){
         return this.newProduct.bundle_ids.indexOf(id) > -1;
@@ -492,6 +522,9 @@ export default {
           reader.onerror = error => reject(error);
         })
       },
+      backPage(){
+        this.$router.push('/catalog/products')
+      }
   },
 };
 </script>
@@ -523,17 +556,21 @@ export default {
                   <option value="3">Bundled Product</option>
                 </select>
               </div>
-              <div class="col-4">
+              <div class="col-3">
                 <label class="mt-3">Product Price <span class="red"> *</span></label>
                 <b-form-input for="text" type="number" v-model="newProduct.price"></b-form-input>
               </div>
-              <div class="col-4">
+              <div class="col-3">
                 <label class="mt-3">Product Cost Price <span class="red"> *</span></label>
                 <b-form-input for="text" type="number" v-model="newProduct.cost_price"></b-form-input>
               </div>
-              <div class="col-4">
+              <div class="col-3">
                 <label class="mt-3">Product Sale Price <span class="red"> *</span></label>
                 <b-form-input for="text" type="number" v-model="newProduct.sale_price"></b-form-input>
+              </div>
+              <div class="col-3">
+                <label class="mt-3">Product Weight <span class="red"> *</span></label>
+                <b-form-input for="text" type="number" v-model="newProduct.weight"></b-form-input>
               </div>
               <div class="col-4">
                 <label class="mt-3">Qty <span class="red"> *</span></label>
@@ -583,8 +620,7 @@ export default {
                   ref="myVueDropzone"
                   :use-custom-slot="true"
                   :options="dropzoneOptions"
-                  autoDiscover="false"
-                  url="/"  
+                  @vdropzone-complete="backPage"
                 >
                   <div class="dropzone-custom-content">
                     <i class="display-4 text-muted bx bxs-cloud-upload"></i>
@@ -596,7 +632,7 @@ export default {
                   <div class="row">
                     <div class="imagesUploaded mb-2 col-6">
                       <div class="imageFile highlight-border">
-                          <img src="placeholder.png"/>
+                          <img src="@/assets/images/product/img-1.png" class="product-img" />
                           <span class="actions-right cursor-ponter">
                             <b-button id="tooltip-set-default-1" variant="primary" class="mr-2"><i class="bx bx-image-alt"></i></b-button>
                             <b-tooltip target="tooltip-set-default-1">Set Image As Default</b-tooltip>
@@ -606,7 +642,7 @@ export default {
                     </div>
                     <div class="imagesUploaded mb-2 col-6">
                       <div class="imageFile">
-                          <img src="placeholder.png"/>
+                          <img src="@/assets/images/product/img-2.png" class="product-img" />
                           <span class="actions-right cursor-ponter">
                             <b-button id="tooltip-set-default-2" variant="primary" class="mr-2"><i class="bx bx-image-alt"></i></b-button>
                             <b-tooltip target="tooltip-set-default-2">Set Image As Default</b-tooltip>
@@ -813,62 +849,62 @@ export default {
           <div class="card-body">
             <h4 class="card-title mt-3">Product Bundles</h4>
                 <div class="row mt-4">
-                        <div class="col-sm-12 col-md-6">
-                            <div id="tickets-table_length" class="dataTables_length">
-                                <label class="d-inline-flex align-items-center">
-                                    Show&nbsp;
-                                    <b-form-select 
-                                      v-model="perPage" 
-                                      size="sm" :options="pageOptions"
-                                      change = "handlePerPageChange"
-                                    >
-                                    </b-form-select>&nbsp;entries
-                                </label>
-                            </div>
-                        </div>
-                        <!-- Search -->
-                        <div class="col-sm-12 col-md-6">
-                            <div id="tickets-table_filter" class="dataTables_filter text-md-right">
-                                <label class="d-inline-flex align-items-center">
-                                    Search:
-                                    <b-form-input v-model="filter" type="search" placeholder="Search..." class="form-control form-control-sm ml-2"></b-form-input>
-                                </label>
-                            </div>
-                        </div>
-                        <!-- End search -->
-                    </div>
-                    <!-- Table -->
-                    <div class="table-responsive mb-0">
-                        <b-table :items="allProductsData" selectable :fields="fields" responsive="sm" :per-page="perPage" :current-page="1" :sort-by.sync="sortBy" :sort-desc.sync="sortDesc" :filter="filter" :filter-included-fields="filterOn" @filtered="onFiltered">
-                      <template #cell(selected)="data">
-                        <b-form-checkbox switch size="lg"  v-on:change="addBundle(data.item.id)"></b-form-checkbox>
-                      </template>
-                       <template #cell(status)="data">
-                        <span v-if="data.item.enabled" class="badge badge-success font-size-12">
-                          <span>Enabled</span>
-                        </span>
-                        <span v-else class="badge badge-danger font-size-12">
-                          <span>Disabled</span>
-                        </span>
-                      </template>
-                        </b-table>
-                    </div>
-                    <div class="row">
-                        <div class="col">
-                            <div class="dataTables_paginate paging_simple_numbers float-right">
-                                <ul class="pagination pagination-rounded mb-0">
-                                    <!-- pagination -->
-                                    <b-pagination 
-                                      v-model="currentPage" 
-                                      :total-rows="rows" 
-                                      :per-page="perPage"
-                                      @change = "handlePageChange"
-                                    >
-                                    </b-pagination>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
+                  <div class="col-sm-12 col-md-6">
+                      <div id="tickets-table_length" class="dataTables_length">
+                          <label class="d-inline-flex align-items-center">
+                              Show&nbsp;
+                              <b-form-select 
+                                v-model="perPage" 
+                                size="sm" :options="pageOptions"
+                                change = "handlePerPageChange"
+                              >
+                              </b-form-select>&nbsp;entries
+                          </label>
+                      </div>
+                  </div>
+                  <!-- Search -->
+                  <div class="col-sm-12 col-md-6">
+                      <div id="tickets-table_filter" class="dataTables_filter text-md-right">
+                          <label class="d-inline-flex align-items-center">
+                              Search:
+                              <b-form-input v-model="filter" type="search" placeholder="Search..." class="form-control form-control-sm ml-2"></b-form-input>
+                          </label>
+                      </div>
+                  </div>
+                  <!-- End search -->
+              </div>
+              <!-- Table -->
+              <div class="table-responsive mb-0">
+                  <b-table :items="allProductsData" selectable :fields="fields" responsive="sm" :per-page="perPage" :current-page="1" :sort-by.sync="sortBy" :sort-desc.sync="sortDesc" :filter="filter" :filter-included-fields="filterOn" @filtered="onFiltered">
+                <template #cell(selected)="data">
+                  <b-form-checkbox switch size="lg"  v-on:change="addBundle(data.item.id)"></b-form-checkbox>
+                </template>
+                  <template #cell(status)="data">
+                  <span v-if="data.item.enabled" class="badge badge-success font-size-12">
+                    <span>Enabled</span>
+                  </span>
+                  <span v-else class="badge badge-danger font-size-12">
+                    <span>Disabled</span>
+                  </span>
+                </template>
+                  </b-table>
+              </div>
+              <div class="row">
+                  <div class="col">
+                      <div class="dataTables_paginate paging_simple_numbers float-right">
+                          <ul class="pagination pagination-rounded mb-0">
+                              <!-- pagination -->
+                              <b-pagination 
+                                v-model="currentPage" 
+                                :total-rows="rows" 
+                                :per-page="perPage"
+                                @change = "handlePageChange"
+                              >
+                              </b-pagination>
+                          </ul>
+                      </div>
+                  </div>
+              </div>
           </div>
         </div>
         <div class="card">
@@ -972,6 +1008,11 @@ export default {
   </Layout>
 </template>
 <style scoped>
+.product-img {
+  height: 135px;
+  width: 135px;
+}
+
 .spinner {
     position: absolute;
     top: 0;

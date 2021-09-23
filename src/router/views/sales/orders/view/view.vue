@@ -42,6 +42,7 @@ export default {
         },
         {
           text: "Orders",
+          href: "/sales/orders"
         },
         {
           text: "View Order",
@@ -85,7 +86,7 @@ export default {
         if (this.order.shipment == null){
           this.order.shipment = {};
         }
-    }).catch(handleAxiosError)
+    }).catch(error => handleAxiosError(error, this))
     .finally(() => {
       this.loading = false
     });
@@ -187,7 +188,7 @@ export default {
                     </thead>
                     <tbody>
                       <tr v-for="product in order.products" :key="product.id">
-                        <td><img :src="product.product.image"/></td>
+                        <td><img :src="product.product.image" class="thumbnail-img"/></td>
                         <td>{{ product.product.name }}</td>
                         <td>{{ product.product.sku }}</td>
                         <td>{{ product.price }}</td>

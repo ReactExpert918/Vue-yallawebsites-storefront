@@ -1,7 +1,6 @@
 export default function alertBox(val,status) {
     let alertDiv = document.getElementById("alert");
     alertDiv.classList.add("active");
-    window.console.log(status);
     if(status) {
         document.getElementsByClassName("active")[0].style.backgroundColor = "#20e26a"
     }

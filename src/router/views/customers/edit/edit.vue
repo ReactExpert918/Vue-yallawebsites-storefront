@@ -8,7 +8,6 @@ import {
 } from "@/helpers/authservice/auth-header";
 import {handleAxiosError} from "@/helpers/authservice/user.service";
 import {roleService} from "@/helpers/authservice/roles";
-import alertBox from "@/helpers/Alert";
 /**
  * Pages component
  */
@@ -36,6 +35,7 @@ export default {
       items: [
         {
           text: "Customers",
+          href: "/customers"
         },
         {
           text: "Edit Customer",
@@ -50,7 +50,7 @@ export default {
         .get(`${this.backendURL}/api/v1/customers/groups?per_page=-1` , authHeader())
         .then(response => (this.customerGroups = response.data.data,
                           this.currentGroupId = response.data.data[0]))
-        .catch(handleAxiosError)
+        .catch(error => handleAxiosError(error, this))
         .finally(() => {
           axios
           .get(`${this.backendURL}/api/v1/customers/${this.$route.params.id}` , authHeader())
@@ -73,7 +73,7 @@ export default {
                 this.customer.group_id = this.currentGroupId.id;
               }
             })
-            .catch(handleAxiosError)
+            .catch(error => handleAxiosError(error, this))
             .finally(() => {
               this.loading = false
             });
@@ -83,7 +83,20 @@ export default {
   methods:{
      updateCustomer(){
        if(!roleService.hasEditPermission(this.pageIdentity)){
-          alert("You do no have the permission to perform this action!")
+          this.$toast.error("You do no have the permission to perform this action!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           return;
        }
        // Using hardcoded country code for now as there is no option in front-end for selecting country from a list now, Need to add that and remove the following loops
@@ -93,8 +106,21 @@ export default {
         .then(response => (
           this.$router.push('/customers'),
           this.data = response.data,
-          alertBox("Customers Updated Successfully!", true)))
-        .catch(handleAxiosError);
+          this.$toast.success("Customers Updated Successfully!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })))
+        .catch(error => handleAxiosError(error, this));
       },
   }
 };

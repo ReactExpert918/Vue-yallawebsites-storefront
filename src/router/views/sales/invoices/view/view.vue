@@ -40,6 +40,7 @@ export default {
         },
         {
           text: "Invoices",
+          href: "/sales/invoices"
         },
         {
           text: "View Invoice",

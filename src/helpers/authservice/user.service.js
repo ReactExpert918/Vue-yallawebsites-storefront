@@ -2,8 +2,16 @@
 import { authHeader } from './auth-header';
 import { createJWTToken } from '../common';
 import { parseAndVerifyJWTToken } from '../common';
-import alertBox from '../Alert';
 import axios from "axios";
+import Vue from "vue";
+import Toast from "vue-toastification";
+import "vue-toastification/dist/index.css";
+
+Vue.use(Toast, {
+  transition: "Vue-Toastification__bounce",
+  maxToasts: 20,
+  newestOnTop: true
+});
 
 export const userService = {
     login,
@@ -90,7 +98,8 @@ function logout() {
 
 }
 
-export function handleAxiosError(error) {
+export function handleAxiosError(error, $this) {
+    window.console.log(error, $this, '-----');
     if (error.response) {
         var data = error.response.data;
         if (error.response.status === 401) {
@@ -99,7 +108,20 @@ export function handleAxiosError(error) {
             location.reload(true);
         }
         const errorMsg = (data && data.message) || error.response.statusText;
-        alertBox("Something Went Wrong!");
+        $this.$toast.error("Something Went Wrong!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
         return Promise.reject(errorMsg);
     }
 }

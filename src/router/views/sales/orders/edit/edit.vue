@@ -9,8 +9,6 @@ import {
 } from "@/helpers/authservice/auth-header";
 import {roleService} from "@/helpers/authservice/roles";
 import {handleAxiosError} from "@/helpers/authservice/user.service";
-import alertBox from "@/helpers/Alert";
-
 /**
  * Pages component
  */
@@ -60,6 +58,7 @@ export default {
         },
         {
           text: "Orders",
+          href: "/sales/orders"
         },
         {
           text: "Edit Order",
@@ -140,7 +139,7 @@ export default {
            this.products[i].order_quantity = 1;
          }
        })
-       .catch(handleAxiosError);
+       .catch(error => handleAxiosError(error, this));
        axios
       .get(`${this.backendURL}/api/v1/orders/${this.$route.params.id}` , authHeader())
       .then(response => {
@@ -160,11 +159,11 @@ export default {
           if (this.order.shipping_address == null){
             this.order.shipping_address = {};
           }
-          if (this.order.payment == null){
-            this.order.payment = {
-              payment_method: {},
-            };
-          }
+          // if (this.order.payment == null){
+          //   this.order.payment = {
+          //     payment_method: {},
+          //   };
+          // }
           if (this.order.shipping_method == null){
             this.order.shipping_method = {};
           }
@@ -178,7 +177,7 @@ export default {
           }
 
       })
-      .catch(handleAxiosError);
+      .catch(error => handleAxiosError(error, this));
 
       axios
       .get(`${this.backendURL}/api/v1/payments/methods` , authHeader())
@@ -198,12 +197,12 @@ export default {
             }
           }          
         })
-      .catch(handleAxiosError);
+      .catch(error => handleAxiosError(error, this));
 
       axios
       .get(`${this.backendURL}/api/v1/shipping/methods` , authHeader())
       .then(response => (this.shippingData = response.data.data))
-      .catch(handleAxiosError)
+      .catch(error => handleAxiosError(error, this))
       .finally(() => {
         this.loading = false
       });
@@ -235,11 +234,37 @@ export default {
       },
       updateOrder(){
         if (!roleService.hasEditPermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!", false)
+          this.$toast.error("You do no have the permission to perform this action!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           return;
         }
         if (!this.order.is_editable){
-          alertBox("Order cannot be edited", false)
+          this.$toast.error("Order Cannot Be Edited!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           return;
         }
         var payload = {
@@ -262,17 +287,56 @@ export default {
         .then(response => (
           this.$router.push('/sales/orders'),
           this.data = response.data,
-          alertBox("Order Updated Successfully!", true)
+          this.$toast.success("Order Updated Successfully!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
         ))
-        .catch(handleAxiosError);
+        .catch(error => handleAxiosError(error, this));
       },
       cancelOrder(){
         if (!roleService.hasEditPermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!", false)
+          this.$toast.error("You do no have the permission to perform this action!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           return;
         }
         if (!this.order.is_cancelable){
-          alertBox("Order cannot be cancelled!", false)
+          this.$toast.error("Order Cannot Be Cancelled!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           return;
         }
         
@@ -280,16 +344,55 @@ export default {
         .delete(`${this.backendURL}/api/v1/orders/${this.$route.params.id}/cancel` , authHeader())
         .then(response => (
           this.data = response.data,
-          alertBox("Order Cancelled Successfully!", true)))
-        .catch(handleAxiosError);
+          this.$toast.success("Order Cancelled Successfully!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })))
+        .catch(error => handleAxiosError(error, this));
       },
       shipOrder(){
         if (!roleService.hasEditPermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!", false)
+          this.$toast.error("You do no have the permission to perform this action!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           return;
         }
         if (!this.order.is_shippable){
-          alertBox("Order cannot be markup shiped!", false)
+          this.$toast.error("Order Cannot Be Markup Shipped!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           return;
         }
         
@@ -297,17 +400,56 @@ export default {
         .put(`${this.backendURL}/api/v1/orders/${this.$route.params.id}/ship`  ,{}, authHeader())
         .then(response => (
           this.data = response.data, 
-          alertBox("Order Marked As Shipped!", true)
+          this.$toast.success("Order Marked As Shipped!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
         ))
-        .catch(handleAxiosError);
+        .catch(error => handleAxiosError(error, this));
       },
       deliverOrder(){
         if (!roleService.hasEditPermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!", false)
+          this.$toast.error("You do no have the permission to perform this action!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           return;
         }
         if (!this.order.is_deliverable){
-           alertBox("Order cannot be markup delivered!", false)
+          this.$toast.error("Order Cannot Be Markup Delivered!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           return;
         }
         
@@ -315,17 +457,56 @@ export default {
         .put(`${this.backendURL}/api/v1/orders/${this.$route.params.id}/deliver` ,{}, authHeader())
         .then(response => (
           this.data = response.data,
-           alertBox("Order be mark as delivered!", true)
+          this.$toast.success("Order Be Mark As Delivered!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
         ))
-        .catch(handleAxiosError);
+        .catch(error => handleAxiosError(error, this));
       },
       refundOrder(){
         if (!roleService.hasEditPermission(this.pageIdentity)){
-           alertBox("You do no have the permission to perform this action!", false)
+           this.$toast.error("You do no have the permission to perform this action!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           return;
         }
         if (!this.order.is_refundable){
-          alertBox("Order cannot be mark as refund!", false)
+          this.$toast.error("Order Cannot Be Mark As Refund!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           return;
         }
 
@@ -337,13 +518,39 @@ export default {
         .put(`${this.backendURL}/api/v1/orders/${this.$route.params.id}/refund` ,payload, authHeader())
         .then(response => (
           this.data=response.data,
-          alertBox("Order refund successfully!", true)
+          this.$toast.success("Order Refund Successfully!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
         ))
-        .catch(handleAxiosError);
+        .catch(error => handleAxiosError(error, this));
       },
       reOrder(){
         if (!roleService.hasCreatePermission(this.pageIdentity)){
-           alertBox("You do no have the permission to perform this action!", false)
+           this.$toast.error("You do no have the permission to perform this action!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           return;
         }
         var payload = {
@@ -366,9 +573,22 @@ export default {
         .post(`${this.backendURL}/api/v1/orders` , payload , authHeader())
         .then(response => (
           this.data = response.data,
-          alertBox("Order re-created!", true)
+          this.$toast.success("Order Re-Created!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
         ))
-        .catch(handleAxiosError);
+        .catch(error => handleAxiosError(error, this));
       },
       // Invluce stripe dynamically
       includeStripe( URL, callback ){
@@ -389,8 +609,8 @@ export default {
 
         this.card.mount('#card-element');
       },
-       purchase(){
-         var orderID = this.$route.params.id;
+      purchase() {
+        var orderID = this.$route.params.id;
         if (this.currentPayment.display_name == 'stripe'){
           if (this.currentPaymentType.method_slug == 'card_payment'){
             this.purchaseWithStripeCard(orderID)
@@ -408,16 +628,43 @@ export default {
         axios
             .post(`${this.backendURL}/api/v1/payments/${this.currentPayment.id}/pay` , payload , authHeader())
             .then(response => (
+              this.$router.push('/sales/orders'),
               this.data = response.data,
-              alertBox("Order get paid!", true)
+              this.$toast.success("Payment is Being Processed!", {
+                position: "top-right",
+                timeout: 5000,
+                closeOnClick: true,
+                pauseOnFocusLoss: true,
+                pauseOnHover: true,
+                draggable: true,
+                draggablePercent: 0.6,
+                showCloseButtonOnHover: false,
+                hideProgressBar: true,
+                closeButton: "button",
+                icon: true,
+                rtl: false
+              })
             ))
-            .catch(handleAxiosError);
+            .catch(error => handleAxiosError(error, this));
       },
       purchaseWithStripeCard(orderID){
           this.stripe.createToken(this.card)
           .then(result => {
             if(result.error){
-              alertBox("Failed to create stripe card token because: " + result.error.message, false)
+              this.$toast.error("Failed to create stripe card token because: " + result.error.message, {
+                position: "top-right",
+                timeout: 5000,
+                closeOnClick: true,
+                pauseOnFocusLoss: true,
+                pauseOnHover: true,
+                draggable: true,
+                draggablePercent: 0.6,
+                showCloseButtonOnHover: false,
+                hideProgressBar: true,
+                closeButton: "button",
+                icon: true,
+                rtl: false
+              })
               return;
             }
 
@@ -432,10 +679,24 @@ export default {
             axios
             .post(`${this.backendURL}/api/v1/payments/${this.currentPayment.id}/pay` , payload , authHeader())
             .then(response => (
+              this.$router.push('/sales/orders'),
               this.data = response.data,
-              alertBox("Order got paid!", true)
+              this.$toast.success("Payment is Being Processed!", {
+                position: "top-right",
+                timeout: 5000,
+                closeOnClick: true,
+                pauseOnFocusLoss: true,
+                pauseOnHover: true,
+                draggable: true,
+                draggablePercent: 0.6,
+                showCloseButtonOnHover: false,
+                hideProgressBar: true,
+                closeButton: "button",
+                icon: true,
+                rtl: false
+              })
             ))
-            .catch(handleAxiosError);
+            .catch(error => handleAxiosError(error, this));
           })
       },
       checkStripeCard(name , type , enabled){
@@ -450,6 +711,33 @@ export default {
         }else{
           this.currentPaymentType = {};
         }
+      },
+      handlePageChange(value) {
+        this.currentPage = value;
+        axios
+        .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}&quantity_greater_than=${this.productQuantityGreaterThan}&with_disabled=false` , authHeader())
+        .then(response => {
+          this.products = response.data.data,
+          this.productsLength = response.data.pagination.total;
+          for(var i = 0; i < this.products.length; i++){
+            this.products[i].order_quantity = 1;
+          }
+        })
+        .catch(error => handleAxiosError(error, this));
+      },
+      handlePerPageChange(value) {
+        this.perPage = value;
+        this.currentPage = 1;
+        axios
+        .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}&quantity_greater_than=${this.productQuantityGreaterThan}&with_disabled=false` , authHeader())
+        .then(response => {
+          this.products = response.data.data,
+          this.productsLength = response.data.pagination.total;
+          for(var i = 0; i < this.products.length; i++){
+            this.products[i].order_quantity = 1;
+          }
+        })
+        .catch(error => handleAxiosError(error, this));
       },
   },
 };
@@ -568,7 +856,7 @@ export default {
                     </thead>
                     <tbody>
                       <tr v-for="product in selectedProducts" :key="product.id">
-                        <td><img :src="product.image"/></td>
+                        <td><img :src="product.image" class="thumbnail-img" /></td>
                         <td>{{ product.name }}</td>
                         <td>{{ product.sku }}</td>
                         <td>{{ product.price }}</td>
@@ -620,59 +908,65 @@ export default {
             </div>
             <div class="row card-body">
               <div class="col-sm-12">
-                <h3>Payment Methods</h3>
-                <b-tabs pills vertical nav-class="p-0" nav-wrapper-class="col-sm-3" content-class="pt-0 px-2 text-muted">
-                  <b-tab v-for="payment in paymentData" :key="payment.id" :title="payment.on_screen_name" active title-item-class="mb-2" @click="currentPayment = payment">
-                    <div v-for="type in payment.types" :key="type.method_slug" v-bind:value="type.method_slug">
-                          <div id="card-element" v-if="checkStripeCard(payment.display_name , type.method_slug, type.enabled)">
-                          </div>
-                          <b-form-checkbox v-if="type.enabled" @change="(v)=>setCurrentPaymentType(v, type)" class="custom-checkbox custom-checkbox-primary"></b-form-checkbox>
-                    </div>
+                <div v-if="this.order.payment == null">
+                  <h3>Payment Methods</h3>
+                  <b-tabs pills vertical nav-class="p-0" nav-wrapper-class="col-sm-3" content-class="pt-0 px-2 text-muted">
+                    <b-tab v-for="payment in paymentData" :key="payment.id" :title="payment.on_screen_name" active title-item-class="mb-2" @click="currentPayment = payment">
+                      <div v-for="type in payment.types" :key="type.method_slug" v-bind:value="type.method_slug">
+                            <div id="card-element" v-if="checkStripeCard(payment.display_name , type.method_slug, type.enabled)">
+                            </div>
+                            <b-form-checkbox v-if="type.enabled" @change="(v)=>setCurrentPaymentType(v, type)" class="custom-checkbox custom-checkbox-primary"></b-form-checkbox>
+                      </div>
 
-                    <b-card-text v-if="payment.display_name == 'paypal'">
-                      <div class="col-sm-12">
-                        <b-button variant="primary">
-                            <i class="bx bx-check-double font-size-16 align-middle mr-2"></i>
-                            Pay With Paypal
-                        </b-button>
-                      </div>
-                    </b-card-text>
-                    <!-- <b-card-text>
-                      <div class="row">
-                        <div class="col-sm-5">
-                          <label class="mt-3">Card Number</label>
-                          <b-form-input for="text"></b-form-input>
+                      <b-card-text v-if="payment.display_name == 'paypal'">
+                        <div class="col-sm-12">
+                          <b-button variant="primary">
+                              <i class="bx bx-check-double font-size-16 align-middle mr-2"></i>
+                              Pay With Paypal
+                          </b-button>
                         </div>
-                        <div class="col-sm-2">
-                          <label class="mt-3">Sort Code</label>
-                          <b-form-input for="text"></b-form-input>
+                      </b-card-text>
+                      <!-- <b-card-text>
+                        <div class="row">
+                          <div class="col-sm-5">
+                            <label class="mt-3">Card Number</label>
+                            <b-form-input for="text"></b-form-input>
+                          </div>
+                          <div class="col-sm-2">
+                            <label class="mt-3">Sort Code</label>
+                            <b-form-input for="text"></b-form-input>
+                          </div>
+                          <div class="col-sm-2">
+                            <label class="mt-3">Expiry</label>
+                            <b-form-input for="text"></b-form-input>
+                          </div>
+                          <div class="col-sm-2">
+                            <label class="mt-3">CVV</label>
+                            <b-form-input for="text"></b-form-input>
+                          </div>
                         </div>
-                        <div class="col-sm-2">
-                          <label class="mt-3">Expiry</label>
-                          <b-form-input for="text"></b-form-input>
+                      </b-card-text> -->
+                    </b-tab>
+                    <!-- <b-tab title="Payment 2" title-item-class="mb-2">
+                      <b-card-text>
+                        <div class="col-sm-12">
+                          <b-button variant="primary">
+                              <i class="bx bx-check-double font-size-16 align-middle mr-2"></i>
+                              Pay With Paypal
+                          </b-button>
                         </div>
-                        <div class="col-sm-2">
-                          <label class="mt-3">CVV</label>
-                          <b-form-input for="text"></b-form-input>
-                        </div>
-                      </div>
-                    </b-card-text> -->
-                  </b-tab>
-                  <!-- <b-tab title="Payment 2" title-item-class="mb-2">
-                    <b-card-text>
-                      <div class="col-sm-12">
-                        <b-button variant="primary">
-                            <i class="bx bx-check-double font-size-16 align-middle mr-2"></i>
-                            Pay With Paypal
-                        </b-button>
-                      </div>
-                    </b-card-text>
-                  </b-tab> -->
-                </b-tabs>
-                <b-button variant="primary" :disabled="Object.keys(currentPayment).length === 0 && currentPayment.constructor === Object" v-b-modal.modal-getpaid-order>
-                    <i class="bx bx-check-double font-size-16 align-middle mr-2"></i>
-                    Get Paid
-                </b-button>
+                      </b-card-text>
+                    </b-tab> -->
+                  </b-tabs>
+                  <b-button variant="primary" :disabled="Object.keys(currentPayment).length === 0 && currentPayment.constructor === Object" v-b-modal.modal-getpaid-order>
+                      <i class="bx bx-check-double font-size-16 align-middle mr-2"></i>
+                      Get Paid
+                  </b-button>
+                </div>
+                <div v-else>
+                  <p v-if="this.order.payment.type" class="align_center">Payment was made via {{this.order.payment.payment_method.display_name}} using {{this.order.payment.type}}!</p>
+                  <p v-else class="align_center">Payment was made via {{this.order.payment.payment_method.display_name}}!</p>
+                </div>
               </div>
             </div>
             <div class="row card-body">
@@ -694,7 +988,7 @@ export default {
           <div id="tickets-table_length" class="dataTables_length">
               <label class="d-inline-flex align-items-center">
                   Show&nbsp;
-                  <b-form-select v-model="perPage" size="sm" :options="pageOptions"></b-form-select>&nbsp;entries
+                  <b-form-select v-model="perPage" @change="handlePerPageChange" size="sm" :options="pageOptions"></b-form-select>&nbsp;entries
               </label>
           </div>
         </div>
@@ -713,7 +1007,7 @@ export default {
                 :fields="fields" 
                 responsive="sm" 
                 :per-page="perPage" 
-                :current-page="currentPage" 
+                :current-page="1" 
                 :sort-by.sync="sortBy" 
                 :sort-desc.sync="sortDesc" 
                 :filter="filter" 
@@ -751,7 +1045,7 @@ export default {
                   <div class="dataTables_paginate paging_simple_numbers float-right">
                       <ul class="pagination pagination-rounded mb-0">
                           <!-- pagination -->
-                          <b-pagination v-model="currentPage" :total-rows="rows" :per-page="perPage"></b-pagination>
+                          <b-pagination v-model="currentPage" @change="handlePageChange" :total-rows="rows" :per-page="perPage"></b-pagination>
                       </ul>
                   </div>
               </div>
@@ -821,5 +1115,17 @@ export default {
     position: absolute;
     top: 15%;
     left: 50%;
+  }
+
+  #card-element {
+    box-sizing: border-box;
+    height: 40px;
+    padding: 10px 12px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    background-color: white;
+    box-shadow: 0 1px 3px 0 #606368;
+    -webkit-transition: box-shadow 150ms ease;
+    transition: box-shadow 150ms ease;
   }
 </style>

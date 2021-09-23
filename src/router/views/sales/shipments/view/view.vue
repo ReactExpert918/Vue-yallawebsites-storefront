@@ -40,6 +40,7 @@ export default {
         },
         {
           text: "Shipments",
+          href: "/sales/shipments"
         },
         {
           text: "View Shipment",

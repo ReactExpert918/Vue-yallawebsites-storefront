@@ -1,8 +1,15 @@
 <script>
 import appConfig from "@/app.config";
-
+import Vue from "vue";
 import { notificationMethods } from "@/state/helpers";
+import Toast from "vue-toastification";
+import "vue-toastification/dist/index.css";
 
+Vue.use(Toast, {
+  transition: "Vue-Toastification__bounce",
+  maxToasts: 20,
+  newestOnTop: true
+});
 export default {
   name: "app",
   page: {
@@ -40,7 +47,7 @@ export default {
 </template>
 <style scoped>
   #alert {
-    position: absolute;
+    position: fixed;
     opacity: 0;
     right: -100%;
     background-color: rgb(12, 179, 76);
@@ -73,6 +80,4 @@ export default {
     90%  {opacity: 1; right: 0; top:0px;}
     100% {opacity: 0; right: -100%; top:0px;}
   }
-  
-  
 </style>

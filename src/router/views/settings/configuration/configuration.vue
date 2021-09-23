@@ -9,7 +9,6 @@ import {
 } from "@/helpers/authservice/auth-header";
 import {handleAxiosError} from "@/helpers/authservice/user.service";
 import {roleService} from "@/helpers/authservice/roles";
-import alertBox from "@/helpers/Alert";
 
 export default {
   page: {
@@ -224,7 +223,7 @@ export default {
         this.general_config.allowed_currencies = [];
       }
      })
-     .catch(handleAxiosError);
+     .catch(error => handleAxiosError(error, this));
      axios
     .get(`${this.backendURL}/api/v1/stores/sales` , authHeader())
     .then(response => {
@@ -273,7 +272,7 @@ export default {
         }
 
      })
-     .catch(handleAxiosError);
+     .catch(error => handleAxiosError(error, this));
     axios
     .get(`${this.backendURL}/api/v1/stores/customer` , authHeader())
     .then(response => {
@@ -282,59 +281,59 @@ export default {
           this.customer_config.group = {};
         }
     })
-    .catch(handleAxiosError);
+    .catch(error => handleAxiosError(error, this));
     axios
     .get(`${this.backendURL}/api/v1/stores/advanced` , authHeader())
     .then(response => (this.advanced_config = response.data.data))
-    .catch(handleAxiosError);
+    .catch(error => handleAxiosError(error, this));
     axios
     .get(`${this.backendURL}/api/v1/domains?per_page=-1` , authHeader())
     .then(response => (this.domains = response.data.data))
-    .catch(handleAxiosError);
+    .catch(error => handleAxiosError(error, this));
     axios
     .get(`${this.backendURL}/api/v1/pages?per_page=-1` , authHeader())
     .then(response => (this.pages = response.data.data))
-    .catch(handleAxiosError);
+    .catch(error => handleAxiosError(error, this));
     axios
     .get(`${this.backendURL}/api/v1/areas/countries` , authHeader())
     .then(response => (this.countries = response.data.data))
-    .catch(handleAxiosError);
+    .catch(error => handleAxiosError(error, this));
     axios
     .get(`${this.backendURL}/api/v1/currencies` , authHeader())
     .then(response => (this.currencies = response.data.data))
-    .catch(handleAxiosError);
+    .catch(error => handleAxiosError(error, this));
     axios
     .get(`${this.backendURL}/api/v1/customers/groups?per_page=-1` , authHeader())
     .then(response => (this.customerGroups = response.data.data))
-    .catch(handleAxiosError);
+    .catch(error => handleAxiosError(error, this));
     axios
     .get(`${this.backendURL}/api/v1/pages/layouts` , authHeader())
     .then(response => (this.layouts = response.data.data))
-    .catch(handleAxiosError);
+    .catch(error => handleAxiosError(error, this));
     axios
     .get(`${this.backendURL}/api/v1/pages/sort-options` , authHeader())
     .then(response => (this.sortOptions = response.data.data))
-    .catch(handleAxiosError);
+    .catch(error => handleAxiosError(error, this));
     axios
     .get(`${this.backendURL}/api/v1/tax/displays` , authHeader())
     .then(response => (this.taxDisplayOptions = response.data.data))
-    .catch(handleAxiosError);
+    .catch(error => handleAxiosError(error, this));
     axios
     .get(`${this.backendURL}/api/v1/tax/rate-bases` , authHeader())
     .then(response => (this.taxRateBasedOns = response.data.data))
-    .catch(handleAxiosError);
+    .catch(error => handleAxiosError(error, this));
     axios
     .get(`${this.backendURL}/api/v1/tax/calculation-bases` , authHeader())
     .then(response => (this.taxCalculationBasedOns = response.data.data))
-    .catch(handleAxiosError);
+    .catch(error => handleAxiosError(error, this));
     axios
     .get(`${this.backendURL}/api/v1/tax/discount-calculations` , authHeader())
     .then(response => (this.taxDiscountCalculations = response.data.data))
-    .catch(handleAxiosError);
+    .catch(error => handleAxiosError(error, this));
     axios
     .get(`${this.backendURL}/api/v1/shipping/services` , authHeader())
     .then(response => (this.shippingServiceData = response.data.data))
-    .catch(handleAxiosError)
+    .catch(error => handleAxiosError(error, this))
     .finally(() => {
        this.loading = false
      });
@@ -357,7 +356,7 @@ export default {
           }
 
       })
-      .catch(handleAxiosError)
+      .catch(error => handleAxiosError(error, this))
       .finally(() => {
         // this.loading = false
       });
@@ -382,7 +381,20 @@ export default {
     },
     saveGeneralConfiguration(){
       if (!roleService.hasEditPermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!", false)
+          this.$toast.error("You do no have the permission to perform this action!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           return;
       }
       this.configData = {
@@ -417,13 +429,39 @@ export default {
       .then(response => {
         this.configData = {};
         this.data = response.data,
-          alertBox("Updated General Configuration!", true)
-       })
-       .catch(handleAxiosError);
+        this.$toast.success("Updated General Configuration!", {
+          position: "top-right",
+          timeout: 5000,
+          closeOnClick: true,
+          pauseOnFocusLoss: true,
+          pauseOnHover: true,
+          draggable: true,
+          draggablePercent: 0.6,
+          showCloseButtonOnHover: false,
+          hideProgressBar: true,
+          closeButton: "button",
+          icon: true,
+          rtl: false
+        })
+      })
+       .catch(error => handleAxiosError(error, this));
     },
     saveCatalogConfiguration(){
       if (!roleService.hasEditPermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!", false)
+          this.$toast.error("You do no have the permission to perform this action!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           return;
       }
        this.configData = {
@@ -455,13 +493,40 @@ export default {
       .then(response => {
         this.configData = {};
         this.data = response.data,
-        alertBox("Updated Catalog Configuration!", true)
+        this.$toast.success("Updated Catalog Configuration!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
+          return;
         })
-        .catch(handleAxiosError);
+        .catch(error => handleAxiosError(error, this));
     },
     saveSalesConfiguration(){
       if (!roleService.hasEditPermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!", false)
+          this.$toast.error("You do no have the permission to perform this action!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           return;
       }
       this.configData = {
@@ -503,16 +568,43 @@ export default {
       .then(response => {
           this.configData = {};
           this.data = response.data,
-          alertBox("Updated Sales Configuration!", true)
-          this.uploadTableRateFile();
+          this.$toast.success("Updated Sales Configuration!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
+          return;
+          // this.uploadTableRateFile();
 
         })
-        .catch(handleAxiosError);
+        .catch(error => handleAxiosError(error, this));
       
     },
     uploadTableRateFile(){
       if (!roleService.hasEditPermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!", false)
+          this.$toast.error("You do no have the permission to perform this action!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           return;
       }
        if (this.tableRateFile != ''){
@@ -524,14 +616,40 @@ export default {
             .post(`${this.backendURL}/api/v1/stores/sales/upload` , formData , header)
             .then(response => {
               this.data = response.data,
-              alertBox("Upload Sales Configuration Table Rate File!", true)
+              this.$toast.success("Upload Sales Configration Table Rate File!", {
+                position: "top-right",
+                timeout: 5000,
+                closeOnClick: true,
+                pauseOnFocusLoss: true,
+                pauseOnHover: true,
+                draggable: true,
+                draggablePercent: 0.6,
+                showCloseButtonOnHover: false,
+                hideProgressBar: true,
+                closeButton: "button",
+                icon: true,
+                rtl: false
               })
-              .catch(handleAxiosError);
+              })
+              .catch(error => handleAxiosError(error, this));
        }
     },
     saveCustomerConfiguration(){
       if (!roleService.hasEditPermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!", false)
+          this.$toast.error("You do no have the permission to perform this action!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           return;
       }
       this.configData = {
@@ -546,13 +664,39 @@ export default {
       .then(response => {
         this.configData = {};
         this.data = response.data,
-        alertBox("Updated Customer Configuration!", true)
+          this.$toast.success("Updated Customer Configuration!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
         })
-        .catch(handleAxiosError);
+        .catch(error => handleAxiosError(error, this));
     },
     saveAdvancedConfiguration(){
       if (!roleService.hasEditPermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!", false)
+          this.$toast.error("You do no have the permission to perform this action!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           return;
       }
       this.configData = {
@@ -569,9 +713,22 @@ export default {
       .then(response => {
         this.configData = {};
         this.data = response.data,
-        alertBox("Updated Advanced Configuration!", true)
+          this.$toast.success("Updated Advanced Configuration!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
        })
-       .catch(handleAxiosError);
+       .catch(error => handleAxiosError(error, this));
     },
     isSortOption(id){
       var i;

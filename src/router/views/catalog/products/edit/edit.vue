@@ -15,7 +15,6 @@ import {
 import {roleService} from "@/helpers/authservice/roles";
 import {handleAxiosError} from "@/helpers/authservice/user.service";
 import {copyArrayOfObjects} from "@/helpers/common";
-import alertBox from "@/helpers/Alert";
 
 /**
  * Pages component
@@ -44,6 +43,7 @@ export default {
         attributes: [],
         specifications: [],
         variations: [],
+        weight: 0
       },
       allProductsDataLength: 1,
       variationsData: [],
@@ -67,7 +67,7 @@ export default {
         },
         {
           text: "Products",
-          href: "/content/pages"
+          href: "/catalog/products"
         },
         {
           text: "Edit Product",
@@ -178,15 +178,18 @@ export default {
       axios
       .get(`${this.backendURL}/api/v1/pages/layouts` , authHeader())
       .then(response => (this.layouts = response.data.data))
-      .catch(handleAxiosError);
+      .catch(error => handleAxiosError(error, this));
       axios
       .get(`${this.backendURL}/api/v1/categories` , authHeader())
       .then(response => (this.categories = response.data.data))
-      .catch(handleAxiosError);
+      .catch(error => handleAxiosError(error, this));
       axios
       .get(`${this.backendURL}/api/v1/products/${this.$route.params.id}` , authHeader())
       .then(response => {
           this.productData = response.data.data;
+          this.selectedCategories = this.categories.filter(obj => 
+             this.productData.category_ids.includes(obj.id)
+          )
           this.productData.meta_keywords_str = "";
           if (this.productData.layout == null){
             this.productData.layout = {};
@@ -279,12 +282,12 @@ export default {
           })
           
       })
-      .catch(handleAxiosError);
+      .catch(error => handleAxiosError(error, this));
       axios
       .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}&without=${this.$route.params.id}&with_disabled=false` , authHeader())
       .then(response => (this.allProductsData = response.data.data,
                          this.allProductsDataLength = response.data.pagination.total))
-      .catch(handleAxiosError);
+      .catch(error => handleAxiosError(error, this));
 
      
       axios
@@ -342,10 +345,10 @@ export default {
             }
             
           })
-          .catch(handleAxiosError);
+          .catch(error => handleAxiosError(error, this));
 
       })
-      .catch(handleAxiosError)
+      .catch(error => handleAxiosError(error, this))
       .finally(() => {
         this.loading = false
       });
@@ -357,7 +360,7 @@ export default {
       .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}&without=${this.$route.params.id}&with_disabled=false` , authHeader())
       .then(response => (this.allProductsData = response.data.data,
                          this.allProductsDataLength = response.data.pagination.total))
-      .catch(handleAxiosError);
+      .catch(error => handleAxiosError(error, this));
       },
       handlePerPageChange(value) {
         this.perPage = value;
@@ -366,11 +369,27 @@ export default {
       .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}&without=${this.$route.params.id}&with_disabled=false` , authHeader())
       .then(response => (this.allProductsData = response.data.data,
                          this.allProductsDataLength = response.data.pagination.total))
-      .catch(handleAxiosError);
+      .catch(error => handleAxiosError(error, this));
       },
       updateProduct(){
+        if (this.$refs.myVueDropzone.getAcceptedFiles().length < 1){ // if there are files added to the dropzone for uploading, then do not hide the modal
+          this.backPage();
+        }
         if (!roleService.hasEditPermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!", false)
+          this.$toast.error("You do no have the permission to perform this action!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           return;
         }
         this.productData.meta_keywords = this.productData.meta_keywords_str.split(" ");
@@ -382,6 +401,7 @@ export default {
            price: parseFloat(this.productData.price),
            cost_price: parseFloat(this.productData.cost_price),
            sale_price: parseFloat(this.productData.sale_price),
+           weight: parseFloat(this.productData.weight),
            short_description: this.productData.short_description,
            long_description: this.productData.long_description,
            meta_title: this.productData.meta_title,
@@ -464,17 +484,42 @@ export default {
         axios
         .put(`${this.backendURL}/api/v1/products/${this.$route.params.id}` , productReq , authHeader())
         .then(response => {
-          this.$router.push('/catalog/products'),
           this.data = response.data;
-          alertBox("Product Updated successfully!", true)
+          this.$toast.success("Product Updated Successfully!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           this.$refs.myVueDropzone.processQueue();
         })
-        .catch(handleAxiosError);
+        .catch(error => handleAxiosError(error, this));
       },
 
       deleteProduct(){
         if (!roleService.hasDeletePermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!", false)
+          this.$toast.error("You do no have the permission to perform this action!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           return;
         }
         axios
@@ -483,8 +528,21 @@ export default {
           response => (
             this.$router.push('/catalog/products'),
             this.data = response.data,
-            alertBox("Product Deleted successfully!", true)))
-        .catch(handleAxiosError);
+            this.$toast.success("Product Deleted Successfully!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })))
+        .catch(error => handleAxiosError(error, this));
       },
 
       handleImageUpload(){
@@ -653,6 +711,9 @@ export default {
           }
         }
       },
+      backPage(){
+        this.$router.push('/catalog/products')
+      }
       
   },
 };
@@ -685,17 +746,21 @@ export default {
                   <option value="3">Bundled Product</option>
                 </select>
               </div>
-              <div class="col-4">
+              <div class="col-3">
                 <label class="mt-3">Product Price <span class="red"> *</span></label>
                 <b-form-input for="text" type="number" v-model="productData.price"></b-form-input>
               </div>
-              <div class="col-4">
+              <div class="col-3">
                 <label class="mt-3">Product Cost Price <span class="red"> *</span></label>
                 <b-form-input for="text" type="number" v-model="productData.cost_price"></b-form-input>
               </div>
-              <div class="col-4">
+              <div class="col-3">
                 <label class="mt-3">Product Sale Price <span class="red"> *</span></label>
                 <b-form-input for="text" type="number" v-model="productData.sale_price"></b-form-input>
+              </div>
+              <div class="col-3">
+                <label class="mt-3">Product Weight <span class="red"> *</span></label>
+                <b-form-input for="text" type="number" v-model="productData.weight"></b-form-input>
               </div>
               <div class="col-4">
                 <label class="mt-3">Qty <span class="red"> *</span></label>
@@ -746,6 +811,7 @@ export default {
                   :use-custom-slot="true"
                   :options="dropzoneOptions"
                   @vdropzone-file-added="handleImageUpload"
+                  @vdropzone-complete="backPage"
                 >
                   <div class="dropzone-custom-content">
                     <i class="display-4 text-muted bx bxs-cloud-upload"></i>
@@ -755,9 +821,9 @@ export default {
                 </div>
                 <div class="col-9">
                   <div class="row">
-                    <div class="imagesUploaded mb-2 col-6">
+                    <div class="imagesUploaded mb-2 col-12">
                       <div class="imageFile highlight-border" v-for="(image , index) of productData.images" :key="index">
-                          <img :src="image" />
+                          <img :src="image" class="product-img" />
                           <span class="actions-right cursor-ponter">
                             <b-button id="tooltip-set-default-1" variant="primary" class="mr-2" @click="productData.default_image_url = image"><i class="bx bx-image-alt"></i></b-button>
                             <b-tooltip target="tooltip-set-default-1">Set Image As Default</b-tooltip>
@@ -1118,7 +1184,7 @@ export default {
   </Layout>
 </template>
 <style scoped>
-.spinner {
+  .spinner {
     position: absolute;
     top: 0;
     left: 0;
@@ -1127,6 +1193,7 @@ export default {
     width: 100%;
     z-index: 20000;
   }
+  
   .loader {
     position: absolute;
     top: 300px;

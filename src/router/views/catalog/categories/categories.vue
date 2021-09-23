@@ -12,7 +12,6 @@ import {
   authHeader,
 } from "@/helpers/authservice/auth-header";
 import {roleService} from "@/helpers/authservice/roles";
-import alertBox from "@/helpers/Alert";
 
 /**
  * Catalog component
@@ -87,7 +86,7 @@ export default {
     .get(`${this.backendURL}/api/v1/categories?tree=true` , authHeader())
     .then(response => (this.categoriesData = response.data.data, this.catPayload.parent_id = response.data.data[0].id)
                       )
-    .catch(handleAxiosError)
+    .catch(error => handleAxiosError(error, this))
     .finally(() => {
       this.loading = false
     });
@@ -105,7 +104,7 @@ export default {
             this.currentProducts = response.data.data;
             this.productMap[this.currentCategory.id] = this.currentProducts;
           })
-          .catch(handleAxiosError);
+          .catch(error => handleAxiosError(error, this));
       }else{
         this.currentProducts = this.productMap[this.currentCategory.id];
       }
@@ -113,9 +112,21 @@ export default {
     },
     createCategory(){
       this.loading = true
-      this.$bvModal.hide("modal-add-category");
       if (!roleService.hasCreatePermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!", false)
+          this.$toast.error("You do no have the permission to perform this action!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           return;
       }
       this.catPayload.meta_keywords = this.catPayload.meta_keywords_str.split(" ");
@@ -128,13 +139,26 @@ export default {
           axios
           .get(`${this.backendURL}/api/v1/categories?tree=true` , authHeader())
           .then(response => (this.categoriesData = response.data.data))
-          .catch(handleAxiosError);
+          .catch(error => handleAxiosError(error, this));
           this.data = response.data,
-          alertBox("Category Created succesfully!", true)
+          this.$toast.success("Category Created Successfully!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           this.$refs.vueCreateDropzone.setOption("url" , `${this.backendURL}/api/v1/categories/${response.data.data.id}/upload`);
           this.$refs.vueCreateDropzone.processQueue();
        })
-      .catch(handleAxiosError)
+      .catch(error => handleAxiosError(error, this))
       .finally(() => {
         this.loading = false
       });
@@ -142,7 +166,20 @@ export default {
     updateCategory(){
       this.loading = true
       if (!roleService.hasEditPermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!", false)
+          this.$toast.error("You do no have the permission to perform this action!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           return;
       }
       this.currentCategory.meta_keywords = this.currentCategory.meta_keywords_str.split(" ");
@@ -156,7 +193,6 @@ export default {
           sort_order: parseInt(sortOrder)
         })
       }
-
       axios
       .put(`${this.backendURL}/api/v1/categories/${this.currentCategory.id}` , this.currentCategory , authHeader())
       .then(response => {
@@ -164,12 +200,25 @@ export default {
           axios
           .get(`${this.backendURL}/api/v1/categories?tree=true` , authHeader())
           .then(response => (this.currentCategory = {},this.categoriesData = response.data.data))
-          .catch(handleAxiosError),
+          .catch(error => handleAxiosError(error, this)),
           this.currentCategory = {},
-          alertBox("Category Updated succesfully!", true)
+          this.$toast.success("Category Updated Successfully!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           this.$refs.myVueDropzone.processQueue();
        })
-      .catch(handleAxiosError)
+      .catch(error => handleAxiosError(error, this))
       .finally(() => {
         this.loading = false
       });
@@ -181,7 +230,20 @@ export default {
       this.loading = true
       this.$bvModal.hide("modal-delete-category");
       if (!roleService.hasDeletePermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!", false)
+          this.$toast.error("You do no have the permission to perform this action!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           return;
       }
       axios
@@ -190,18 +252,34 @@ export default {
         axios
         .get(`${this.backendURL}/api/v1/categories?tree=true` , authHeader())
         .then(response => (this.currentCategory = {},this.categoriesData = response.data.data))
-        .catch(handleAxiosError),
+        .catch(error => handleAxiosError(error, this)),
         this.currentCategory = {},
         this.data = response.data,
-        alertBox("Category Deleted successfully", true)
+        this.$toast.success("Category Deleted Successfully!", {
+          position: "top-right",
+          timeout: 5000,
+          closeOnClick: true,
+          pauseOnFocusLoss: true,
+          pauseOnHover: true,
+          draggable: true,
+          draggablePercent: 0.6,
+          showCloseButtonOnHover: false,
+          hideProgressBar: true,
+          closeButton: "button",
+          icon: true,
+          rtl: false
+        })
       ))
-      .catch(handleAxiosError)
+      .catch(error => handleAxiosError(error, this))
       .finally(() => {
         this.loading = false
       });
     },
     productSortChange(product){
         this.productSortMap[product.id] = product.sort_order;
+    },
+    backPage() {
+      this.$bvModal.hide("modal-add-category");
     }
   },
 };
@@ -382,7 +460,7 @@ export default {
                 <div class="col-12 p-0">
                   <div class="imagesUploaded mb-4">
                     <div class="imageFile">
-                        <img :src="currentCategory.image"/>
+                        <img :src="currentCategory.image" class="category-img"/>
                         <span>placeholder.png</span>
                         <span class="actions-right cursor-ponter">
                           <b-button 
@@ -502,6 +580,7 @@ export default {
             ref="vueCreateDropzone"
             :use-custom-slot="true"
             :options="dropzoneOptions"
+            @vdropzone-complete="backPage"
           >
             <div class="dropzone-custom-content">
               <i class="display-4 text-muted bx bxs-cloud-upload"></i>
@@ -513,7 +592,7 @@ export default {
           <!--IMAGE PLACEHOLDER-->
           <div class="imagesUploaded">
             <div class="imageFile">
-                <img src="placeholder.png" />
+                <img src="placeholder.png" class="category-img"  />
                 <span>placeholder.png</span>
                 <span class="actions-right cursor-ponter">
                   <b-button 

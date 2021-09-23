@@ -69,10 +69,12 @@
     border: 3px solid #566ee5;
 }
 .imagesUploaded  {
+    display: grid;
+    grid-template-columns: auto auto;
+    grid-gap: 10px;
     .imageFile {
         padding: 10px;
         width: 100%;
-        margin-top: 10px;
         background: #f6f6f9;
         border-radius: 3px;
         
@@ -86,8 +88,18 @@
             display: inline-block;
             vertical-align: middle;
         }
+
+        .category-img {
+            height: 100px;
+            width: 100px;
+        }
+
+        .product-img {
+            height: 125px;
+            width: 125px;
+        }
+        
         .actions-right {
-            float: right;
             padding: 5px;
         }
         &.full {

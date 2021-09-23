@@ -11,7 +11,6 @@ import {
 } from "@/helpers/authservice/auth-header";
 import {roleService} from "@/helpers/authservice/roles";
 import {handleAxiosError} from "@/helpers/authservice/user.service";
-import alertBox from "@/helpers/Alert";
 
 /**
  * Pages component
@@ -36,7 +35,7 @@ export default {
         },
         {
           text: "Blocks",
-          href: "/content/pages"
+          href: "/content/blocks"
         },
         {
           text: "Edit Block",
@@ -81,7 +80,7 @@ export default {
      axios
     .get(`${this.backendURL}/api/v1/blocks/${this.$route.params.id}` , authHeader())
     .then(response => (this.blockData = response.data.data),this.loading = false)
-    .catch(handleAxiosError)
+    .catch(error => handleAxiosError(error, this))
     .fianlly(() => {
       this.loading = false
     });
@@ -89,7 +88,20 @@ export default {
   methods:{
     editBlock(){
       if (!roleService.hasEditPermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!", false)
+          this.$toast.error("You do no have the permission to perform this action!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           return;
       }
       axios
@@ -97,9 +109,22 @@ export default {
       .then(response => (
         this.$router.push("/content/blocks"),
         this.data = response.data,
-        alertBox("Blocks Updated succesfully", true)
+        this.$toast.success("Blocks Updated succesfully!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
       ))
-      .catch(handleAxiosError);
+      .catch(error => handleAxiosError(error, this));
     }
   }
 };

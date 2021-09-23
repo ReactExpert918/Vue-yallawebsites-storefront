@@ -7,7 +7,6 @@ import {
 } from "@/helpers/authservice/auth-header";
 import {roleService} from "@/helpers/authservice/roles";
 import {handleAxiosError} from "@/helpers/authservice/user.service";
-import alertBox from "@/helpers/Alert";
 
 import appConfig from "@/app.config";
 
@@ -177,7 +176,7 @@ export default {
             this.attributesData.default_option = {};
           }
        })
-       .catch(handleAxiosError);
+       .catch(error => handleAxiosError(error, this));
       axios
       .get(`${this.backendURL}/api/v1/products/attributes/groups` , authHeader())
       .then(response => (this.attributeGroups = response.data.data,
@@ -187,7 +186,7 @@ export default {
       .get(`${this.backendURL}/api/v1/products/attributes/types` , authHeader())
       .then(response => (this.attrTypes = response.data.data,
       this.newAttr.type_id = response.data.data[0].id))
-      .catch(handleAxiosError)
+      .catch(error => handleAxiosError(error, this))
       .finally(() => {
         this.loading = false
       });
@@ -279,7 +278,20 @@ export default {
         this.loading = true
         this.$bvModal.hide("modal-scrollable-add");
         if (!roleService.hasCreatePermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!", false)
+          this.$toast.error("You do no have the permission to perform this action!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           return;
         }
           this.newAttr.sort_order = parseInt(this.newAttr.sort_order);
@@ -293,10 +305,23 @@ export default {
                 this.attributesDataLength = response.data.pagination.total;
             }),
            this.data = response.data,
-            alertBox("Attribute Created Successfully!", true)
+           this.$toast.success("Attribute Created Successfully!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           this.newAttr = {options: []};
          })
-         .catch(handleAxiosError)
+         .catch(error => handleAxiosError(error, this))
          .finally(() => {
         this.loading = false
          });
@@ -305,7 +330,20 @@ export default {
         this.loading = true
         this.$bvModal.hide("modal-scrollable-edit");
         if (!roleService.hasEditPermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!", false)
+          this.$toast.error("You do no have the permission to perform this action!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           return;
         }
         this.newAttr = {
@@ -326,10 +364,23 @@ export default {
          .put(`${this.backendURL}/api/v1/products/attributes/${this.currentAttribute.id}` , this.newAttr , authHeader())
          .then(response => {
             this.data = response.data,
-            alertBox("Attribute Updated Successfully!", true)
+            this.$toast.success("Attribute Updated Successfully!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
             this.newAttr = {options: []};
          })
-         .catch(handleAxiosError)
+         .catch(error => handleAxiosError(error, this))
          .finally(() => {
            this.loading = false
          });
@@ -338,7 +389,20 @@ export default {
         this.loading = true
         this.$bvModal.hide("modal-delete-page");
         if (!roleService.hasDeletePermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!", false)
+          this.$toast.error("You do no have the permission to perform this action!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           return;
         }
         axios
@@ -351,16 +415,42 @@ export default {
               this.attributesDataLength = response.data.pagination.total;
           }),
           this.data = response.data,
-          alertBox("Attribute Deleted Successfully!", true)
+          this.$toast.success("Attribute Deleted Successgfully!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
         ))
-        .catch(handleAxiosError)
+        .catch(error => handleAxiosError(error, this))
         .finally(() => {
           this.loading = false
         });
       },
       addOption(){
         if (!roleService.hasCreatePermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!", false)
+          this.$toast.error("You do no have the permission to perform this action!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           return;
         }
         axios
@@ -374,7 +464,7 @@ export default {
           })
           this.newOption = {};
         })
-        .catch(handleAxiosError);
+        .catch(error => handleAxiosError(error, this));
       },
       cancle() {
         this.showid = "";
@@ -392,23 +482,62 @@ export default {
       deleteProductOption(opt){
         this.$bvModal.hide("modal-attribute-groups");
         if (!roleService.hasDeletePermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!", false)
+          this.$toast.error("You do no have the permission to perform this action!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           return;
         }
          axios
         .delete(`${this.backendURL}/api/v1/products/attributes/options/${opt.id}` , authHeader())
         .then(response => {
           this.data = response.data,
-          alertBox("Option Deleted Successfully!", true)
+          this.$toast.success("Option Deleted Successfully!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           this.handleProductOptionDelete(opt.name , this.currentAttribute.options)
         })
-        .catch(handleAxiosError);
+        .catch(error => handleAxiosError(error, this));
       },
       addAttributeGroup(){
         this.loading = true
         this.$bvModal.hide("modal-attribute-groups");
         if (!roleService.hasCreatePermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!", false)
+          this.$toast.error("You do no have the permission to perform this action!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           return;
         }
         axios
@@ -418,10 +547,23 @@ export default {
           axios
           .get(`${this.backendURL}/api/v1/products/attributes/groups` , authHeader())
           .then(response => (this.attributeGroups = response.data.data))
-          alertBox("Attribute Group Created Successfully!", true)
+          this.$toast.success("Attribute Group Created Successfully!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           this.newGroup = {name: ""};
         })
-        .catch(handleAxiosError)
+        .catch(error => handleAxiosError(error, this))
         .finally(() => {
           this.loading = false
         });
@@ -438,19 +580,45 @@ export default {
         this.loading = true
         this.$bvModal.hide("modal-attribute-groups");
         if (!roleService.hasDeletePermission(this.pageIdentity)){
-          alertBox("You do no have the permission to perform this action!", false)
+          this.$toast.error("You do no have the permission to perform this action!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           return;
         }
         axios
         .delete(`${this.backendURL}/api/v1/products/attributes/groups/${group.id}` , authHeader())
         .then(response => {
           this.data = response.data,
-          alertBox("Attribute Group Deleted Successfully!", true),
+          this.$toast.success("Attribute Group Deleted Successfully!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
           axios
           .get(`${this.backendURL}/api/v1/products/attributes/groups` , authHeader())
           .then(response => (this.attributeGroups = response.data.data))
         })
-        .catch(handleAxiosError)
+        .catch(error => handleAxiosError(error, this))
         .finally(() => {
           this.loading = false
         });
@@ -1106,7 +1274,7 @@ export default {
     top: 0;
     left: 0;
     background-color: rgba(0, 0, 0, 0.4);
-    height: 100%;
+    height: 100vh;
     width: 100%;
     z-index: 20000;
   }
