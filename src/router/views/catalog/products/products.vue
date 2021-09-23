@@ -142,7 +142,7 @@ export default {
             icon: true,
             rtl: false
           }))
-        .catch(handleAxiosError)
+        .catch(error => handleAxiosError(error, this))
         .finally(() => {
           this.loading = false
         });

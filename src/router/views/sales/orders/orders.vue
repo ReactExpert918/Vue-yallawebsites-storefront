@@ -108,7 +108,7 @@ export default {
       .get(`${this.backendURL}/api/v1/orders?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
       .then(response => (this.ordersData = convert(response.data.data),
                         this.ordersDataLength = response.data.pagination.total))
-      .catch(handleAxiosError)
+      .catch(error => handleAxiosError(error, this))
       .finally(() => {
         this.loading = false
       });
@@ -145,7 +145,7 @@ export default {
           .get(`${this.backendURL}/api/v1/orders?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
           .then(response => (this.ordersData = convert(response.data.data),
                             this.ordersDataLength = response.data.pagination.total))
-          .catch(handleAxiosError),
+          .catch(error => handleAxiosError(error, this)),
           this.$toast.success("Order Deleted Successfully!", {
             position: "top-right",
             timeout: 5000,
@@ -161,7 +161,7 @@ export default {
             rtl: false
           })
           ))
-        .catch(handleAxiosError)
+        .catch(error => handleAxiosError(error, this))
         .finally(() => {
           this.loading = false
         });

@@ -86,15 +86,15 @@ export default {
         this.configuration.secondary_font = {};
       }
     })
-    .catch(handleAxiosError)
+    .catch(error => handleAxiosError(error, this))
     axios
     .get(`${this.backendURL}/api/v1/design/fonts` , authHeader())
     .then(response => (this.fonts = response.data.data))
-    .catch(handleAxiosError)
+    .catch(error => handleAxiosError(error, this))
     axios
     .get(`${this.backendURL}/api/v1/design/themes` , authHeader())
     .then(response => (this.themesData = response.data.data))
-    .catch(handleAxiosError)
+    .catch(error => handleAxiosError(error, this))
     .finally(() => {
       this.loading = false
     })
@@ -182,11 +182,11 @@ export default {
                 rtl: false
               })
             })
-          .catch(handleAxiosError);
+          .catch(error => handleAxiosError(error, this));
       }
 
     })
-    .catch(handleAxiosError)
+    .catch(error => handleAxiosError(error, this))
     },
     handlePrimaryFontUpload(){
       this.primaryFontFile = this.$refs.primaryFontFile.files[0];

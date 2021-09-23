@@ -209,16 +209,16 @@ export default {
       .get(`${this.backendURL}/api/v1/pages/layouts` , authHeader())
       .then(response => (this.layouts = response.data.data,
       this.newProduct.layout_id = this.layouts[0].id))
-      .catch(handleAxiosError);
+      .catch(error => handleAxiosError(error, this));
       axios
       .get(`${this.backendURL}/api/v1/categories` , authHeader())
       .then(response => (this.categories = response.data.data))
-      .catch(handleAxiosError);
+      .catch(error => handleAxiosError(error, this));
       axios
       .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}&with_disabled=false` , authHeader())
       .then(response => (this.allProductsData = response.data.data,
       this.allProductsDataLength = response.data.pagination.total))
-      .catch(handleAxiosError);
+      .catch(error => handleAxiosError(error, this));
       
       axios
       .get(`${this.backendURL}/api/v1/products/attributes?with_disabled=false&all=true` , authHeader())
@@ -262,10 +262,10 @@ export default {
           }
           this.custom_specs = this.currentAttrGroup.attributes;
         })
-        .catch(handleAxiosError);
+        .catch(error => handleAxiosError(error, this));
 
       })
-      .catch(handleAxiosError)
+      .catch(error => handleAxiosError(error, this))
       .finally(() => {
         this.loading = false
       });
@@ -277,7 +277,7 @@ export default {
         .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}&with_disabled=false` , authHeader())
         .then(response => (this.allProductsData = response.data.data,
         this.allProductsDataLength = response.data.pagination.total))
-        .catch(handleAxiosError);
+        .catch(error => handleAxiosError(error, this));
       },
       handlePerPageChange(value) {
         this.perPage = value;
@@ -286,7 +286,7 @@ export default {
         .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}&with_disabled=false` , authHeader())
         .then(response => (this.allProductsData = response.data.data,
         this.allProductsDataLength = response.data.pagination.total))
-        .catch(handleAxiosError);
+        .catch(error => handleAxiosError(error, this));
       },
       createProduct(){
         if (this.$refs.myVueDropzone.getAcceptedFiles().length < 1){ // if there are files added to the dropzone for uploading, then do not hide the modal
@@ -379,7 +379,7 @@ export default {
           this.$refs.myVueDropzone.setOption("url" , `${this.backendURL}/api/v1/products/${response.data.data.id}/upload`);
           this.$refs.myVueDropzone.processQueue();
          })
-        .catch(handleAxiosError);
+        .catch(error => handleAxiosError(error, this));
       },
       isBundleID(id){
         return this.newProduct.bundle_ids.indexOf(id) > -1;

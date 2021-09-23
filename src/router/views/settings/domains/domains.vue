@@ -101,7 +101,7 @@ export default {
       axios
       .get(`${this.backendURL}/api/v1/domains?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
       .then(response => (this.domainsData = response.data.data))
-      .catch(handleAxiosError)
+      .catch(error => handleAxiosError(error, this))
       .finally(() => {
         this.loader = false
       });
@@ -184,7 +184,7 @@ export default {
               })
           }
         })
-        .catch(handleAxiosError)
+        .catch(error => handleAxiosError(error, this))
         .finally(() => {
           this.loader = false
         });
@@ -232,7 +232,7 @@ export default {
               rtl: false
             })
           ))
-        .catch(handleAxiosError)
+        .catch(error => handleAxiosError(error, this))
         .finally(() => {
           this.loader = false
         });
@@ -279,7 +279,7 @@ export default {
               icon: true,
               rtl: false
             })))
-        .catch(handleAxiosError)
+        .catch(error => handleAxiosError(error, this))
         .finally(() => {
           this.loader = false
         });

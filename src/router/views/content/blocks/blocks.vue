@@ -107,7 +107,7 @@ export default {
       .get(`${this.backendURL}/api/v1/blocks?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
       .then(response => (this.blockData = convert(response.data.data),
                          this.blockDataLength = response.data.pagination.total))
-      .catch(handleAxiosError)
+      .catch(error => handleAxiosError(error, this))
       .finally(() => {
         this.loading = false;
       });
@@ -168,7 +168,7 @@ export default {
             rtl: false
           })
         ))
-        .catch(handleAxiosError)
+        .catch(error => handleAxiosError(error, this))
         .finally(() => {
           this.loading = false
         });

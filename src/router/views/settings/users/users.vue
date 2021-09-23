@@ -156,15 +156,15 @@ export default {
            }
          }
        })
-      .catch(handleAxiosError);
+      .catch(error => handleAxiosError(error, this));
       axios
       .get(`${this.backendURL}/api/v1/users/roles` , authHeader())
       .then(response => (this.rolesData = response.data.data))
-      .catch(handleAxiosError);
+      .catch(error => handleAxiosError(error, this));
       axios
       .get(`${this.backendURL}/api/v1/users/roles/contents` , authHeader())
       .then(response => (this.roleContents = response.data.data))
-      .catch(handleAxiosError)
+      .catch(error => handleAxiosError(error, this))
       .finally(() => {
         this.loader = false
       });
@@ -225,7 +225,7 @@ export default {
               rtl: false
             })
           )
-        .catch(handleAxiosError)
+        .catch(error => handleAxiosError(error, this))
         .finally(() => {
           this.loader = false
         });
@@ -276,15 +276,15 @@ export default {
               }
             }
           })
-          .catch(handleAxiosError),
+          .catch(error => handleAxiosError(error, this)),
           axios
           .get(`${this.backendURL}/api/v1/users/roles` , authHeader())
           .then(response => (this.rolesData = response.data.data))
-          .catch(handleAxiosError),
+          .catch(error => handleAxiosError(error, this)),
           axios
           .get(`${this.backendURL}/api/v1/users/roles/contents` , authHeader())
           .then(response => (this.roleContents = response.data.data))
-          .catch(handleAxiosError),
+          .catch(error => handleAxiosError(error, this)),
             this.$toast.success("User Created Successfully!", {
               position: "top-right",
               timeout: 5000,
@@ -302,7 +302,7 @@ export default {
             this.$refs.vueCreateDropzone.setOption("url" , `${this.backendURL}/api/v1/users/${response.data.data.id}/upload`);
             this.$refs.vueCreateDropzone.processQueue();
          })
-        .catch(handleAxiosError)
+        .catch(error => handleAxiosError(error, this))
         .finally(() => {
           this.loader = false
         });
@@ -359,7 +359,7 @@ export default {
             })
           this.$refs.myVueDropzone.processQueue();
          })
-        .catch(handleAxiosError)
+        .catch(error => handleAxiosError(error, this))
         .finally(() =>{
           this.loader = false;
         });

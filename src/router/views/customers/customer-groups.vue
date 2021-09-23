@@ -122,7 +122,7 @@ export default {
       .then(response => (this.customerGroupsData = response.data.data,
       window.console.log(this.customerGroupsData),
                         this.customerGroupsDataLength = response.data.pagination.total))
-      .catch(handleAxiosError)
+      .catch(error => handleAxiosError(error, this))
       .finally(() => {
         this.loading = false
       });
@@ -146,7 +146,7 @@ export default {
                         this.createGroupPayload.rule.tax_class = this.taxClasses[0].country_code,
                         this.createGroupPayload.rule.metric = "percentage",
                         this.createGroupPayload.rule.calculation = "+"))
-      .catch(handleAxiosError);
+      .catch(error => handleAxiosError(error, this));
       },
       deleteCustomerGroup(id) {
         this.loading = true
@@ -175,7 +175,7 @@ export default {
           .get(`${this.backendURL}/api/v1/customers/groups?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
           .then(response => (this.customerGroupsData = response.data.data,
                             this.customerGroupsDataLength = response.data.pagination.total))
-          .catch(handleAxiosError),
+          .catch(error => handleAxiosError(error, this)),
           this.$toast.success("Customer Group Deleted Successfully!", {
             position: "top-right",
             timeout: 5000,
@@ -191,7 +191,7 @@ export default {
             rtl: false
           })
           )
-        .catch(handleAxiosError)
+        .catch(error => handleAxiosError(error, this))
         .finally(() => {
           this.loading = false
         });
@@ -225,7 +225,7 @@ export default {
           .get(`${this.backendURL}/api/v1/customers/groups?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
           .then(response => (this.customerGroupsData = response.data.data,
                             this.customerGroupsDataLength = response.data.pagination.total))
-          .catch(handleAxiosError),
+          .catch(error => handleAxiosError(error, this)),
           this.data = response.data,
           this.$toast.success("Customer Group Created Successfully!", {
             position: "top-right",
@@ -242,7 +242,7 @@ export default {
             rtl: false
           })
           ))
-        .catch(handleAxiosError)
+        .catch(error => handleAxiosError(error, this))
         .finally(() => {
           this.loading = false
         });
@@ -276,7 +276,7 @@ export default {
           .get(`${this.backendURL}/api/v1/customers/groups?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
           .then(response => (this.customerGroupsData = response.data.data,
                             this.customerGroupsDataLength = response.data.pagination.total))
-          .catch(handleAxiosError),
+          .catch(error => handleAxiosError(error, this)),
           this.data = response.data,
           this.$toast.success("Customer Group Updated Successfully!", {
             position: "top-right",
@@ -292,7 +292,7 @@ export default {
             icon: true,
             rtl: false
           })))
-        .catch(handleAxiosError)
+        .catch(error => handleAxiosError(error, this))
         .finally(() => {
           this.loading = false
         });

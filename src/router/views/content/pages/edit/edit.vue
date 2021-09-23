@@ -82,7 +82,7 @@ export default {
     axios
     .get(`${this.backendURL}/api/v1/pages/layouts` , authHeader())
     .then(response => (this.layouts = response.data.data))
-    .catch(handleAxiosError);
+    .catch(error => handleAxiosError(error, this));
      axios
     .get(`${this.backendURL}/api/v1/pages/${this.$route.params.id}` , authHeader())
     .then(response => {
@@ -98,7 +98,7 @@ export default {
         }
       }
     })
-    .catch(handleAxiosError)
+    .catch(error => handleAxiosError(error, this))
     .finally(() => {
       this.loading = false
     });
@@ -147,7 +147,7 @@ export default {
             rtl: false
           })
         ))
-      .catch(handleAxiosError);
+      .catch(error => handleAxiosError(error, this));
     }
   }
 };

@@ -50,7 +50,7 @@ export default {
         .get(`${this.backendURL}/api/v1/customers/groups?per_page=-1` , authHeader())
         .then(response => (this.customerGroups = response.data.data,
                           this.currentGroupId = response.data.data[0]))
-        .catch(handleAxiosError)
+        .catch(error => handleAxiosError(error, this))
         .finally(() => {
           axios
           .get(`${this.backendURL}/api/v1/customers/${this.$route.params.id}` , authHeader())
@@ -73,7 +73,7 @@ export default {
                 this.customer.group_id = this.currentGroupId.id;
               }
             })
-            .catch(handleAxiosError)
+            .catch(error => handleAxiosError(error, this))
             .finally(() => {
               this.loading = false
             });
@@ -120,7 +120,7 @@ export default {
             icon: true,
             rtl: false
           })))
-        .catch(handleAxiosError);
+        .catch(error => handleAxiosError(error, this));
       },
   }
 };

@@ -110,7 +110,7 @@ export default {
       .get(`${this.backendURL}/api/v1/pages?per_page=${this.perPage}&page=${this.currentPage}` , authHeader())
       .then(response => (this.pagesData = convert(response.data.data),
                         this.pagesDataLength = response.data.pagination.total))
-      .catch(handleAxiosError)
+      .catch(error => handleAxiosError(error, this))
       .finally(() => {
                         this.loading =  false
                     });
@@ -172,7 +172,7 @@ export default {
             rtl: false
           })
           ))
-        .catch(handleAxiosError)
+        .catch(error => handleAxiosError(error, this))
         .finally(() => {
             this.loading =  false
         });

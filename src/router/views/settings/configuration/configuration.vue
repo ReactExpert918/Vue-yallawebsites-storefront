@@ -223,7 +223,7 @@ export default {
         this.general_config.allowed_currencies = [];
       }
      })
-     .catch(handleAxiosError);
+     .catch(error => handleAxiosError(error, this));
      axios
     .get(`${this.backendURL}/api/v1/stores/sales` , authHeader())
     .then(response => {
@@ -272,7 +272,7 @@ export default {
         }
 
      })
-     .catch(handleAxiosError);
+     .catch(error => handleAxiosError(error, this));
     axios
     .get(`${this.backendURL}/api/v1/stores/customer` , authHeader())
     .then(response => {
@@ -281,59 +281,59 @@ export default {
           this.customer_config.group = {};
         }
     })
-    .catch(handleAxiosError);
+    .catch(error => handleAxiosError(error, this));
     axios
     .get(`${this.backendURL}/api/v1/stores/advanced` , authHeader())
     .then(response => (this.advanced_config = response.data.data))
-    .catch(handleAxiosError);
+    .catch(error => handleAxiosError(error, this));
     axios
     .get(`${this.backendURL}/api/v1/domains?per_page=-1` , authHeader())
     .then(response => (this.domains = response.data.data))
-    .catch(handleAxiosError);
+    .catch(error => handleAxiosError(error, this));
     axios
     .get(`${this.backendURL}/api/v1/pages?per_page=-1` , authHeader())
     .then(response => (this.pages = response.data.data))
-    .catch(handleAxiosError);
+    .catch(error => handleAxiosError(error, this));
     axios
     .get(`${this.backendURL}/api/v1/areas/countries` , authHeader())
     .then(response => (this.countries = response.data.data))
-    .catch(handleAxiosError);
+    .catch(error => handleAxiosError(error, this));
     axios
     .get(`${this.backendURL}/api/v1/currencies` , authHeader())
     .then(response => (this.currencies = response.data.data))
-    .catch(handleAxiosError);
+    .catch(error => handleAxiosError(error, this));
     axios
     .get(`${this.backendURL}/api/v1/customers/groups?per_page=-1` , authHeader())
     .then(response => (this.customerGroups = response.data.data))
-    .catch(handleAxiosError);
+    .catch(error => handleAxiosError(error, this));
     axios
     .get(`${this.backendURL}/api/v1/pages/layouts` , authHeader())
     .then(response => (this.layouts = response.data.data))
-    .catch(handleAxiosError);
+    .catch(error => handleAxiosError(error, this));
     axios
     .get(`${this.backendURL}/api/v1/pages/sort-options` , authHeader())
     .then(response => (this.sortOptions = response.data.data))
-    .catch(handleAxiosError);
+    .catch(error => handleAxiosError(error, this));
     axios
     .get(`${this.backendURL}/api/v1/tax/displays` , authHeader())
     .then(response => (this.taxDisplayOptions = response.data.data))
-    .catch(handleAxiosError);
+    .catch(error => handleAxiosError(error, this));
     axios
     .get(`${this.backendURL}/api/v1/tax/rate-bases` , authHeader())
     .then(response => (this.taxRateBasedOns = response.data.data))
-    .catch(handleAxiosError);
+    .catch(error => handleAxiosError(error, this));
     axios
     .get(`${this.backendURL}/api/v1/tax/calculation-bases` , authHeader())
     .then(response => (this.taxCalculationBasedOns = response.data.data))
-    .catch(handleAxiosError);
+    .catch(error => handleAxiosError(error, this));
     axios
     .get(`${this.backendURL}/api/v1/tax/discount-calculations` , authHeader())
     .then(response => (this.taxDiscountCalculations = response.data.data))
-    .catch(handleAxiosError);
+    .catch(error => handleAxiosError(error, this));
     axios
     .get(`${this.backendURL}/api/v1/shipping/services` , authHeader())
     .then(response => (this.shippingServiceData = response.data.data))
-    .catch(handleAxiosError)
+    .catch(error => handleAxiosError(error, this))
     .finally(() => {
        this.loading = false
      });
@@ -356,7 +356,7 @@ export default {
           }
 
       })
-      .catch(handleAxiosError)
+      .catch(error => handleAxiosError(error, this))
       .finally(() => {
         // this.loading = false
       });
@@ -444,7 +444,7 @@ export default {
           rtl: false
         })
       })
-       .catch(handleAxiosError);
+       .catch(error => handleAxiosError(error, this));
     },
     saveCatalogConfiguration(){
       if (!roleService.hasEditPermission(this.pageIdentity)){
@@ -509,7 +509,7 @@ export default {
           })
           return;
         })
-        .catch(handleAxiosError);
+        .catch(error => handleAxiosError(error, this));
     },
     saveSalesConfiguration(){
       if (!roleService.hasEditPermission(this.pageIdentity)){
@@ -586,7 +586,7 @@ export default {
           // this.uploadTableRateFile();
 
         })
-        .catch(handleAxiosError);
+        .catch(error => handleAxiosError(error, this));
       
     },
     uploadTableRateFile(){
@@ -631,7 +631,7 @@ export default {
                 rtl: false
               })
               })
-              .catch(handleAxiosError);
+              .catch(error => handleAxiosError(error, this));
        }
     },
     saveCustomerConfiguration(){
@@ -679,7 +679,7 @@ export default {
             rtl: false
           })
         })
-        .catch(handleAxiosError);
+        .catch(error => handleAxiosError(error, this));
     },
     saveAdvancedConfiguration(){
       if (!roleService.hasEditPermission(this.pageIdentity)){
@@ -728,7 +728,7 @@ export default {
             rtl: false
           })
        })
-       .catch(handleAxiosError);
+       .catch(error => handleAxiosError(error, this));
     },
     isSortOption(id){
       var i;

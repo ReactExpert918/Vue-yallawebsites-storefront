@@ -80,7 +80,7 @@ export default {
      axios
     .get(`${this.backendURL}/api/v1/blocks/${this.$route.params.id}` , authHeader())
     .then(response => (this.blockData = response.data.data),this.loading = false)
-    .catch(handleAxiosError)
+    .catch(error => handleAxiosError(error, this))
     .fianlly(() => {
       this.loading = false
     });
@@ -124,7 +124,7 @@ export default {
             rtl: false
           })
       ))
-      .catch(handleAxiosError);
+      .catch(error => handleAxiosError(error, this));
     }
   }
 };

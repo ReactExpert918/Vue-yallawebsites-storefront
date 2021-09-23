@@ -139,7 +139,7 @@ export default {
            this.products[i].order_quantity = 1;
          }
        })
-       .catch(handleAxiosError);
+       .catch(error => handleAxiosError(error, this));
        axios
       .get(`${this.backendURL}/api/v1/orders/${this.$route.params.id}` , authHeader())
       .then(response => {
@@ -177,7 +177,7 @@ export default {
           }
 
       })
-      .catch(handleAxiosError);
+      .catch(error => handleAxiosError(error, this));
 
       axios
       .get(`${this.backendURL}/api/v1/payments/methods` , authHeader())
@@ -197,12 +197,12 @@ export default {
             }
           }          
         })
-      .catch(handleAxiosError);
+      .catch(error => handleAxiosError(error, this));
 
       axios
       .get(`${this.backendURL}/api/v1/shipping/methods` , authHeader())
       .then(response => (this.shippingData = response.data.data))
-      .catch(handleAxiosError)
+      .catch(error => handleAxiosError(error, this))
       .finally(() => {
         this.loading = false
       });
@@ -302,7 +302,7 @@ export default {
             rtl: false
           })
         ))
-        .catch(handleAxiosError);
+        .catch(error => handleAxiosError(error, this));
       },
       cancelOrder(){
         if (!roleService.hasEditPermission(this.pageIdentity)){
@@ -358,7 +358,7 @@ export default {
             icon: true,
             rtl: false
           })))
-        .catch(handleAxiosError);
+        .catch(error => handleAxiosError(error, this));
       },
       shipOrder(){
         if (!roleService.hasEditPermission(this.pageIdentity)){
@@ -415,7 +415,7 @@ export default {
             rtl: false
           })
         ))
-        .catch(handleAxiosError);
+        .catch(error => handleAxiosError(error, this));
       },
       deliverOrder(){
         if (!roleService.hasEditPermission(this.pageIdentity)){
@@ -472,7 +472,7 @@ export default {
             rtl: false
           })
         ))
-        .catch(handleAxiosError);
+        .catch(error => handleAxiosError(error, this));
       },
       refundOrder(){
         if (!roleService.hasEditPermission(this.pageIdentity)){
@@ -533,7 +533,7 @@ export default {
             rtl: false
           })
         ))
-        .catch(handleAxiosError);
+        .catch(error => handleAxiosError(error, this));
       },
       reOrder(){
         if (!roleService.hasCreatePermission(this.pageIdentity)){
@@ -588,7 +588,7 @@ export default {
             rtl: false
           })
         ))
-        .catch(handleAxiosError);
+        .catch(error => handleAxiosError(error, this));
       },
       // Invluce stripe dynamically
       includeStripe( URL, callback ){
@@ -645,7 +645,7 @@ export default {
                 rtl: false
               })
             ))
-            .catch(handleAxiosError);
+            .catch(error => handleAxiosError(error, this));
       },
       purchaseWithStripeCard(orderID){
           this.stripe.createToken(this.card)
@@ -696,7 +696,7 @@ export default {
                 rtl: false
               })
             ))
-            .catch(handleAxiosError);
+            .catch(error => handleAxiosError(error, this));
           })
       },
       checkStripeCard(name , type , enabled){
@@ -723,7 +723,7 @@ export default {
             this.products[i].order_quantity = 1;
           }
         })
-        .catch(handleAxiosError);
+        .catch(error => handleAxiosError(error, this));
       },
       handlePerPageChange(value) {
         this.perPage = value;
@@ -737,7 +737,7 @@ export default {
             this.products[i].order_quantity = 1;
           }
         })
-        .catch(handleAxiosError);
+        .catch(error => handleAxiosError(error, this));
       },
   },
 };

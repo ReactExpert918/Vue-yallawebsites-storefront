@@ -117,7 +117,7 @@ export default {
             }
          }
        })
-      .catch(handleAxiosError)
+      .catch(error => handleAxiosError(error, this))
       .finally(() => {
         this.loading = false
       });

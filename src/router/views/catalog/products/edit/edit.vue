@@ -178,11 +178,11 @@ export default {
       axios
       .get(`${this.backendURL}/api/v1/pages/layouts` , authHeader())
       .then(response => (this.layouts = response.data.data))
-      .catch(handleAxiosError);
+      .catch(error => handleAxiosError(error, this));
       axios
       .get(`${this.backendURL}/api/v1/categories` , authHeader())
       .then(response => (this.categories = response.data.data))
-      .catch(handleAxiosError);
+      .catch(error => handleAxiosError(error, this));
       axios
       .get(`${this.backendURL}/api/v1/products/${this.$route.params.id}` , authHeader())
       .then(response => {
@@ -282,12 +282,12 @@ export default {
           })
           
       })
-      .catch(handleAxiosError);
+      .catch(error => handleAxiosError(error, this));
       axios
       .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}&without=${this.$route.params.id}&with_disabled=false` , authHeader())
       .then(response => (this.allProductsData = response.data.data,
                          this.allProductsDataLength = response.data.pagination.total))
-      .catch(handleAxiosError);
+      .catch(error => handleAxiosError(error, this));
 
      
       axios
@@ -345,10 +345,10 @@ export default {
             }
             
           })
-          .catch(handleAxiosError);
+          .catch(error => handleAxiosError(error, this));
 
       })
-      .catch(handleAxiosError)
+      .catch(error => handleAxiosError(error, this))
       .finally(() => {
         this.loading = false
       });
@@ -360,7 +360,7 @@ export default {
       .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}&without=${this.$route.params.id}&with_disabled=false` , authHeader())
       .then(response => (this.allProductsData = response.data.data,
                          this.allProductsDataLength = response.data.pagination.total))
-      .catch(handleAxiosError);
+      .catch(error => handleAxiosError(error, this));
       },
       handlePerPageChange(value) {
         this.perPage = value;
@@ -369,7 +369,7 @@ export default {
       .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}&without=${this.$route.params.id}&with_disabled=false` , authHeader())
       .then(response => (this.allProductsData = response.data.data,
                          this.allProductsDataLength = response.data.pagination.total))
-      .catch(handleAxiosError);
+      .catch(error => handleAxiosError(error, this));
       },
       updateProduct(){
         if (this.$refs.myVueDropzone.getAcceptedFiles().length < 1){ // if there are files added to the dropzone for uploading, then do not hide the modal
@@ -501,7 +501,7 @@ export default {
           })
           this.$refs.myVueDropzone.processQueue();
         })
-        .catch(handleAxiosError);
+        .catch(error => handleAxiosError(error, this));
       },
 
       deleteProduct(){
@@ -542,7 +542,7 @@ export default {
             icon: true,
             rtl: false
           })))
-        .catch(handleAxiosError);
+        .catch(error => handleAxiosError(error, this));
       },
 
       handleImageUpload(){

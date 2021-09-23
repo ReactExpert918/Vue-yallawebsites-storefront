@@ -86,7 +86,7 @@ export default {
         if (this.order.shipment == null){
           this.order.shipment = {};
         }
-    }).catch(handleAxiosError)
+    }).catch(error => handleAxiosError(error, this))
     .finally(() => {
       this.loading = false
     });

@@ -98,7 +98,8 @@ function logout() {
 
 }
 
-export function handleAxiosError(error) {
+export function handleAxiosError(error, $this) {
+    window.console.log(error, $this, '-----');
     if (error.response) {
         var data = error.response.data;
         if (error.response.status === 401) {
@@ -107,7 +108,7 @@ export function handleAxiosError(error) {
             location.reload(true);
         }
         const errorMsg = (data && data.message) || error.response.statusText;
-        this.$toast.error("Something Went Wrong!", {
+        $this.$toast.error("Something Went Wrong!", {
             position: "top-right",
             timeout: 5000,
             closeOnClick: true,

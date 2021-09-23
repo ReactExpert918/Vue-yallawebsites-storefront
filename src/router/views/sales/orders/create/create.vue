@@ -165,7 +165,7 @@ export default {
            this.products[i].order_quantity = 1;
          }
        })
-       .catch(handleAxiosError);
+       .catch(error => handleAxiosError(error, this));
        axios
       .get(`${this.backendURL}/api/v1/payments/methods` , authHeader())
       .then(response => {
@@ -183,11 +183,11 @@ export default {
             }
           }          
         })
-      .catch(handleAxiosError);
+      .catch(error => handleAxiosError(error, this));
       axios
       .get(`${this.backendURL}/api/v1/shipping/methods` , authHeader())
       .then(response => (this.shippingData = response.data.data))
-      .catch(handleAxiosError)
+      .catch(error => handleAxiosError(error, this))
       .finally(() => {
         this.loading = false
       });
@@ -204,7 +204,7 @@ export default {
         .get(`${this.backendURL}/api/v1/customers?per_page=${this.perPage}&page=${this.currentPage}&address=true` , authHeader())
         .then(response => (this.customers = response.data.data,
         this.customersLength = response.data.pagination.total))
-        .catch(handleAxiosError)
+        .catch(error => handleAxiosError(error, this))
         .finally(() => {
           this.loading = false
         });
@@ -224,7 +224,7 @@ export default {
             this.products[i].order_quantity = 1;
           }
         })
-        .catch(handleAxiosError);
+        .catch(error => handleAxiosError(error, this));
       },
       handleProductPerPageChange(value) {
         this.currentProductPage = 1;
@@ -238,7 +238,7 @@ export default {
             this.products[i].order_quantity = 1;
           }
         })
-        .catch(handleAxiosError);
+        .catch(error => handleAxiosError(error, this));
       },
       handlePageChange(value) {
         this.currentPage = value;
@@ -246,7 +246,7 @@ export default {
         .get(`${this.backendURL}/api/v1/customers?per_page=${this.perPage}&page=${this.currentPage}&address=true` , authHeader())
         .then(response => (this.customers = response.data.data,
         this.customersLength = response.data.pagination.total))
-        .catch(handleAxiosError);
+        .catch(error => handleAxiosError(error, this));
       },
       handlePerPageChange(value) {
         this.currentPage = 1;
@@ -255,7 +255,7 @@ export default {
         .get(`${this.backendURL}/api/v1/customers?per_page=${this.perPage}&page=${this.currentPage}&address=true` , authHeader())
         .then(response => (this.customers = response.data.data,
         this.customersLength = response.data.pagination.total))
-        .catch(handleAxiosError);
+        .catch(error => handleAxiosError(error, this));
       },
       uncheckSelectAll(data){
         this.selectedAll = false
@@ -348,7 +348,7 @@ export default {
           })
             this.purchase(response.data.data.id);
          })
-        .catch(handleAxiosError);
+        .catch(error => handleAxiosError(error, this));
       },
       // Invluce stripe dynamically
       includeStripe( URL, callback ){
@@ -424,7 +424,7 @@ export default {
                 rtl: false
               })
               ))
-            .catch(handleAxiosError);
+            .catch(error => handleAxiosError(error, this));
           })
       },
       checkStripeCard(name , type , enabled){
@@ -457,7 +457,7 @@ export default {
                 rtl: false
               })
               ))
-            .catch(handleAxiosError);
+            .catch(error => handleAxiosError(error, this));
       },
       setCurrentPaymentType(checked , type){
         if (checked){

@@ -176,7 +176,7 @@ export default {
             this.attributesData.default_option = {};
           }
        })
-       .catch(handleAxiosError);
+       .catch(error => handleAxiosError(error, this));
       axios
       .get(`${this.backendURL}/api/v1/products/attributes/groups` , authHeader())
       .then(response => (this.attributeGroups = response.data.data,
@@ -186,7 +186,7 @@ export default {
       .get(`${this.backendURL}/api/v1/products/attributes/types` , authHeader())
       .then(response => (this.attrTypes = response.data.data,
       this.newAttr.type_id = response.data.data[0].id))
-      .catch(handleAxiosError)
+      .catch(error => handleAxiosError(error, this))
       .finally(() => {
         this.loading = false
       });
@@ -321,7 +321,7 @@ export default {
           })
           this.newAttr = {options: []};
          })
-         .catch(handleAxiosError)
+         .catch(error => handleAxiosError(error, this))
          .finally(() => {
         this.loading = false
          });
@@ -380,7 +380,7 @@ export default {
           })
             this.newAttr = {options: []};
          })
-         .catch(handleAxiosError)
+         .catch(error => handleAxiosError(error, this))
          .finally(() => {
            this.loading = false
          });
@@ -430,7 +430,7 @@ export default {
             rtl: false
           })
         ))
-        .catch(handleAxiosError)
+        .catch(error => handleAxiosError(error, this))
         .finally(() => {
           this.loading = false
         });
@@ -464,7 +464,7 @@ export default {
           })
           this.newOption = {};
         })
-        .catch(handleAxiosError);
+        .catch(error => handleAxiosError(error, this));
       },
       cancle() {
         this.showid = "";
@@ -518,7 +518,7 @@ export default {
           })
           this.handleProductOptionDelete(opt.name , this.currentAttribute.options)
         })
-        .catch(handleAxiosError);
+        .catch(error => handleAxiosError(error, this));
       },
       addAttributeGroup(){
         this.loading = true
@@ -563,7 +563,7 @@ export default {
           })
           this.newGroup = {name: ""};
         })
-        .catch(handleAxiosError)
+        .catch(error => handleAxiosError(error, this))
         .finally(() => {
           this.loading = false
         });
@@ -618,7 +618,7 @@ export default {
           .get(`${this.backendURL}/api/v1/products/attributes/groups` , authHeader())
           .then(response => (this.attributeGroups = response.data.data))
         })
-        .catch(handleAxiosError)
+        .catch(error => handleAxiosError(error, this))
         .finally(() => {
           this.loading = false
         });

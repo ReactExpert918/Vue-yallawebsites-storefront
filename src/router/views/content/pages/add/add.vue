@@ -94,7 +94,7 @@ export default {
       .get(`${this.backendURL}/api/v1/pages/layouts` , authHeader())
       .then(response => (this.layouts = response.data.data,
                         this.pageData.layout_id = this.layouts[0].id))
-      .catch(handleAxiosError)
+      .catch(error => handleAxiosError(error, this))
       .finally(() => {
                         this.loading =  false
                     });
@@ -143,7 +143,7 @@ export default {
           }),
         this.loading = false
       ))
-      .catch(handleAxiosError);
+      .catch(error => handleAxiosError(error, this));
     }
   }
 };

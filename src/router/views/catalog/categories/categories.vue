@@ -86,7 +86,7 @@ export default {
     .get(`${this.backendURL}/api/v1/categories?tree=true` , authHeader())
     .then(response => (this.categoriesData = response.data.data, this.catPayload.parent_id = response.data.data[0].id)
                       )
-    .catch(handleAxiosError)
+    .catch(error => handleAxiosError(error, this))
     .finally(() => {
       this.loading = false
     });
@@ -104,7 +104,7 @@ export default {
             this.currentProducts = response.data.data;
             this.productMap[this.currentCategory.id] = this.currentProducts;
           })
-          .catch(handleAxiosError);
+          .catch(error => handleAxiosError(error, this));
       }else{
         this.currentProducts = this.productMap[this.currentCategory.id];
       }
@@ -139,7 +139,7 @@ export default {
           axios
           .get(`${this.backendURL}/api/v1/categories?tree=true` , authHeader())
           .then(response => (this.categoriesData = response.data.data))
-          .catch(handleAxiosError);
+          .catch(error => handleAxiosError(error, this));
           this.data = response.data,
           this.$toast.success("Category Created Successfully!", {
             position: "top-right",
@@ -158,7 +158,7 @@ export default {
           this.$refs.vueCreateDropzone.setOption("url" , `${this.backendURL}/api/v1/categories/${response.data.data.id}/upload`);
           this.$refs.vueCreateDropzone.processQueue();
        })
-      .catch(handleAxiosError)
+      .catch(error => handleAxiosError(error, this))
       .finally(() => {
         this.loading = false
       });
@@ -200,7 +200,7 @@ export default {
           axios
           .get(`${this.backendURL}/api/v1/categories?tree=true` , authHeader())
           .then(response => (this.currentCategory = {},this.categoriesData = response.data.data))
-          .catch(handleAxiosError),
+          .catch(error => handleAxiosError(error, this)),
           this.currentCategory = {},
           this.$toast.success("Category Updated Successfully!", {
             position: "top-right",
@@ -218,7 +218,7 @@ export default {
           })
           this.$refs.myVueDropzone.processQueue();
        })
-      .catch(handleAxiosError)
+      .catch(error => handleAxiosError(error, this))
       .finally(() => {
         this.loading = false
       });
@@ -252,7 +252,7 @@ export default {
         axios
         .get(`${this.backendURL}/api/v1/categories?tree=true` , authHeader())
         .then(response => (this.currentCategory = {},this.categoriesData = response.data.data))
-        .catch(handleAxiosError),
+        .catch(error => handleAxiosError(error, this)),
         this.currentCategory = {},
         this.data = response.data,
         this.$toast.success("Category Deleted Successfully!", {
@@ -270,7 +270,7 @@ export default {
           rtl: false
         })
       ))
-      .catch(handleAxiosError)
+      .catch(error => handleAxiosError(error, this))
       .finally(() => {
         this.loading = false
       });

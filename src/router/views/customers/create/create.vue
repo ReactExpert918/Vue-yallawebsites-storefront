@@ -68,7 +68,7 @@ export default {
     .get(`${this.backendURL}/api/v1/customers/groups?per_page=-1` , authHeader())
     .then(response => (this.customerGroups = response.data.data,
           this.createCustomerPayload.group_id = response.data.data[0].id))
-    .catch(handleAxiosError)
+    .catch(error => handleAxiosError(error, this))
     .finally(() => {
       this.loading = false
     });
@@ -121,7 +121,7 @@ export default {
             icon: true,
             rtl: false
           })))
-      .catch(handleAxiosError);
+      .catch(error => handleAxiosError(error, this));
     },
   }
 };
