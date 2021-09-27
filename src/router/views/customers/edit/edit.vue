@@ -56,7 +56,6 @@ export default {
           .get(`${this.backendURL}/api/v1/customers/${this.$route.params.id}` , authHeader())
           .then(response => {
               this.customer = response.data.data
-              this.customer.group_id = this.customer.group.id
               if (this.customer.billing_addresses.length == 0){
                 this.customer.billing_addresses = [{} , {}];
               }
@@ -70,14 +69,16 @@ export default {
                 this.customer.shipping_addresses.push({});
               }
               if(this.customer.group == null){
-                this.customer.group_id = this.currentGroupId.id;
+                this.customer.group = {id: "", name: "", created_at: ""}
+                this.customer.group.id = this.currentGroupId.id;
+                this.loading = false
               }
+              window.console.log(this.customer.group)
             })
             .catch(error => handleAxiosError(error, this))
             .finally(() => {
               this.loading = false
             });
-        
         });
   },
   methods:{
@@ -100,7 +101,6 @@ export default {
           return;
        }
        // Using hardcoded country code for now as there is no option in front-end for selecting country from a list now, Need to add that and remove the following loops
-      window.console.log(this.customer);
         axios
         .put(`${this.backendURL}/api/v1/customers/${this.$route.params.id}` , this.customer , authHeader())
         .then(response => (
@@ -176,7 +176,7 @@ export default {
                   </div>
                   <div class="col-sm-3">
                     <label class="mt-3">Customer Group</label>
-                    <select class="custom-select" v-model="customer.group_id">
+                    <select class="custom-select" v-model="customer.group.id">
                       <option v-for="group in customerGroups" v-bind:value="group.id" :key="group.id" :selected="group.id == customer.group.id">{{group.name}}</option>
                     </select>
                   </div>
