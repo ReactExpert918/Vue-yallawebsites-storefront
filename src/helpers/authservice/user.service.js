@@ -99,7 +99,6 @@ function logout() {
 }
 
 export function handleAxiosError(error, $this) {
-    window.console.log(error, $this, '-----');
     if (error.response) {
         var data = error.response.data;
         if (error.response.status === 401) {
