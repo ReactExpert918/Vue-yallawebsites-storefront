@@ -157,7 +157,8 @@ export default {
       value1: '',
       outputUrl: '',
       tempArr: [],
-      tempArr2: null
+      tempArr2: null,
+      currentSeletedImage: null,
     };
   },
   computed: {
@@ -545,6 +546,15 @@ export default {
         .catch(error => handleAxiosError(error, this));
       },
 
+      confirmSetDefaultImage() {
+        this.productData.default_image_url = this.currentSeletedImage;
+        this.$bvModal.hide("modal-default-image-page");
+      },
+
+      cancelSetDefaultIamge() {
+        this.$bvModal.hide("modal-default-image-page");
+      },
+
       handleImageUpload(){
         this.$refs.myVueDropzone.setOption("url" , `${this.backendURL}/api/v1/products/${this.productData.id}/upload`);
       },
@@ -825,7 +835,7 @@ export default {
                       <div class="imageFile highlight-border" v-for="(image , index) of productData.images" :key="index">
                           <img :src="image" class="product-img" />
                           <span class="actions-right cursor-ponter">
-                            <b-button id="tooltip-set-default-1" variant="primary" class="mr-2" @click="productData.default_image_url = image"><i class="bx bx-image-alt"></i></b-button>
+                            <b-button id="tooltip-set-default-1" variant="primary" class="mr-2" @click="currentSeletedImage = image" v-b-modal.modal-default-image-page><i class="bx bx-image-alt"></i></b-button>
                             <b-tooltip target="tooltip-set-default-1">Set Image As Default</b-tooltip>
                             <b-button class="mr-1 w-s" variant="danger" @click="productData.delete_image_urls.push(image)"><i class="mdi mdi-trash-can d-block"></i></b-button>
                           </span>
@@ -1181,6 +1191,14 @@ export default {
         <b-button variant="danger" @click="deleteProduct()">Delete</b-button>
       </div>
     </b-modal>
+    <b-modal id="modal-default-image-page" centered title="Set Default Image" title-class="font-18" hide-footer>
+      <p>Are you sure? Set This Image As Default?</p>
+      <div class="text-right">
+        <b-button variant="danger" @click="confirmSetDefaultImage()">Yes</b-button>
+        <b-button variant="danger" @click="cancelSetDefaultIamge()">Cancel</b-button>
+      </div>
+    </b-modal>
+    
   </Layout>
 </template>
 <style scoped>

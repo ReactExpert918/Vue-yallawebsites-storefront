@@ -1,89 +1,382 @@
 <script>
-import Layout from "../../../layouts/main";
+import CKEditor from "@ckeditor/ckeditor5-vue";
+import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
+import vue2Dropzone from "vue2-dropzone";
+import Multiselect from "vue-multiselect";
+
+import Layout from "../../../../layouts/main";
 import PageHeader from "@/components/page-header";
+
 import axios from "axios";
 import appConfig from "@/app.config";
 import {
   authHeader,
 } from "@/helpers/authservice/auth-header";
-import {handleAxiosError} from "@/helpers/authservice/user.service";
 import {roleService} from "@/helpers/authservice/roles";
+import {handleAxiosError} from "@/helpers/authservice/user.service";
+import {copyArrayOfObjects} from "@/helpers/common";
+
 /**
  * Pages component
  */
 export default {
   page: {
-    title: "Orders",
+    title: "Edit Product",
     meta: [{ name: "description", content: appConfig.description }]
   },
-  components: { Layout, PageHeader },
+  components: { Layout, PageHeader, ckeditor: CKEditor.component, vueDropzone: vue2Dropzone, Multiselect },
+
   data() {
     return {
-      pageIdentity: "customers",
+      pageIdentity: "products",
       backendURL: process.env.VUE_APP_BACKEND_URL,
-      customer: {
-        group:{},
-        billing_addresses:[{} , {}],
-        shipping_addresses: [{} , {}],
-        orders: [],
-        group_id: ""
-      },
+      data: "",
       loading: false,
-      customerGroups: [],
-      currentGroupId: "",
-      title: "Edit Customer",
+      productData: {
+        layout:{} , 
+        meta_keywords_str:"" ,
+        meta_description:"" , 
+        bundle_ids:[],
+        default_image_url: "",
+        delete_image_urls: [],
+        attribute_group_id: "",
+        attributes: [],
+        specifications: [],
+        variations: [],
+        weight: 0
+      },
+      allProductsDataLength: 1,
+      variationsData: [],
+      allProductsData: [],
+      attrs: [],
+      attrGroups: [],
+      preVariation: [],
+      layouts: [],
+      categories: [],
+      selectedCategories: [],
+      id: [],
+      variations: [],
+      variationValue: 'Variation Name',
+      variationOptions: [],
+      variationRequired: false,
+      custom_specs: [],
+      title: "Edit Product",
       items: [
         {
-          text: "Customers",
-          href: "/customers"
+          text: "Catalog",
         },
         {
-          text: "Edit Customer",
-          active: true
+          text: "Products",
+          href: "/catalog/products"
         },
-      ]
+        {
+          text: "Edit Product",
+          active: true
+        }
+      ],
+      attrMap: {},
+      attrGrpMap: {},
+      currentAttrGroup: {},
+      totalRows: 1,
+      currentPage: 1,
+      perPage: 10,
+      pageOptions: [10, 25, 50, 100],
+      filter: null,
+      filterOn: [],
+      sortBy: "age",
+      sortDesc: false,
+      fields: [{
+              label: "Selected",
+              key: "selected",
+              sortable: true,
+          },
+          { 
+              label: "Product Name",
+              key: "name",
+              sortable: true,
+          },
+          {   
+              label: "SKU",
+              key: "sku",
+              sortable: true,
+          },
+          {
+              label: "Price",
+              key: "price",
+              sortable: true,
+          },
+          {
+              label: "Qty",
+              key: "quantity",
+              sortable: true,
+          },
+          {
+              key: "status",
+              sortable: true,
+          },
+      ],
+      editor: ClassicEditor,
+      editorData: "",
+      content: "",
+      plugins: [
+        "advlist autolink link image lists charmap print preview hr anchor pagebreak spellchecker",
+        "searchreplace wordcount visualblocks visualchars code fullscreen insertdatetime media nonbreaking",
+        "save table contextmenu directionality emoticons template paste textcolor",
+      ],
+      toolbar: "insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | l      ink image | print preview media fullpage | forecolor backcolor emoticons",
+      options: {
+        height: 300,
+        style_formats: [
+          { title: "Bold text", inline: "b" },
+          { title: "Red text", inline: "span", styles: { color: "#ff0000" } },
+          { title: "Red header", block: "h1", styles: { color: "#ff0000" } },
+          { title: "Example 1", inline: "span", classes: "example1" },
+          { title: "Example 2", inline: "span", classes: "example2" },
+          { title: "Table styles" },
+          { title: "Table row 1", selector: "tr", classes: "tablerow1" },
+        ],
+      },
+      dropzoneOptions: {
+        url: `${process.env.VUE_APP_BACKEND_URL}/api/v1/products/upload`,
+        // thumbnailWidth: 75,
+        paramName: "product_image",
+        maxFilesize: 200,
+        headers: authHeader().headers,
+        autoProcessQueue: false,
+      },
+      variationDropzoneOptions:{
+         url: `${process.env.VUE_APP_BACKEND_URL}/api/v1/products/upload`,
+        // thumbnailWidth: 75,
+        paramName: "product_variation_image",
+        maxFilesize: 200,
+        headers: authHeader().headers,
+        autoProcessQueue: false,
+      },
+      textarea: '',
+      lgchecked: '',
+      value1: '',
+      outputUrl: '',
+      tempArr: [],
+      tempArr2: null,
+      currentSeletedImage: null,
     };
   },
-  mounted() {
-      this.loading = true
-        axios
-        .get(`${this.backendURL}/api/v1/customers/groups?per_page=-1` , authHeader())
-        .then(response => (this.customerGroups = response.data.data,
-                          this.currentGroupId = response.data.data[0]))
-        .catch(error => handleAxiosError(error, this))
-        .finally(() => {
-          axios
-          .get(`${this.backendURL}/api/v1/customers/${this.$route.params.id}` , authHeader())
-          .then(response => {
-              this.customer = response.data.data
-              if (this.customer.billing_addresses.length == 0){
-                this.customer.billing_addresses = [{} , {}];
-              }
-              if (this.customer.shipping_addresses.length == 0){
-                this.customer.shipping_addresses = [{} , {}];
-              }
-              if (this.customer.billing_addresses.length == 1){
-                this.customer.billing_addresses.push({});
-              }
-              if (this.customer.shipping_addresses.length == 1){
-                this.customer.shipping_addresses.push({});
-              }
-              if(this.customer.group == null){
-                this.customer.group = {id: "", name: "", created_at: ""}
-                this.customer.group.id = this.currentGroupId.id;
-                this.loading = false
-              }
-              window.console.log(this.customer.group)
-            })
-            .catch(error => handleAxiosError(error, this))
-            .finally(() => {
-              this.loading = false
-            });
-        });
+  computed: {
+    isdisable() {
+      if(this.productData.name == "" || this.productData.short_description == "" || this.productData.long_description == "" || this.productData.sku == "" || this.productData.ean == "" || this.productData.price <= 0 
+      || this.productData.cost_price <= 0 || this.productData.sale_price <= 0 || this.productData.quantity == "" || this.productData.visibility == "" || this.productData.layout_id == "") {
+        return true;
+      } else {
+        return false;
+      }
+    },
+      rows() {
+          return this.allProductsDataLength;
+      },
   },
-  methods:{
-     updateCustomer(){
-       if(!roleService.hasEditPermission(this.pageIdentity)){
+  mounted() {
+    this.loading = true;
+      axios
+      .get(`${this.backendURL}/api/v1/pages/layouts` , authHeader())
+      .then(response => (this.layouts = response.data.data))
+      .catch(error => handleAxiosError(error, this));
+      axios
+      .get(`${this.backendURL}/api/v1/categories` , authHeader())
+      .then(response => (this.categories = response.data.data))
+      .catch(error => handleAxiosError(error, this));
+      axios
+      .get(`${this.backendURL}/api/v1/products/${this.$route.params.id}` , authHeader())
+      .then(response => {
+          this.productData = response.data.data;
+          this.selectedCategories = this.categories.filter(obj => 
+             this.productData.category_ids.includes(obj.id)
+          )
+          this.productData.meta_keywords_str = "";
+          if (this.productData.layout == null){
+            this.productData.layout = {};
+          }
+          if (this.productData.attributes == null){
+            this.productData.attributes = [];
+          } 
+          for (var i  = 0; i < this.productData.meta_keywords.length; i++){
+            this.productData.meta_keywords_str += this.productData.meta_keywords[i];
+            if ((this.productData.meta_keywords.length - i) > 1){ // adding space seperated words and checking for the last item
+              this.productData.meta_keywords_str += " ";
+            }
+          }
+          for(var j = 0; j < this.productData.attributes.length; j++){
+            var a = this.productData.attributes[j];
+            this.attrMap[a.id] = a;
+          }
+
+
+          if(this.attrs.length > 0){
+            for(var k = 0; k < this.attrs.length; k++){
+              var attr = this.attrs[k];
+              if(attr.id in this.attrMap){
+                if (this.attrMap[attr.id].option){
+                   attr.option_id = this.attrMap[attr.id].option.id;
+                }
+                attr.value = this.attrMap[attr.id].value; 
+              }
+            }
+          }
+
+          if (this.attrGroups.length > 0 && this.productData.attribute_group){
+            var grp = this.attrGroups[this.attrGroups.map(function(e) { return e.id; }).indexOf(this.productData.attribute_group.id)];
+            if (grp){
+              this.currentAttrGroup = grp;
+            }
+         }
+        
+         this.custom_specs = this.currentAttrGroup.attributes;
+
+          this.productData.delete_image_urls = [];
+
+          this.productData.specifications.forEach((v) => {
+              var vd = {
+                uuid: v.id,
+                name: v.name,
+                options: [],
+              }
+              v.values.forEach((o) => {
+                vd.options.push({
+                  name: o,
+                })
+              })
+              this.variationsData.push(vd);
+          })
+
+          this.productData.variations.forEach((v) =>{
+              var varData = {
+                uuid: v.id,
+                options: [],
+                labels: v.labels,
+                subitem: {
+                  uuid: v.id,
+                  qty: v.quantity,
+                  price: v.price,
+                  costprice: v.cost_price,
+                  saleprice: v.sale_price,
+                  sku: v.sku,
+                  ean: v.ean,
+                  customImage: v.image,
+                  specs: [],
+                },
+                custom_specs: copyArrayOfObjects(this.custom_specs),
+              }
+              v.labels.forEach((label) => {
+                varData.options.push(label[Object.keys(label)[0]]);
+              })
+              if (v.custom_specs.length > 0){
+                v.custom_specs.forEach((cs) => {
+                  varData.subitem.specs.push({
+                    id: cs.attribute_id,
+                    name: cs.attribute_name,
+                    custom_value: cs.value,
+                  })
+                })
+                
+              }
+
+              this.variations.push(varData);
+          })
+          
+      })
+      .catch(error => handleAxiosError(error, this));
+      axios
+      .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}&without=${this.$route.params.id}&with_disabled=false` , authHeader())
+      .then(response => (this.allProductsData = response.data.data,
+                         this.allProductsDataLength = response.data.pagination.total))
+      .catch(error => handleAxiosError(error, this));
+
+     
+      axios
+      .get(`${this.backendURL}/api/v1/products/attributes?with_disabled=false&all=true` , authHeader())
+      .then(response => {
+        this.attrs = response.data.data;
+        for(var i = 0; i < this.attrs.length; i++){
+
+          var attr = this.attrs[i];
+
+          if (attr.group == null){
+            attr.group = {};
+          }else{
+            if(!(attr.group.id in this.attrGrpMap)){
+              this.attrGrpMap[attr.group.id] = [];
+            }
+            attr.value = "";
+            attr.option_id = "";
+            this.attrGrpMap[attr.group.id].push(attr);
+          }
+
+          if (attr.type == null){
+            attr.type = {};
+          }
+
+          if (attr.options.length < 1) {
+            attr.options = [];
+          }
+
+          if(attr.id in this.attrMap){
+            if (this.attrMap[attr.id].option){
+              attr.option_id = this.attrMap[attr.id].option.id;
+            }
+            attr.value = this.attrMap[attr.id].value; 
+          }
+
+        }
+
+        axios
+          .get(`${this.backendURL}/api/v1/products/attributes/groups` , authHeader())
+          .then(response => {
+            this.attrGroups = response.data.data;
+            if (this.attrGroups.length > 0){
+              this.currentAttrGroup = this.attrGroups[0];
+            }
+            for(var j = 0; j < this.attrGroups.length; j++){
+              this.attrGroups[j].attributes = this.attrGrpMap[this.attrGroups[j].id];
+              var agi = "";
+              if (this.productData.attribute_group){
+                agi = this.productData.attribute_group.id;
+              }
+              if (this.attrGroups[j].id == agi){
+                this.currentAttrGroup = this.attrGroups[j];
+              }
+            }
+            
+          })
+          .catch(error => handleAxiosError(error, this));
+
+      })
+      .catch(error => handleAxiosError(error, this))
+      .finally(() => {
+        this.loading = false
+      });
+  },
+  methods: {
+      handlePageChange(value) {
+        this.currentPage = value;
+        axios
+      .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}&without=${this.$route.params.id}&with_disabled=false` , authHeader())
+      .then(response => (this.allProductsData = response.data.data,
+                         this.allProductsDataLength = response.data.pagination.total))
+      .catch(error => handleAxiosError(error, this));
+      },
+      handlePerPageChange(value) {
+        this.perPage = value;
+        this.currentPage = 1;
+       axios
+      .get(`${this.backendURL}/api/v1/products?per_page=${this.perPage}&page=${this.currentPage}&without=${this.$route.params.id}&with_disabled=false` , authHeader())
+      .then(response => (this.allProductsData = response.data.data,
+                         this.allProductsDataLength = response.data.pagination.total))
+      .catch(error => handleAxiosError(error, this));
+      },
+      updateProduct(){
+        if (this.$refs.myVueDropzone.getAcceptedFiles().length < 1){ // if there are files added to the dropzone for uploading, then do not hide the modal
+          this.backPage();
+        }
+        if (!roleService.hasEditPermission(this.pageIdentity)){
           this.$toast.error("You do no have the permission to perform this action!", {
             position: "top-right",
             timeout: 5000,
@@ -99,14 +392,144 @@ export default {
             rtl: false
           })
           return;
-       }
-       // Using hardcoded country code for now as there is no option in front-end for selecting country from a list now, Need to add that and remove the following loops
+        }
+        this.productData.meta_keywords = this.productData.meta_keywords_str.split(" ");
+        if (this.productData.meta_keywords[0] == ""){
+          this.productData.meta_keywords = [];
+        } 
+        var productReq = {
+           name: this.productData.name,
+           price: parseFloat(this.productData.price),
+           cost_price: parseFloat(this.productData.cost_price),
+           sale_price: parseFloat(this.productData.sale_price),
+           weight: parseFloat(this.productData.weight),
+           short_description: this.productData.short_description,
+           long_description: this.productData.long_description,
+           meta_title: this.productData.meta_title,
+           meta_description: this.productData.meta_description,
+           meta_keywords: this.productData.meta_keywords,
+           layout_id: this.productData.layout.id,
+           ean: this.productData.ean,
+           sku: this.productData.sku,
+           visibility: this.productData.visibility,
+           url_key: this.productData.url_key,
+           quantity: parseInt(this.productData.quantity),
+           enabled: this.productData.enabled,
+           is_downloadable: this.productData.is_downloadable,
+           default_image_url: this.productData.default_image_url,
+           delete_image_urls: this.productData.delete_image_urls,
+           category_ids: [],
+           bundle_ids: this.productData.bundle_ids,
+           attributes: [],
+           specifications: [],
+           variations: [],
+        }
+
+        for(var i = 0; i < this.selectedCategories.length; i++){ 
+           productReq.category_ids.push(this.selectedCategories[i].id);
+        }
+
+        if(this.currentAttrGroup.attributes){
+          for(var j = 0; j < this.currentAttrGroup.attributes.length; j++){
+            var attr = this.currentAttrGroup.attributes[j];
+            if (attr.option_id == ""){
+              continue;
+            }
+            productReq.attributes.push({
+              id: attr.id,
+              option_id: attr.option_id,
+              value: attr.value,
+            })
+          }
+        }
+
+        this.variationsData.forEach((v) => {
+          var spec = {
+            id: v.uuid,
+            name: v.name,
+            values: [],
+          }
+          v.options.forEach((o) => {
+            spec.values.push(o.name);
+          })
+          productReq.specifications.push(spec);
+        })
+
+        this.variations.forEach((v) => {
+          var varReq = {
+            id: v.uuid,
+            labels: v.labels,
+            quantity: parseInt(v.subitem.qty),
+            price: parseFloat(v.subitem.price),
+            cost_price: parseFloat(v.subitem.costprice),
+            sale_price: parseFloat(v.subitem.saleprice),
+            sku: v.subitem.sku,
+            ean: v.subitem.ean,
+            custom_specs: [],
+          }
+          if (v.image_name){
+            varReq.image_name = v.image_name;
+            varReq.image_content = v.image_content;
+          }
+          if (v.subitem.specs.length > 0) { 
+            v.subitem.specs.forEach((s) => {
+              varReq.custom_specs.push({
+                attribute_id: s.id,
+                value: s.custom_value,
+              });
+            });
+          }
+          productReq.variations.push(varReq);
+        })
+
         axios
-        .put(`${this.backendURL}/api/v1/customers/${this.$route.params.id}` , this.customer , authHeader())
-        .then(response => (
-          this.$router.push('/customers'),
-          this.data = response.data,
-          this.$toast.success("Customers Updated Successfully!", {
+        .put(`${this.backendURL}/api/v1/products/${this.$route.params.id}` , productReq , authHeader())
+        .then(response => {
+          this.data = response.data;
+          this.$toast.success("Product Updated Successfully!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
+          this.$refs.myVueDropzone.processQueue();
+        })
+        .catch(error => handleAxiosError(error, this));
+      },
+
+      deleteProduct(){
+        if (!roleService.hasDeletePermission(this.pageIdentity)){
+          this.$toast.error("You do no have the permission to perform this action!", {
+            position: "top-right",
+            timeout: 5000,
+            closeOnClick: true,
+            pauseOnFocusLoss: true,
+            pauseOnHover: true,
+            draggable: true,
+            draggablePercent: 0.6,
+            showCloseButtonOnHover: false,
+            hideProgressBar: true,
+            closeButton: "button",
+            icon: true,
+            rtl: false
+          })
+          return;
+        }
+        axios
+        .delete(`${this.backendURL}/api/v1/products/${this.productData.id}` , authHeader())
+        .then(
+          response => (
+            this.$router.push('/catalog/products'),
+            this.data = response.data,
+            this.$toast.success("Product Deleted Successfully!", {
             position: "top-right",
             timeout: 5000,
             closeOnClick: true,
@@ -122,7 +545,187 @@ export default {
           })))
         .catch(error => handleAxiosError(error, this));
       },
-  }
+
+      confirmSetDefaultImage() {
+        this.productData.default_image_url = this.currentSeletedImage;
+        this.$bvModal.hide("modal-default-image-page");
+      },
+
+      cancelSetDefaultIamge() {
+        this.$bvModal.hide("modal-default-image-page");
+      },
+
+      handleImageUpload(){
+        this.$refs.myVueDropzone.setOption("url" , `${this.backendURL}/api/v1/products/${this.productData.id}/upload`);
+      },
+
+      isBundleID(id){
+         return this.productData.bundle_ids.indexOf(id) > -1;
+      },
+      addBundle(id){
+        if (this.isBundleID(id)){
+          this.productData.bundle_ids.splice(this.productData.bundle_ids.indexOf(id) , 1);
+          return;
+        }
+        this.productData.bundle_ids.push(id);
+      },
+      addTag (searchQuery, id, varName) {
+          let optionValue = {
+            name: searchQuery,
+            varspec: searchQuery + "_" + varName,
+          }
+          this.variationsData[id].options.push(optionValue)
+           this.variationsData[id].labels[optionValue] = this.variationsData[id].name;
+          this.id = []
+          this.tempArr = []
+          this.variations = []
+          this.variationsData.forEach( i => {
+            i.options.forEach( i => this.id.push(i.varspec) )
+            this.tempArr.push(this.id)
+            this.id = []
+          })
+          this.tempArr2 = this.cartesianProduct(this.tempArr)
+          this.tempArr2.forEach( opts => {
+          let tag = {
+          id: 1,
+          uuid: '',
+          name: this.variationsData[id].name,
+          options: [],
+          labels: [],
+          subitem:  { 
+              id: 1,
+              uuid: '',
+              price: 0.0,
+              qty: 0,
+              sku: '',
+              costprice: 0.0,
+              saleprice: 0.0,
+              ean: '',
+              specs: [] 
+            },
+            custom_specs: copyArrayOfObjects(this.custom_specs),
+          }   
+          var options = [];
+          opts.forEach(opt =>{
+            var obj = {};
+            var data = opt.split("_");
+            options.push(data[0]);
+            obj[data[1]] = data[0];
+            tag.labels.push(obj);
+          })
+          tag.options = options;      
+          this.variations.push(tag);
+        })
+      },
+      /**
+        * Search the table data with search input
+        */
+      onFiltered(filteredItems) {
+          // Trigger pagination to update the number of buttons/pages due to filtering
+          this.totalRows = filteredItems.length;
+          this.currentPage = 1;
+      },
+      addVariation(){
+        let variation = {
+          uuid: '',
+          name: '',
+          options: [],
+          labels: {},
+          required: false
+        }
+        this.variationsData.push(variation)
+      },
+      addVariationSpec(variation , spec, selected){
+        if (selected){
+          variation.subitem.specs.push(spec);
+        }else{
+          variation.subitem.specs = variation.subitem.specs.filter(item => item.id !== spec.id); // removing spec from variation if unchecked is toggled
+        }
+      },
+      isCustomSpecSelected(spec , varSpecs){
+        for(var i = 0; i < varSpecs.length; i++){
+          if (varSpecs[i].id == spec.id){
+            spec.custom_value = varSpecs[i].custom_value;
+            return true;
+          }
+        }
+        return false;
+      },
+      updateSubSpecValue(val , specID , variation){
+        for(var i = 0; i < variation.subitem.specs.length; i++){
+          var cs = variation.subitem.specs[i];
+          if (cs.id == specID){
+            cs.custom_value = val;
+          }
+        }
+      },
+      handleVariationImageUpload(file , variation){
+        this.getBase64(file).
+        then(data => {
+          variation.image_name = file.name;
+          variation.image_content = data;
+        });
+      },
+      getBase64(file) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.readAsDataURL(file);
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = error => reject(error);
+        })
+      },
+      cartesianProduct(arr) {
+          return arr.reduce(function(a,b){
+              return a.map(function(x){
+                  return b.map(function(y){
+                      return x.concat([y]);
+                  })
+              }).reduce(function(a,b){ return a.concat(b) },[])
+          }, [[]])
+      },
+      deleteVariation(index){
+        this.variationsData.splice(index, 1);
+      },
+      deleteOption(option, id){
+        if (id == 0){
+            this.variations = this.variations.filter( i => {
+            return i.options[0] !== option.name
+            })
+            if(!this.variations.length){
+              this.variationsData = []
+            }
+        } 
+        else if(id == 1){
+          if(this.variationsData[1].options.length == 1){
+            this.variations.forEach( variation => {
+             variation.options = variation.options.filter( i => {
+                return i !== option.name
+              })
+            })                 
+          } else {
+            this.variations = this.variations.filter( i => {
+            return i.options[1] !== option.name
+            })               
+          }}
+       else if (id == 2){
+          if(this.variationsData[2].options.length == 1){
+            this.variations.forEach( variation => {
+             variation.options = variation.options.filter( i => {
+                return i !== option.name
+              })
+            })                 
+          } else {
+            this.variations = this.variations.filter( i => {
+            return i.options[2] !== option.name
+            })                 
+          }
+        }
+      },
+      backPage(){
+        this.$router.push('/catalog/products')
+      }
+      
+  },
 };
 </script>
 
@@ -134,292 +737,472 @@ export default {
       </div>
     </div>
     <PageHeader :title="title" :items="items" />
-
     <div class="row">
-      <div class="col-12">
-        <div class="card"> <!--Why is customerData expected to be an iterable when we are dealing with just one customer to edit -->
+      <div class="col-9">
+        <div class="card">
           <div class="card-body">
-            <div class="row mb-2">
-              <div class="col-sm-12">
-                <div class="text-sm-right">
-                  <button type="button" class="btn btn btn-rounded mr-2">
-                    <i class="mdi mdi-trash mr-1"></i> Delete Customer
-                  </button>
-                  <button type="button" class="btn btn btn-rounded mr-2">
-                    <i class="mdi mdi-trash mr-1"></i> Create Order
-                  </button>
-                  <button type="button" class="btn btn btn-rounded mr-2">
-                    <i class="mdi mdi-trash mr-1"></i> Login As Customer
-                  </button>
-                  <b-button v-b-modal variant="primary" @click="updateCustomer()">
-                    <i class="mdi mdi-plus mr-1"></i> Save Customer
+          <h4 class="card-title mt-3">General</h4>
+            <div class="row">
+              <div class="col-9">
+                <label class="mt-3">Product Name <span class="red"> *</span></label>
+                <b-form-input for="text" v-model="productData.name"></b-form-input>
+              </div>
+              <div class="col-3">
+              <label class="mt-3">Product Type</label>
+                <select class="custom-select">
+                  <option value="0">Simple Product</option>
+                  <option value="1">Downloadable Product</option>
+                  <option value="2">Groupped Product</option>
+                  <option value="3">Bundled Product</option>
+                </select>
+              </div>
+              <div class="col-3">
+                <label class="mt-3">Product Price <span class="red"> *</span></label>
+                <b-form-input for="text" type="number" v-model="productData.price"></b-form-input>
+              </div>
+              <div class="col-3">
+                <label class="mt-3">Product Cost Price <span class="red"> *</span></label>
+                <b-form-input for="text" type="number" v-model="productData.cost_price"></b-form-input>
+              </div>
+              <div class="col-3">
+                <label class="mt-3">Product Sale Price <span class="red"> *</span></label>
+                <b-form-input for="text" type="number" v-model="productData.sale_price"></b-form-input>
+              </div>
+              <div class="col-3">
+                <label class="mt-3">Product Weight <span class="red"> *</span></label>
+                <b-form-input for="text" type="number" v-model="productData.weight"></b-form-input>
+              </div>
+              <div class="col-4">
+                <label class="mt-3">Qty <span class="red"> *</span></label>
+                <b-form-input for="text" type="number" v-model="productData.quantity"></b-form-input>
+              </div>
+              <div class="col-4">
+                <label class="mt-3">SKU <span class="red"> *</span></label>
+                <b-form-input for="text" v-model="productData.sku"></b-form-input>
+              </div>
+              <div class="col-4">
+                <label class="mt-3">EAN <span class="red"> *</span></label>
+                <b-form-input for="text" v-model="productData.ean"></b-form-input>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-body">
+          <h4 class="card-title mt-3">Short Description <span class="red"> *</span></h4>
+          <div class="row">
+            <div class="col-12">
+              <ckeditor :editor="editor" v-model="productData.short_description"></ckeditor>
+            </div>
+          </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-body">
+            <h4 class="card-title mt-3">Full Product Description <span class="red"> *</span></h4>
+            <div class="row">
+              <div class="col-12">
+                <ckeditor :editor="editor" v-model="productData.long_description"></ckeditor>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-body">
+            <h4 class="card-title mt-3">Images</h4>
+            <div class="row">
+              <div class="col-3 mt-2">
+                <vue-dropzone
+                  id="dropzone"
+                  ref="myVueDropzone"
+                  :use-custom-slot="true"
+                  :options="dropzoneOptions"
+                  @vdropzone-file-added="handleImageUpload"
+                  @vdropzone-complete="backPage"
+                >
+                  <div class="dropzone-custom-content">
+                    <i class="display-4 text-muted bx bxs-cloud-upload"></i>
+                    <h4>Drop files here or click to upload.</h4>
+                  </div>
+                </vue-dropzone>
+                </div>
+                <div class="col-9">
+                  <div class="row">
+                    <div class="imagesUploaded mb-2 col-12">
+                      <div class="imageFile highlight-border" v-for="(image , index) of productData.images" :key="index">
+                          <img :src="image" class="product-img" />
+                          <span class="actions-right cursor-ponter">
+                            <b-button id="tooltip-set-default-1" variant="primary" class="mr-2" @click="currentSeletedImage = image" v-b-modal.modal-default-image-page><i class="bx bx-image-alt"></i></b-button>
+                            <b-tooltip target="tooltip-set-default-1">Set Image As Default</b-tooltip>
+                            <b-button class="mr-1 w-s" variant="danger" @click="productData.delete_image_urls.push(image)"><i class="mdi mdi-trash-can d-block"></i></b-button>
+                          </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-body">
+            <h4 class="card-title mt-3">Attributes</h4>
+            <div class="row">
+              <div class="col-12">
+                <div class="table-responsive">
+                  <table class="table mb-0">
+                    <thead>
+                      <tr>
+                        <th>Attribute</th>
+                        <th>Value</th>
+                        <th></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                       <tr v-for="attr in currentAttrGroup.attributes" :key="attr.id">
+                        <td>
+                          {{attr.name}}
+                        </td>
+                        <td>
+                          <select class="custom-select" v-if="attr.type.slug =='dropdown'" v-model="attr.option_id">
+                             <option v-for="opt in attr.options" v-bind:value="opt.id" :key="opt.id">{{opt.name}}</option>
+                          </select>
+                          <b-form-input v-else for="text" v-model="attr.value"></b-form-input>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+        <div class="card">
+          <div class="card-body">
+            <h4 class="card-title mt-3">Product Variations</h4>
+            <div class="variationHeadings" v-if="variationsData.length">
+              <div class="row">
+                <div class="col-3">
+                  <label>Variation Name</label>
+                </div>
+                <div class="col-9">
+                  <label>Option Value</label>
+                </div>
+              </div>
+            </div>
+            <div class="variation" v-for="(item, index) of variationsData" :key="index + 34">
+              <div class="row">
+                <div class="col-3">
+                  <b-form-input value="" size="md" v-model="item.name"></b-form-input>
+                </div>
+                <div class="col-9 mb-1">
+                  <multiselect 
+                    track-by="name" 
+                    :multiple="true" 
+                    :taggable="true" 
+                    :id="index"
+                    @tag="(sq , id) => addTag(sq , id , item.name)"
+                    @remove="deleteOption"
+                    v-model="item.options" 
+                    label="name"  
+                    :options="item.options" 
+                  >
+                  <template  slot="item.variationOptions">
+                   {{item.name}}
+                  </template>
+                  </multiselect>
+                </div>
+              </div>
+            </div>
+            <div class="variationToolbar">
+              <div class="row">
+                <div class="col-12" >
+                  <b-button @click="addVariation()" v-if="variationsData.length < 3" variant="primary mb-2 ">
+                      <i class="bx bx-plus-circle font-size-16 align-middle mr-2"></i>
+                      Add Variation
                   </b-button>
                 </div>
               </div>
-              <!-- end col-->
             </div>
-            <div class="row card-body">
-              <div class="col-sm-12">
-                <h4>General Information</h4>
-                <div class="row">
-                  <div class="col-sm-3">
-                    <label class="mt-3">First Name <span class="red"> *</span></label>
-                    <b-form-input for="text" v-model="customer.first_name"></b-form-input>
+            <div class="variationGenerated">
+              <div class="category-tabs" role="tablist">
+                  <div v-for="(variation, index) in variations" :key="index + 65">
+                    <b-card no-body class="mb-1 shadow-none">
+                      <b-card-header header-tag="header" role="tab">
+                          <a v-b-toggle="'accordion-' + index" class="text-dark row" href="javascript: void(0);">
+                            <div class="col-4">
+                              <i class="bx bx-caret-down mr-3"></i>
+                              <!-- <span>{{variation.name}}</span> -->
+                              <span v-for="(i, index) in variation.options" :key="index + 20"> {{i}} /</span>
+                            </div>
+                            <div class="col-8 row">
+                              <div class="col-4">
+                                <label class="mt-3">Price</label>
+                                <b-form-input for="text" type="number" v-model="variation.subitem.price"></b-form-input>
+                              </div>
+                              <div class="col-4">
+                                <label class="mt-3">Qty</label>
+                                <b-form-input for="text" type="number" v-model="variation.subitem.qty"></b-form-input>
+                              </div>
+                              <div class="col-4">
+                                <label class="mt-3">SKU</label>
+                                <b-form-input for="text" v-model="variation.subitem.sku"></b-form-input>
+                              </div>
+                            </div>
+                          </a>
+                      </b-card-header>
+                      <b-collapse :id="'accordion-' + index" accordion="" role="tabpanel">
+                          <div>
+                            <div class="subcategory card-header">
+                              <div class="row">
+                                <div class="col-3">
+                                  <label class="mt-3">Cost Price</label>
+                                  <b-form-input for="text" v-model="variation.subitem.costprice"></b-form-input>
+                                </div>
+                                <div class="col-3">
+                                  <label class="mt-3">Sale Price</label>
+                                  <b-form-input for="text" v-model="variation.subitem.saleprice"></b-form-input>
+                                </div>
+                                <div class="col-3">
+                                  <label class="mt-3">EAN</label>
+                                  <b-form-input for="text" v-model="variation.subitem.ean"></b-form-input>
+                                </div>
+                                <div class="col-3">
+                                  <label class="mt-3">Custom Image</label>
+                                  <vue-dropzone
+                                    id="vardropzone"
+                                    ref="myVariationVueDropzone"
+                                    :use-custom-slot="true"
+                                    :options="variationDropzoneOptions"
+                                    @vdropzone-file-added="(file) => handleVariationImageUpload(file,variation)"
+                                    url="/"
+                                    autoDiscover="false"
+                                    >
+                                    <div class="dropzone-custom-content customImage">
+                                      <i class="display-14 text-muted bx bxs-cloud-upload"></i>
+                                      <h6>Drop files here or click to upload.</h6>
+                                    </div>
+                                  </vue-dropzone>
+                                </div>
+                                <div class="col-12">
+                                  <label class="mt-3">Custom Specs</label>
+                                  <div class="table-responsive">
+                                    <table class="table table-striped mb-0">
+                                      <thead>
+                                        <tr>
+                                          <th>Select</th>
+                                          <th>Attribute</th>
+                                          <th>Value</th>
+                                        </tr>
+                                      </thead>
+                                      <tbody>
+                                        <tr v-for="spec in variation.custom_specs" :key="spec.id">
+                                          <td><b-form-checkbox switch size="lg" :checked="isCustomSpecSelected(spec , variation.subitem.specs)" v-on:change="(selected) => addVariationSpec(variation , spec , selected)"></b-form-checkbox></td>
+                                          <td>{{spec.name}}</td>
+                                          <td><b-form-input for="text" v-on:change="(v)=>updateSubSpecValue(v , spec.id , variation)" v-model="spec.custom_value"></b-form-input></td>
+                                        </tr>
+                                      </tbody>
+                                    </table>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                      </b-collapse>
+                    </b-card>
                   </div>
-                  <div class="col-sm-3">
-                    <label class="mt-3">Last Name <span class="red"> *</span></label>
-                    <b-form-input for="text" v-model="customer.last_name"></b-form-input>
-                  </div>
-                  <div class="col-sm-3">
-                    <label class="mt-3">Email <span class="red"> *</span></label>
-                    <b-form-input for="text" v-model="customer.email"></b-form-input>
-                  </div>
-                  <div class="col-sm-3">
-                    <label class="mt-3">Customer Group</label>
-                    <select class="custom-select" v-model="customer.group.id">
-                      <option v-for="group in customerGroups" v-bind:value="group.id" :key="group.id" :selected="group.id == customer.group.id">{{group.name}}</option>
-                    </select>
-                  </div>
-                  <div class="col-sm-3">
-                    <label class="mt-3">New Password <span class="red"> *</span></label>
-                    <b-form-input for="text"></b-form-input>
-                  </div>
-                  <div class="col-sm-3">
-                    <label class="mt-3">Confirm Password <span class="red"> *</span></label>
-                    <b-form-input for="text"></b-form-input>
-                  </div>
-                  <div class="col-sm-2">
-                    <label class="mt-3">Newsletter Subscriber</label>
-                    <b-form-checkbox switch size="lg" v-model="customer.newsletter_subscriber"></b-form-checkbox>
-                  </div>
+                </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-body">
+            <h4 class="card-title mt-3">Product Bundles</h4>
+            <div class="row mt-4">
+                        <div class="col-sm-12 col-md-6">
+                            <div id="tickets-table_length" class="dataTables_length">
+                                <label class="d-inline-flex align-items-center">
+                                    Show&nbsp;
+                                    <b-form-select 
+                                      v-model="perPage" 
+                                      size="sm" 
+                                      :options="pageOptions"
+                                      @change = "handlePerPageChange"
+                                    >
+                                    </b-form-select>&nbsp;entries
+                                </label>
+                            </div>
+                        </div>
+                        <!-- Search -->
+                        <div class="col-sm-12 col-md-6">
+                            <div id="tickets-table_filter" class="dataTables_filter text-md-right">
+                                <label class="d-inline-flex align-items-center">
+                                    Search:
+                                    <b-form-input v-model="filter" type="search" placeholder="Search..." class="form-control form-control-sm ml-2"></b-form-input>
+                                </label>
+                            </div>
+                        </div>
+                        <!-- End search -->
+                    </div>
+                    <!-- Table -->
+                    <div class="table-responsive mb-0">
+                        <b-table :items="allProductsData" selectable :fields="fields" responsive="sm" :per-page="perPage" :current-page="1" :sort-by.sync="sortBy" :sort-desc.sync="sortDesc" :filter="filter" :filter-included-fields="filterOn" @filtered="onFiltered">
+                      <template #cell(selected)="data">
+                        <b-form-checkbox switch size="lg"   v-on:change="addBundle(data.item.id)" :checked="isBundleID(data.item.id)"></b-form-checkbox>
+                      </template>
+                       <template #cell(status)="data">
+                        <span v-if="data.item.enabled" class="badge badge-success font-size-12">
+                          <span>Enabled</span>
+                        </span>
+                        <span v-else class="badge badge-danger font-size-12">
+                          <span>Disabled</span>
+                        </span>
+                      </template>
+                        </b-table>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <div class="dataTables_paginate paging_simple_numbers float-right">
+                                <ul class="pagination pagination-rounded mb-0">
+                                    <!-- pagination -->
+                                    <b-pagination 
+                                      v-model="currentPage" 
+                                      :per-page="perPage"
+                                      :total-rows="rows" 
+                                      @change = "handlePageChange"
+                                    >
+                                    </b-pagination>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-body">
+            <h4 class="card-title mt-3">Search Engine Optimisation</h4>
+            <div class="row">
+              <div class="col-md-6">
+                <label class="mb-1 mt-3 font-weight-medium">Meta Title</label>
+                <b-form-input for="text" v-model="productData.meta_title"></b-form-input>
+              </div>
+              <div class="col-md-6">
+                 <label class="mb-1 mt-3 font-weight-medium">Meta Keywords</label>
+                <b-form-input for="text" v-model="productData.meta_keywords_str"></b-form-input>
+              </div>
+              <div class="col-md-12">
+                 <label class="mb-1 mt-3 font-weight-medium">Meta Description</label>
+                <textarea
+                v-model="productData.meta_description"
+                class="form-control"
+                :maxlength="225"
+                rows="3"
+                placeholder="This textarea has a limit of 225 chars."
+              ></textarea>
+              <div class="text-center">
+                <p
+                  v-if="textarea.meta_description"
+                  class="badge position-absolute"
+                  :class="{ 'badge-success': textarea.length !== 225,
+                            'badge-danger': textarea.length === 225 }"
+                >
+                  {{ textarea.length }} /
+                  225
+                </p>
                 </div>
               </div>
             </div>
-            <div class="row card-body">
-              <div class="col-sm-12">
-                <h4>Addresses <span class="red"> *</span></h4>
-                <div class="row">
-                  <div class="col-sm-6">
-                    <h5>Billing Address - <b-button v-b-modal.modal-scrollable-billing variant="primary">Edit</b-button></h5>
-                    <div class="row">
-                      <div class="col-sm-6">
-                        <div class="grey-box" v-for="item in customer.billing_addresses" :key="item.id">
-                          <p>
-                            {{item.name}}<br>
-                            {{item.street}}<br>
-                            {{item.city}}<br>
-                            {{item.postcode}}<br>
-                            {{item.country}}<br>
-                          </p>
-                        </div>
+          </div>
+        </div>
+
+      </div>
+      <div class="col-3">
+        <div class="card">
+          <div class="card-body">
+            <div class="row">
+                <div class="col-12">
+                  <form class="form-horizontal pagesSidebar" role="form">
+                    <div class="form-group row">
+                      <label class="col-md-6 col-form-label">Enabled</label>
+                      <div class="col-md-6 align-right">
+                        <b-form-checkbox switch size="lg" v-model="productData.enabled" class="text-right"></b-form-checkbox>
                       </div>
                     </div>
-                  </div>
-                  <div class="col-sm-6">
-                    <h5>Shipping Address - <b-button v-b-modal.modal-scrollable-shipping variant="primary">Edit</b-button></h5>
-                    <div class="row">
-                      <div class="col-sm-6">
-                        <div class="grey-box" v-for="item in customer.shipping_addresses" :key="item.id">
-                          <p>
-                            {{item.name}}<br>
-                            {{item.street}}<br>
-                            {{item.city}}<br>
-                            {{item.postcode}}<br>
-                            {{item.country}}<br>
-                          </p>
-                        </div>
+                    <div class="form-group row">
+                      <label class="col-md-6 col-form-label">Visibility <span class="red"> *</span></label>
+                      <div class="col-md-6 align-right pl-0">
+                        <select class="custom-select" v-model="productData.visibility">
+                          <option selected value="public">Public</option>
+                          <option value="private">Private</option>
+                        </select>
                       </div>
                     </div>
-                  </div>
+                    <div class="form-group row">
+                      <label class="col-md-6 col-form-label">Layout <span class="red"> *</span></label>
+                      <div class="col-md-6 align-right pl-0">
+                        <select class="custom-select" v-model="productData.layout.id">
+                         <option v-for="layout in layouts" v-bind:value="layout.id" :key="layout.id">{{layout.name}}</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="form-group row">
+                      <label class="col-md-6 col-form-label">URL</label>
+                      <div class="col-md-6 align-right pl-0">
+                        <b-form-input for="text" v-model="productData.url_key"></b-form-input>
+                      </div>
+                    </div>
+                    <div class="form-group row">
+                      <label class="col-md-6 col-form-label">Categories</label>
+                      <multiselect class="mr-3 ml-2"  v-model="selectedCategories" label="name" track-by="id" :options="categories"  :multiple="true"></multiselect>
+                    </div>
+                    <div class="row">
+                      <div class="col-md-4">
+                        <b-button class="btn-block" variant="danger" v-b-modal.modal-delete-page><i class="mdi mdi-trash-can d-block"></i></b-button>
+                       </div>
+                       <div class="col-md-8 mb-2 text-right pl-0">
+                          <b-button variant="light" class="btn-block">
+                              Preview
+                          </b-button>
+                        </div>
+                        <div class="col-md-12">
+                         <b-button variant="primary" class="btn-block" :disabled="isdisable"  @click="updateProduct()">
+                              <i class="bx bx-check-double font-size-16 align-middle mr-2"></i>
+                              Publish
+                          </b-button>
+                        </div>
+                    </div>
+                  </form>
                 </div>
-              </div>
-            </div>
-            <div class="row card-body">
-              <div class="col-sm-12">
-                <h4>Previous Orders</h4>
-                <table class="table mb-0">
-                  <thead>
-                    <tr>
-                      <th>Order ID</th>
-                      <th>Purchase Date</th>
-                      <th>No Of Products</th>
-                      <th>Total</th>
-                      <th></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr v-for="order in customer.orders" :key="order.id">
-                      <td>{{order.id}}</td>
-                      <td>{{order.created_at}}</td>
-                      <td>{{order.product_no}}</td>
-                      <td>{{order.total_price }}</td>
-                      <td>
-                        <b-button variant="primary" >
-                            <i class="bx bx-check-double font-size-16 align-middle mr-2"></i>
-                            View
-                        </b-button>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
     <!-- end row -->
-
-    <!--Billing Method Popup-->
-    <b-modal id="modal-scrollable-billing" scrollable title="Edit Billing Addresses" title-class="font-18" hide-footer>
-      <b-tabs justified nav-class="nav-tabs-custom" content-class="p-3 text-muted">
-        <b-tab active>
-          <template v-slot:title>
-            <span class="d-inline-block d-sm-none">
-              <i class="fas fa-home"></i>
-            </span>
-            <span class="d-none d-sm-inline-block">Address 1</span>
-          </template>
-          <div class="row">
-            <div class="col-sm-6">
-              <label class="mt-3">First Name</label>
-              <b-form-input for="text" v-model="customer.billing_addresses[0].first_name"></b-form-input>
-              <label class="mt-3">Street Address</label>
-              <b-form-input for="text" v-model="customer.billing_addresses[0].street"></b-form-input>
-              <label class="mt-3">State</label>
-              <b-form-input for="text" v-model="customer.billing_addresses[0].state"></b-form-input>
-              <label class="mt-3">Country</label>
-              <b-form-input for="text" v-model="customer.billing_addresses[0].country"></b-form-input>
-            </div>
-            <div class="col-sm-6">
-              <label class="mt-3">Last Name</label>
-              <b-form-input for="text" v-model="customer.billing_addresses[0].last_name"></b-form-input>
-              <label class="mt-3">City</label>
-              <b-form-input for="text" v-model="customer.billing_addresses[0].city"></b-form-input>
-              <label class="mt-3">Zip / Postcode</label>
-              <b-form-input for="text" v-model="customer.billing_addresses[0].postcode"></b-form-input>
-              <label class="mt-3">Default Billing Addreess</label>
-              <b-form-checkbox switch size="lg" v-model="customer.billing_addresses[0].default_billing_address"></b-form-checkbox>
-            </div>
-          </div>
-        </b-tab>
-        <b-tab>
-          <template v-slot:title>
-            <span class="d-inline-block d-sm-none">
-              <i class="fas fa-home"></i>
-            </span>
-            <span class="d-none d-sm-inline-block">Address 2</span>
-          </template>
-          <div class="row">
-            <div class="col-sm-6">
-              <label class="mt-3">First Name</label>
-              <b-form-input for="text" v-model="customer.billing_addresses[1].first_name"></b-form-input>
-              <label class="mt-3">Street Address</label>
-              <b-form-input for="text" v-model="customer.billing_addresses[1].street"></b-form-input>
-              <label class="mt-3">State</label>
-              <b-form-input for="text" v-model="customer.billing_addresses[1].state"></b-form-input>
-              <label class="mt-3">Country</label>
-              <b-form-input for="text" v-model="customer.billing_addresses[1].country"></b-form-input>
-            </div>
-            <div class="col-sm-6">
-              <label class="mt-3">Last Name</label>
-              <b-form-input for="text" v-model="customer.billing_addresses[1].last_name"></b-form-input>
-              <label class="mt-3">City</label>
-              <b-form-input for="text" v-model="customer.billing_addresses[1].city"></b-form-input>
-              <label class="mt-3">Zip / Postcode</label>
-              <b-form-input for="text" v-model="customer.billing_addresses[1].postcode"></b-form-input>
-              <label class="mt-3">Default Billing Addreess</label>
-              <b-form-checkbox switch size="lg" v-model="customer.billing_addresses[1].default_billing_address"></b-form-checkbox>
-            </div>
-          </div>
-        </b-tab>
-      </b-tabs>
-      <br>
-      <div class="text-sm-right">
-        <b-button variant="primary">
-            <i class="bx bx-check-double font-size-16 align-middle mr-2"></i>
-            Save
-        </b-button>
+    <b-modal id="modal-delete-page" centered title="Delete Product" title-class="font-18" hide-footer>
+      <p>Are you sure? Pressing Delete will remove this product permenantly.</p>
+      <div class="text-right">
+        <b-button variant="danger" @click="deleteProduct()">Delete</b-button>
       </div>
     </b-modal>
-
-    <!--Shippinig Method Popup-->
-    <b-modal id="modal-scrollable-shipping" scrollable title="Edit Shipping Addresses" title-class="font-18" hide-footer>
-      <b-tabs justified nav-class="nav-tabs-custom" content-class="p-3 text-muted">
-        <b-tab active>
-          <template v-slot:title>
-            <span class="d-inline-block d-sm-none">
-              <i class="fas fa-home"></i>
-            </span>
-            <span class="d-none d-sm-inline-block">Address 1</span>
-          </template>
-          <div class="row">
-            <div class="col-sm-6">
-              <label class="mt-3">First Name</label>
-              <b-form-input for="text" v-model="customer.shipping_addresses[0].first_name"></b-form-input>
-              <label class="mt-3">Street Address</label>
-              <b-form-input for="text" v-model="customer.shipping_addresses[0].street"></b-form-input>
-              <label class="mt-3">State</label>
-              <b-form-input for="text" v-model="customer.shipping_addresses[0].state"></b-form-input>
-              <label class="mt-3">Country</label>
-              <b-form-input for="text" v-model="customer.shipping_addresses[0].country"></b-form-input>
-            </div>
-            <div class="col-sm-6">
-              <label class="mt-3">Last Name</label>
-              <b-form-input for="text" v-model="customer.shipping_addresses[0].last_name"></b-form-input>
-              <label class="mt-3">City</label>
-              <b-form-input for="text" v-model="customer.shipping_addresses[0].city"></b-form-input>
-              <label class="mt-3">Zip / Postcode</label>
-              <b-form-input for="text" v-model="customer.shipping_addresses[0].postcode"></b-form-input>
-              <label class="mt-3">Default Shipping Addreess</label>
-              <b-form-checkbox switch size="lg" v-model="customer.shipping_addresses[0].default_shipping_address"></b-form-checkbox>
-            </div>
-          </div>
-        </b-tab>
-        <b-tab>
-          <template v-slot:title>
-            <span class="d-inline-block d-sm-none">
-              <i class="fas fa-home"></i>
-            </span>
-            <span class="d-none d-sm-inline-block">Address 2</span>
-          </template>
-          <div class="row">
-            <div class="col-sm-6">
-              <label class="mt-3">First Name</label>
-              <b-form-input for="text" v-model="customer.shipping_addresses[1].first_name"></b-form-input>
-              <label class="mt-3">Street Address</label>
-              <b-form-input for="text" v-model="customer.shipping_addresses[1].street"></b-form-input>
-              <label class="mt-3">State</label>
-              <b-form-input for="text" v-model="customer.shipping_addresses[1].state"></b-form-input>
-              <label class="mt-3">Country</label>
-              <b-form-input for="text" v-model="customer.shipping_addresses[1].country"></b-form-input>
-            </div>
-            <div class="col-sm-6">
-              <label class="mt-3">Last Name</label>
-              <b-form-input for="text" v-model="customer.shipping_addresses[1].last_name"></b-form-input>
-              <label class="mt-3">City</label>
-              <b-form-input for="text" v-model="customer.shipping_addresses[1].city"></b-form-input>
-              <label class="mt-3">Zip / Postcode</label>
-              <b-form-input for="text" v-model="customer.shipping_addresses[1].postcode"></b-form-input>
-              <label class="mt-3">Default Shipping Addreess</label>
-              <b-form-checkbox switch size="lg" v-model="customer.shipping_addresses[1].default_shipping_address"></b-form-checkbox>
-            </div>
-          </div>
-        </b-tab>
-      </b-tabs>
-      <br>
-      <div class="text-sm-right">
-        <b-button variant="primary">
-            <i class="bx bx-check-double font-size-16 align-middle mr-2"></i>
-            Save
-        </b-button>
+    <b-modal id="modal-default-image-page" centered title="Set Default Image" title-class="font-18" hide-footer>
+      <p>Are you sure? Set This Image As Default?</p>
+      <div class="text-right">
+        <b-button variant="danger" @click="confirmSetDefaultImage()">Yes</b-button>
+        <b-button variant="danger" @click="cancelSetDefaultIamge()">Cancel</b-button>
       </div>
     </b-modal>
-
+    
   </Layout>
 </template>
 <style scoped>
-.spinner {
+  .spinner {
     position: absolute;
     top: 0;
     left: 0;
@@ -428,9 +1211,10 @@ export default {
     width: 100%;
     z-index: 20000;
   }
+  
   .loader {
     position: absolute;
-    top: 30%;
+    top: 300px;
     left: 50%;
   }
 </style>
