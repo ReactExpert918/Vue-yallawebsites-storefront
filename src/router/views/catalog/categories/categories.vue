@@ -3,8 +3,8 @@
 import Layout from "../../../layouts/main";
 import appConfig from "@/app.config";
 import PageHeader from "@/components/page-header";
-import nestedDraggable from "./nested";
-// import draggable from 'vuedraggable'
+// import nestedDraggable from "./nested";
+import draggable from 'vuedraggable'
 import axios from "axios";
 import vue2Dropzone from "vue2-dropzone";
 import {handleAxiosError} from "@/helpers/authservice/user.service";
@@ -21,7 +21,7 @@ export default {
     title: "Categories",
     meta: [{ name: "description", content: appConfig.description }]
   },
-  components: { Layout, PageHeader , nestedDraggable, vueDropzone: vue2Dropzone, },
+  components: { Layout, PageHeader, draggable, vueDropzone: vue2Dropzone, },
   data() {
     return {
       pageIdentity: "categories",
@@ -299,8 +299,8 @@ export default {
           <div class="card-body">
             <div class="col-lg-12">
                 <div class="category-tabs" role="tablist"> 
-                  <nested-draggable :tasks="categoriesData" />
-                  <!-- <draggable
+                  <!-- <nested-draggable :tasks="categoriesData" /> -->
+                  <draggable
                     v-model="categoriesData"                @start="drag=true" 
                     @end="drag=false"
                     class="dragArea"
@@ -362,7 +362,7 @@ export default {
                         </b-collapse>
                       </b-card>
                     </div>
-                  </draggable> -->
+                  </draggable>
                 </div>
                 <b-button 
                   class="mt-2" variant="primary" 
