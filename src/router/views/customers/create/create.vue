@@ -27,6 +27,7 @@ export default {
       title: "Create Customer",
       backendURL: process.env.VUE_APP_BACKEND_URL,
       customerGroups: [],
+      billing: [],
       data: "",
       createCustomerPayload: {
         first_name: "",
@@ -36,8 +37,8 @@ export default {
         email: "",
         group_id: "",
         newsletter_subscriber: false,
-        billing_addresses: [{} , {}],
-        shipping_addresses: [{} , {}]
+        billing_addresses:[{} , {}],
+        shipping_addresses: [{} , {}],
       },
       items: [
         {
@@ -104,7 +105,8 @@ export default {
           })
           return;
       }
-
+      this.createCustomerPayload.billing_addresses = this.createCustomerPayload.billing_addresses.filter(value => Object.keys(value).length !== 0);
+      this.createCustomerPayload.shipping_addresses = this.createCustomerPayload.shipping_addresses.filter(value => Object.keys(value).length !== 0);
       // Using hardcoded country code for now as there is no option in front-end for selecting country from a list now, Need to add that and remove the following loops
       // for(var i = 0; i < this.createCustomerPayload.billing_addresses.length; i++){
       //   var bi = this.createCustomerPayload.billing_addresses[i];
@@ -209,6 +211,19 @@ export default {
                   <div class="col-sm-6">
                     <h5>Billing Address</h5>
                     <b-button v-b-modal.modal-scrollable-billing variant="primary">Add Address</b-button>
+                    <!-- <div class="row" v-if="billing.length">
+                      <div class="col-sm-6">
+                        <div class="grey-box" v-for="item in customer.billing_addresses" :key="item.id">
+                          <p>
+                            {{item.name}}<br>
+                            {{item.street}}<br>
+                            {{item.city}}<br>
+                            {{item.postcode}}<br>
+                            {{item.country}}<br>
+                          </p>
+                        </div>
+                      </div>
+                    </div> -->
                   </div>
                   <div class="col-sm-6">
                     <h5>Shipping Address</h5>
