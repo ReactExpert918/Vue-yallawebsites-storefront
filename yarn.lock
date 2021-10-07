@@ -9610,6 +9610,13 @@
   dependencies:
     "cropperjs" "^1.5.6"
 
+"vue-drag-tree@^1.1.9":
+  "integrity" "sha512-1hqhnW2byQT6NUHyDK7w45S4Q26pUR85sOzT/EOIU4ZA2Nh0Bv6x0JAJcM2a6mFNeMDAJNjq8rJTh/KijerAxg=="
+  "resolved" "https://registry.npmjs.org/vue-drag-tree/-/vue-drag-tree-1.1.9.tgz"
+  "version" "1.1.9"
+  dependencies:
+    "vue" "^2.6.10"
+
 "vue-easy-lightbox@^0.14.0":
   "integrity" "sha512-WUcqTcI3ndQen9KINh+qPb8sC4YdDliwoldwd6+TplhT1tBSqByAiLGQ3oEg/iwnz17HkX4K7x61BtoxgoKk2w=="
   "resolved" "https://registry.npmjs.org/vue-easy-lightbox/-/vue-easy-lightbox-0.14.0.tgz"

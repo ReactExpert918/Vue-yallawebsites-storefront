@@ -4,7 +4,7 @@ import Layout from "../../../layouts/main";
 import appConfig from "@/app.config";
 import PageHeader from "@/components/page-header";
 // import nestedDraggable from "./nested";
-import draggable from 'vuedraggable'
+// import draggable from 'vuedraggable'
 import axios from "axios";
 import vue2Dropzone from "vue2-dropzone";
 import {handleAxiosError} from "@/helpers/authservice/user.service";
@@ -21,11 +21,45 @@ export default {
     title: "Categories",
     meta: [{ name: "description", content: appConfig.description }]
   },
-  components: { Layout, PageHeader, draggable, vueDropzone: vue2Dropzone, },
+  components: { Layout, PageHeader, vueDropzone: vue2Dropzone, },
   data() {
     return {
       pageIdentity: "categories",
       data: "",
+      data1: [
+        {
+          name: "Node 0-0",
+          id: 0,
+          children: [
+            {
+              name: "Node 1-1",
+              id: 3,
+              children: [
+                {
+                  name: "Node 2-1",
+                  id: 4,
+                  children: []
+                },
+                {
+                  name: "Node 2-2",
+                  id: 10,
+                  children: []
+                }
+              ]
+            },
+            {
+              name: "Node 1-2",
+              id: 13,
+              children: []
+            }
+          ]
+        },
+        {
+          name: "Node 0-1",
+          id: 14,
+          children: []
+        }
+      ],
       loading: false,
       backendURL: process.env.VUE_APP_BACKEND_URL,
       categoriesData: [],
@@ -280,7 +314,12 @@ export default {
     },
     backPage() {
       this.$bvModal.hide("modal-add-category");
-    }
+    },allowDrag() {
+      return true;
+    },
+    allowDrop() {
+      return true;
+    },
   },
 };
 </script>
@@ -299,70 +338,9 @@ export default {
           <div class="card-body">
             <div class="col-lg-12">
                 <div class="category-tabs" role="tablist"> 
-                  <!-- <nested-draggable :tasks="categoriesData" /> -->
-                  <draggable
-                    v-model="categoriesData"                @start="drag=true" 
-                    @end="drag=false"
-                    class="dragArea"
-                    :group="{ name: 'g1' }"
-                  >
-                    <div 
-                      v-for="(category, index) in categoriesData" :key="index + 10"
-                    >
-                      <b-card static 
-                        no-body 
-                        class="mb-0 shadow-none"
-                      >
-                        <div header-tag="header" role="tab" class="category-tab">
-                          <h6 class="m-0">
-                            <span class="move">
-                              <i class="bx bx-move"></i>
-                            </span>
-                            <a
-                              v-b-toggle="'accordion-' + index"
-                              class="text-dark"
-                              href="javascript: void(0);"
-                            >
-                              <i class="bx bx-caret-down mr-3"></i>
-                              <span>{{category.name}}</span>
-                            </a>
-                            <span class="actions-right cursor-ponter btn-primary">
-                              <i @click="currentCategoryData(category)" class="bx bx-edit-alt"></i>
-                            </span>
-                          </h6>
-                        </div>
-                        <b-collapse 
-                          :id="'accordion-' + index"
-                          accordion="" role="tabpanel"
-                        >
-                          <draggable  
-                            v-model="category.subitems"                               
-                            @start="drag=true" 
-                            @end="drag=false"
-                            class="dragArea"
-                            :group="{ name: 'g1' }"
-                          >
-                            <div 
-                              v-for="(subCat, index) in category.sub_categories" 
-                              :key="index"
-                            >
-                              <div class="subcategory category-tab">
-                                <span class="move">
-                                  <i class="bx bx-move"></i>
-                                </span>
-                                {{ subCat.name }}
-                                <span class="actions-right cursor-ponter btn-primary">
-                                  <i 
-                                    @click="currentCategoryData(subCat)" 
-                                    class="bx bx-edit-alt"></i>
-                                </span>
-                              </div>
-                            </div>
-                          </draggable>
-                        </b-collapse>
-                      </b-card>
-                    </div>
-                  </draggable>
+                   <vue-drag-tree class="category" :data='data1' :allowDrag='allowDrag' :allowDrop='allowDrop' :defaultText='"New Node"' @current-clicked='curNodeClicked' @drag="dragHandler" @drag-enter="dragEnterHandler" @drag-leave="dragLeaveHandler" @drag-over="dragOverHandler" @drag-end="dragEndHandler" @drop="dropHandler" :disableDBClick='false' expand-all>
+                        </vue-drag-tree>
+                
                 </div>
                 <b-button 
                   class="mt-2" variant="primary" 

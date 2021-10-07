@@ -78,7 +78,6 @@ export default {
                 this.customer.group.id = this.currentGroupId.id;
                 this.loading = false
               }
-              window.console.log(this.customer.group)
             })
             .catch(error => handleAxiosError(error, this))
             .finally(() => {
@@ -112,6 +111,8 @@ export default {
           return;
        }
        // Using hardcoded country code for now as there is no option in front-end for selecting country from a list now, Need to add that and remove the following loops
+        this.customer.billing_addresses = this.customer.billing_addresses.filter(value => Object.keys(value).length !== 0);
+        this.customer.shipping_addresses = this.customer.shipping_addresses.filter(value => Object.keys(value).length !== 0);
         axios
         .put(`${this.backendURL}/api/v1/customers/${this.$route.params.id}` , this.customer , authHeader())
         .then(response => (
