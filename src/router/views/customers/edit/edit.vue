@@ -46,6 +46,11 @@ export default {
   },
   mounted() {
       this.loading = true
+      axios.get(`${this.backendURL}/api/v1/areas/countries/allowed` , authHeader())
+      .then(response => 
+            this.billing_addresses_country = response.data.data
+      )
+      .catch(error=> handleAxiosError(error, this)),
         axios
         .get(`${this.backendURL}/api/v1/customers/groups?per_page=-1` , authHeader())
         .then(response => (this.customerGroups = response.data.data,
@@ -73,7 +78,6 @@ export default {
                 this.customer.group.id = this.currentGroupId.id;
                 this.loading = false
               }
-              window.console.log(this.customer.group)
             })
             .catch(error => handleAxiosError(error, this))
             .finally(() => {
@@ -82,6 +86,12 @@ export default {
         });
   },
   methods:{
+    saveShipping() {
+      this.$bvModal.hide("modal-scrollable-shipping");
+    },
+    saveBill() {
+       this.$bvModal.hide("modal-scrollable-billing");
+    },
      updateCustomer(){
        if(!roleService.hasEditPermission(this.pageIdentity)){
           this.$toast.error("You do no have the permission to perform this action!", {
@@ -101,6 +111,8 @@ export default {
           return;
        }
        // Using hardcoded country code for now as there is no option in front-end for selecting country from a list now, Need to add that and remove the following loops
+        this.customer.billing_addresses = this.customer.billing_addresses.filter(value => Object.keys(value).length !== 0);
+        this.customer.shipping_addresses = this.customer.shipping_addresses.filter(value => Object.keys(value).length !== 0);
         axios
         .put(`${this.backendURL}/api/v1/customers/${this.$route.params.id}` , this.customer , authHeader())
         .then(response => (
@@ -254,7 +266,7 @@ export default {
                       <td>{{order.product_no}}</td>
                       <td>{{order.total_price }}</td>
                       <td>
-                        <b-button variant="primary" >
+                        <b-button variant="primary" :href="'/sales/orders/view/' + order.id">
                             <i class="bx bx-check-double font-size-16 align-middle mr-2"></i>
                             View
                         </b-button>
@@ -289,7 +301,10 @@ export default {
               <label class="mt-3">State</label>
               <b-form-input for="text" v-model="customer.billing_addresses[0].state"></b-form-input>
               <label class="mt-3">Country</label>
-              <b-form-input for="text" v-model="customer.billing_addresses[0].country"></b-form-input>
+              <select class="custom-select" v-model="customer.billing_addresses[0].country_id">
+                <option v-for="city in billing_addresses_country" v-bind:value="city.id" :key="city.id">{{city.name}}</option>
+              </select>
+              <!-- <b-form-input for="text" v-model="customer.billing_addresses[0].country"></b-form-input> -->
             </div>
             <div class="col-sm-6">
               <label class="mt-3">Last Name</label>
@@ -319,7 +334,9 @@ export default {
               <label class="mt-3">State</label>
               <b-form-input for="text" v-model="customer.billing_addresses[1].state"></b-form-input>
               <label class="mt-3">Country</label>
-              <b-form-input for="text" v-model="customer.billing_addresses[1].country"></b-form-input>
+              <select class="custom-select" v-model="customer.billing_addresses[1].country_id">
+                <option v-for="city in billing_addresses_country" v-bind:value="city.id" :key="city.id">{{city.name}}</option>
+              </select>
             </div>
             <div class="col-sm-6">
               <label class="mt-3">Last Name</label>
@@ -336,7 +353,7 @@ export default {
       </b-tabs>
       <br>
       <div class="text-sm-right">
-        <b-button variant="primary">
+        <b-button variant="primary" @click="saveBill()">
             <i class="bx bx-check-double font-size-16 align-middle mr-2"></i>
             Save
         </b-button>
@@ -362,7 +379,9 @@ export default {
               <label class="mt-3">State</label>
               <b-form-input for="text" v-model="customer.shipping_addresses[0].state"></b-form-input>
               <label class="mt-3">Country</label>
-              <b-form-input for="text" v-model="customer.shipping_addresses[0].country"></b-form-input>
+              <select class="custom-select" v-model="customer.shipping_addresses[0].country_id">
+                <option v-for="city in billing_addresses_country" v-bind:value="city.id" :key="city.id">{{city.name}}</option>
+              </select>
             </div>
             <div class="col-sm-6">
               <label class="mt-3">Last Name</label>
@@ -392,7 +411,9 @@ export default {
               <label class="mt-3">State</label>
               <b-form-input for="text" v-model="customer.shipping_addresses[1].state"></b-form-input>
               <label class="mt-3">Country</label>
-              <b-form-input for="text" v-model="customer.shipping_addresses[1].country"></b-form-input>
+              <select class="custom-select" v-model="customer.shipping_addresses[1].country_id">
+                <option v-for="city in billing_addresses_country" v-bind:value="city.id" :key="city.id">{{city.name}}</option>
+              </select>
             </div>
             <div class="col-sm-6">
               <label class="mt-3">Last Name</label>
@@ -409,7 +430,7 @@ export default {
       </b-tabs>
       <br>
       <div class="text-sm-right">
-        <b-button variant="primary">
+        <b-button variant="primary" @click="saveShipping()">
             <i class="bx bx-check-double font-size-16 align-middle mr-2"></i>
             Save
         </b-button>

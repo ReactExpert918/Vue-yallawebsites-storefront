@@ -27,6 +27,7 @@ export default {
       title: "Create Customer",
       backendURL: process.env.VUE_APP_BACKEND_URL,
       customerGroups: [],
+      billing: [],
       data: "",
       createCustomerPayload: {
         first_name: "",
@@ -36,8 +37,8 @@ export default {
         email: "",
         group_id: "",
         newsletter_subscriber: false,
-        billing_addresses: [{} , {}],
-        shipping_addresses: [{} , {}]
+        billing_addresses:[{} , {}],
+        shipping_addresses: [{} , {}],
       },
       items: [
         {
@@ -64,6 +65,12 @@ export default {
   },
   mounted(){
     this.loading = true;
+    axios.get(`${this.backendURL}/api/v1/areas/countries/allowed` , authHeader())
+    .then(response => 
+          (this.createCustomerPayload.billing_addresses[0].country_id = response.data.data[0].id,
+          this.billing_addresses_country = response.data.data)          
+    )
+    .catch(error=> handleAxiosError(error, this)),
     axios
     .get(`${this.backendURL}/api/v1/customers/groups?per_page=-1` , authHeader())
     .then(response => (this.customerGroups = response.data.data,
@@ -74,6 +81,12 @@ export default {
     });
   },
   methods:{
+    saveShipping() {
+      this.$bvModal.hide("modal-scrollable-shipping");
+    },
+    saveBill() {
+       this.$bvModal.hide("modal-scrollable-billing");
+    },
     createCustomer(){
       if(!roleService.hasCreatePermission(this.pageIdentity)){
           this.$toast.error("You do no have the permission to perform this action!", {
@@ -92,16 +105,17 @@ export default {
           })
           return;
       }
-
+      this.createCustomerPayload.billing_addresses = this.createCustomerPayload.billing_addresses.filter(value => Object.keys(value).length !== 0);
+      this.createCustomerPayload.shipping_addresses = this.createCustomerPayload.shipping_addresses.filter(value => Object.keys(value).length !== 0);
       // Using hardcoded country code for now as there is no option in front-end for selecting country from a list now, Need to add that and remove the following loops
-      for(var i = 0; i < this.createCustomerPayload.billing_addresses.length; i++){
-        var bi = this.createCustomerPayload.billing_addresses[i];
-        bi.country_code = "UK";
-      }
-      for(var j = 0; j < this.createCustomerPayload.shipping_addresses.length; j++){
-        var si = this.createCustomerPayload.shipping_addresses[j];
-        si.country_code = "UK";
-      }
+      // for(var i = 0; i < this.createCustomerPayload.billing_addresses.length; i++){
+      //   var bi = this.createCustomerPayload.billing_addresses[i];
+      //   bi.country_code = "UK";
+      // }
+      // for(var j = 0; j < this.createCustomerPayload.shipping_addresses.length; j++){
+      //   var si = this.createCustomerPayload.shipping_addresses[j];
+      //   si.country_code = "UK";
+      // }
       axios
       .post(`${this.backendURL}/api/v1/customers` , this.createCustomerPayload , authHeader())
       .then(response => (
@@ -197,6 +211,19 @@ export default {
                   <div class="col-sm-6">
                     <h5>Billing Address</h5>
                     <b-button v-b-modal.modal-scrollable-billing variant="primary">Add Address</b-button>
+                    <!-- <div class="row" v-if="billing.length">
+                      <div class="col-sm-6">
+                        <div class="grey-box" v-for="item in customer.billing_addresses" :key="item.id">
+                          <p>
+                            {{item.name}}<br>
+                            {{item.street}}<br>
+                            {{item.city}}<br>
+                            {{item.postcode}}<br>
+                            {{item.country}}<br>
+                          </p>
+                        </div>
+                      </div>
+                    </div> -->
                   </div>
                   <div class="col-sm-6">
                     <h5>Shipping Address</h5>
@@ -229,7 +256,9 @@ export default {
               <label class="mt-3">State</label>
               <b-form-input for="text" v-model="createCustomerPayload.billing_addresses[0].state"></b-form-input>
               <label class="mt-3">Country</label>
-              <b-form-input for="text" v-model="createCustomerPayload.billing_addresses[0].country"></b-form-input>
+              <select class="custom-select" v-model="createCustomerPayload.billing_addresses[0].country_id">
+                <option v-for="city in billing_addresses_country" v-bind:value="city.id" :key="city.id">{{city.name}}</option>
+              </select>
             </div>
             <div class="col-sm-6">
               <label class="mt-3">Last Name</label>
@@ -259,7 +288,9 @@ export default {
               <label class="mt-3">State</label>
               <b-form-input for="text" v-model="createCustomerPayload.billing_addresses[1].state"></b-form-input>
               <label class="mt-3">Country</label>
-              <b-form-input for="text" v-model="createCustomerPayload.billing_addresses[1].country"></b-form-input>
+              <select class="custom-select" v-model="createCustomerPayload.billing_addresses[1].country_id">
+                <option v-for="city in billing_addresses_country" v-bind:value="city.id" :key="city.id">{{city.name}}</option>
+              </select>
             </div>
             <div class="col-sm-6">
               <label class="mt-3">Last Name</label>
@@ -276,7 +307,7 @@ export default {
       </b-tabs>
       <br>
       <div class="text-sm-right">
-        <b-button variant="primary">
+        <b-button variant="primary" v-on:click="saveBill()">
             <i class="bx bx-check-double font-size-16 align-middle mr-2"></i>
             Save
         </b-button>
@@ -302,7 +333,9 @@ export default {
               <label class="mt-3">State</label>
               <b-form-input for="text" v-model="createCustomerPayload.shipping_addresses[0].state"></b-form-input>
               <label class="mt-3">Country</label>
-              <b-form-input for="text" v-model="createCustomerPayload.shipping_addresses[0].country"></b-form-input>
+              <select class="custom-select" v-model="createCustomerPayload.shipping_addresses[0].country_id">
+                <option v-for="city in billing_addresses_country" v-bind:value="city.id" :key="city.id">{{city.name}}</option>
+              </select>
             </div>
             <div class="col-sm-6">
               <label class="mt-3">Last Name</label>
@@ -332,7 +365,9 @@ export default {
               <label class="mt-3">State</label>
               <b-form-input for="text" v-model="createCustomerPayload.shipping_addresses[1].state"></b-form-input>
               <label class="mt-3">Country</label>
-              <b-form-input for="text" v-model="createCustomerPayload.shipping_addresses[1].country"></b-form-input>
+              <select class="custom-select" v-model="createCustomerPayload.shipping_addresses[1].country_id">
+                <option v-for="city in billing_addresses_country" v-bind:value="city.id" :key="city.id">{{city.name}}</option>
+              </select>
             </div>
             <div class="col-sm-6">
               <label class="mt-3">Last Name</label>
@@ -349,7 +384,7 @@ export default {
       </b-tabs>
       <br>
       <div class="text-sm-right">
-        <b-button variant="primary">
+        <b-button variant="primary" @click="saveShipping()">
             <i class="bx bx-check-double font-size-16 align-middle mr-2"></i>
             Save
         </b-button>
